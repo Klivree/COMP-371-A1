@@ -1,4 +1,4 @@
-# **COMP 371 - Computer Graphics**
+# **The Real Slim Shaders**
 
 This repository is part of the course COMP 371 of Concordia University.
 The assignments are team assignment and consist in a project using openGL.
