@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: g++.exe build active file",
+			"command": "D:\\Programs\\GCCforWindows\\mingw64\\bin\\g++.exe",
+			"args": [
+				"-I",
+				"${workspaceFolder}/ThirdParty/include",
+
+				"-L",
+				"${workspaceFolder}/ThirdParty/lib",
+
+				"-g",
+				"${workspaceFolder}/src/main.cpp",
+				"-o",
+				"${workspaceFolder}/bin/main.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: D:\\Programs\\GCCforWindows\\mingw64\\bin\\g++.exe"
+		}
+	]
+}
