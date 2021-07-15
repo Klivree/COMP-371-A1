@@ -9,4 +9,4 @@ The assignments are team assignment and consist in a project using openGL.
 - Mélina Deneuve - ID# 40153103 (_Github: Klivree_)
 - Jack Drolet - ID# 40085961 (_Github: J-Drolet_)
 - Cedrik Edwards - ID# 40092691  (_Github: SeedrikMTL_)
-- Thapan Thambu - ID#  (_Github: Thapan18_)
+- Thapan Thambu - ID# 40096755  (_Github: Thapan18_)
