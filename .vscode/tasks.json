@@ -3,15 +3,25 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "C/C++: g++.exe build active file",
+			"label": "C/C++: g++.exe build main.cpp file",
 			"command": "D:\\Programs\\GCCforWindows\\mingw64\\bin\\g++.exe",
 			"args": [
+
+
 				"-I",
 				"${workspaceFolder}/ThirdParty/include",
 
-				
+
 				"-L",
-				"${workspaceFolder}/ThirdParty/lib",
+				"${workspaceFolder}/ThirdParty/lib/win64",
+
+				//"-Xlinker",
+				//"--verbose",
+
+				"-l",
+				"glfw3",
+
+				"-lglew32",
 
 				"-g",
 				"${workspaceFolder}/src/main.cpp",
