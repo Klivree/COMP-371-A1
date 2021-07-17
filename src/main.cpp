@@ -4,15 +4,17 @@
 #include <GLFW/glfw3.h> // GLFW provides a cross-platform interface for creating a graphical context,
 // initializing OpenGL and binding inputs
 #include <glm/glm.hpp>  // GLM is an optimized math library with syntax to similar to OpenGL Shading Language
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <string>
-#include <cstring>
 #include <fstream>
 #include <iostream>
+#include "Camera.hpp"
 
 using namespace std;
 
-float scale = 0.15f;
+const int width = 1024;
+const int height = 768;
+const float FOV = 90.0f;
 
 char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/20/how-to-load-a-glsl-shader-in-opengl-using-c.html
     string content;
@@ -20,7 +22,7 @@ char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/2
 
     if (!fileStream.is_open()) {
         cerr << "Could not read file " << filePath << ". File does not exist." << endl;
-        return new char[0];
+        return "";
     }
 
     string line = "";
@@ -41,64 +43,9 @@ char* getVertexShaderSource() { return readFile("vertexShader.glsl"); }
 
 char* getFragmentShaderSource() { return readFile("fragmentShader.glsl"); }
 
-GLuint compileAndLinkShaders() {
-    // compile and link shader program
-    // return shader program id
-    // ------------------------------------
-
-    // create vertex shader
-    char* vertexShaderSource = getVertexShaderSource();
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
-    }
-
-    // create fragment shader
-    char* fragmentShaderSource = getFragmentShaderSource();
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // check for shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
-    }
-
-    //create shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    //link the shader program
-    glLinkProgram(shaderProgram);
-
-    // check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
-    }
-
-    //delete shaders since they are already in the program
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
-}
-
 GLuint getCubeModel(glm::vec3 color) {
     // Cube model
-    glm::vec3 vertexArray[] = {  
-        // position,                  color
+    glm::vec3 vertexArray[] = {  // position,                            color
         glm::vec3(-0.5f,-0.5f,-0.5f), color, // left
         glm::vec3(-0.5f,-0.5f, 0.5f), color,
         glm::vec3(-0.5f, 0.5f, 0.5f), color,
@@ -172,6 +119,60 @@ GLuint getCubeModel(glm::vec3 color) {
     return VAO;
 }
 
+GLuint compileAndLinkShaders() {
+    // compile and link shader program
+    // return shader program id
+    // ------------------------------------
+
+    // create vertex shader
+    const char* vertexShaderSource = getVertexShaderSource();
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    // check for shader compile errors
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
+    }
+
+    // create fragment shader
+    const char* fragmentShaderSource = getFragmentShaderSource();
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // check for shader compile errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
+    }
+
+    //create shader program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    //link the shader program
+    glLinkProgram(shaderProgram);
+
+    // check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
+    }
+
+    //delete shaders since they are already in the program
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLuint shaderProgram) {
     /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
     * filePath - filePath of the .csv file that defines the shape
@@ -218,7 +219,7 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLuint sh
                 value.append(string(1, curChar)); // add the char to the current value
 
             // line is finished
-            if (curChar == '\n') 
+            if (curChar == '\n' || curChar == '/') 
                 break;
         }
 
@@ -226,7 +227,7 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLuint sh
             cerr << "There should be exclusively 6 values per line of the csv" << endl;
             return;
         }
-       
+
         //scale the values
         for (int k = 0; k < 6; k++) {
             cubeInfo[k] = scale * cubeInfo[k];
@@ -255,7 +256,7 @@ int main(int argc, char* argv[]) {
 #endif
 
     // Create Window and rendering context using GLFW, resolution is 800x600
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Comp371 - Assignment 1", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "Comp371 - Assignment 1", NULL, NULL);
     if (window == NULL) {
         cerr << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -277,30 +278,46 @@ int main(int argc, char* argv[]) {
     //get shader program
     GLuint shaderProgram = compileAndLinkShaders();
 
-    //get Shape cubes
-    GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 1.0f, 0.0f));
 
+    //get VAOs - we use two different ones so we can have different colors
+    GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 1.0f, 0.0f));
     GLuint wallVAO = getCubeModel(glm::vec3(0.5f, 0.5f, 0.5f));
 
+    Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+
+    // For frame time
+    float lastFrameTime = glfwGetTime();
+
+    glEnable(GL_DEPTH_TEST);
+
+    //Main loop
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT); //clear the window each frame
+        // Frame time calculation
+        float dt = glfwGetTime() - lastFrameTime;
+        lastFrameTime += dt;
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear the window each frame
         glUseProgram(shaderProgram);
 
-        //draw the shapes
+        camera.matrix(FOV, 0.01f, 100.0f, shaderProgram);
+
         glBindVertexArray(shapeVAO);
-        renderShapeFromCSV("shapefilepath.csv", glm::vec3(0.0,0.0,0.0), 0.2, shaderProgram);
+
+        renderShapeFromCSV("Jack's Shape.csv", glm::vec3(-1.0f * 0.2f, 0.5f * 0.2f, -0.5f * 0.2f), 0.2f, shaderProgram);
+
         glBindVertexArray(0);
 
-
-        //draw the wall models
         glBindVertexArray(wallVAO);
-        renderShapeFromCSV("shapeHoleFilepath.csv", glm::vec3(0.0,0.0,2.0), 0.2, shaderProgram);
+
+        renderShapeFromCSV("Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), 0.2, shaderProgram);
+
         glBindVertexArray(0);
 
-
+        //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
+        glfwPollEvents(); //get inputs
 
-        glfwPollEvents();
+        camera.inputs(window, dt);
+
     }
 
     // Shutdown GLFW
