@@ -6,18 +6,31 @@ Camera::Camera(int w, int h, glm::vec3 pos) {
 	position = pos;
 }
 
-void Camera::matrix(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram) {
+void Camera::createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram) {
+	/* creates and sends the view and projection matrices to the shader program
+	* 
+	*	FOVdeg - the FOV of the camera in degrees
+	*	nearPlane - the near plane of the projection matrix
+	*	farPlane - the far plane of the projection matrix
+	*	shaderProgram - the loaded shader program of the OpenGL application
+	*/
+
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	glm::mat4 projectionMatrix = glm::mat4(1.0f);
 
+	// creation of view and projection matrices
 	viewMatrix = glm::lookAt(position, position + orientation, up);
 	projectionMatrix = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
 
+	// sending the view and projection matrices to the vertex shader
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, &projectionMatrix[0][0]);
 }
 
-void Camera::inputs(GLFWwindow *window, float dt) {
+void Camera::processInputs(GLFWwindow *window, float dt) {
+	/* Handles the inputs that will affect the camera position and view
+	*/
+
 	// camera positions
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		position += dt * speed * orientation;
@@ -60,8 +73,6 @@ void Camera::inputs(GLFWwindow *window, float dt) {
 		
 	
 		orientation = glm::rotate(orientation, glm::radians(-rotY), up);
-
-		//glfwSetCursorPos(window, (float) width/2, (float) height/2);
 
 	}
 	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {

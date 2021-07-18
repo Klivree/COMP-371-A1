@@ -23,9 +23,9 @@ public:
 
 	Camera(int width, int height, glm::vec3 pos);
 
-	void matrix(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram);
+	void createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram);
 
-	void inputs(GLFWwindow* window, float dt);	
+	void processInputs(GLFWwindow* window, float dt);	
 
 };
 
