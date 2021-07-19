@@ -1,6 +1,6 @@
 #define GLEW_STATIC 1   // This allows linking with Static Library on Windows, without DLL
 #include <GL/glew.h>    // Include GLEW - OpenGL Extension Wrangler
-
+#include <algorithm>    // added this line to use std::min and std::max
 #include <GLFW/glfw3.h> // GLFW provides a cross-platform interface for creating a graphical context,
 // initializing OpenGL and binding inputs
 #include <glm/glm.hpp>  // GLM is an optimized math library with syntax to similar to OpenGL Shading Language
@@ -240,6 +240,8 @@ int main(int argc, char* argv[]) {
 
     Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
+    float angle = 0;
+    float rotationSpeed = 180.0f;  // 180 degrees per second
     // For frame time
     float lastFrameTime = glfwGetTime();
 
@@ -274,6 +276,79 @@ int main(int argc, char* argv[]) {
         glfwPollEvents(); //get inputs
         
         executeEvents(window, camera, dt);
+
+        // ROTATION
+        angle = (angle + rotationSpeed * dt); // angles in degrees, but glm expects radians (conversion below)
+        if (GLFWGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { // Rx: Counter-clockwise rotation about positive x-axis
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+        }
+        if (GLFWGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { // R-x: Counter-clockwise rotation about negative x-axis
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(-1.0f, 0.0f, 0.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+        }
+        if (GLFWGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {    // Ry: Counter-clockwise rotation about positive y-axis
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+        }
+        if (GLFWGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {  // R-y: Counter-clockwise rotation about negative y-axis
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, -1.0f, 0.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+        }
+        if (GLFWGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {  // Reset world position and orientation
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 0.0f, 0.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+        }
+
+        // PAN AND TILT
+        double mousePosX, mousePosY;
+        glfwGetCursorPos(window, &mousePosX, &mousePosY);
+
+        double dx = mousePosX - lastMousePosX;
+        double dy = mousePosY - lastMousePosY;
+
+        lastMousePosX = mousePosX;
+        lastMousePosY = mousePosY;
+
+        // Convert to spherical coordinates
+        const float cameraAngularSpeed = 60.0f;
+        cameraHorizontalAngle -= dx * cameraAngularSpeed * dt;
+        cameraVerticalAngle -= dy * cameraAngularSpeed * dt;
+
+        // Clamp vertical angle to [-85, 85] degrees
+        cameraVerticalAngle = std::max(-85.0f, std::min(85.0f, cameraVerticalAngle));
+        if (cameraHorizontalAngle > 360)
+        {
+            cameraHorizontalAngle -= 360;
+        }
+        else if (cameraHorizontalAngle < -360)
+        {
+            cameraHorizontalAngle += 360;
+        }
+
+        float theta = radians(cameraHorizontalAngle);
+        float phi = radians(cameraVerticalAngle);
+
+        // PAN in x direction
+        while (lastMouseLeftState == GLFW_RELEASE && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+            orientation = vec3(cosf(phi) * cosf(theta), 0, 0);  // Pan only in x direction
+            vec3 cameraSideVector = glm::cross(orientation, vec3(0.0f, 1.0f, 0.0f));
+            glm::normalize(cameraSideVector);
+        }
+        // TILT in y direction
+        while (lastMouseLeftState == GLFW_RELEASE && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+            orientation = vec3(0, sinf(phi), 0);    // Tilt only in y direction
+            vec3 cameraSideVector = glm::cross(orientation, vec3(0.0f, 1.0f, 0.0f));
+            glm::normalize(cameraSideVector);
+        }
+
+
+        // ZOOMING: NOT DONE!, Still needs work
+        while (lastMouseLeftState == GLFW_RELEASE && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            orientation = vec3(0, sinf(phi), 0);
+            vec3 cameraSideVector = glm::cross(orientation, vec3(0.0f, 1.0f, 0.0f));
+            glm::normalize(cameraSideVector);
+        }
     }
 
     // Shutdown GLFW
