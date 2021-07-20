@@ -136,6 +136,56 @@ GLuint getCubeModel(glm::vec3 color) {
     return VAO;
 }
 
+GLuint getGridModel(glm::vec3 color) {
+	/* Creates a grid model VAO with the given color.
+	* This method should not be called in any loops as it will create a memory leak. Use before the main program loop
+	*
+	*   color - color vector of the grid
+	*
+	* returns the GLuint corresponding with the created VAO
+	*/
+
+	// Grid Model
+
+	glm::vec3 vertexArray[] = {  // position,          color
+		glm::vec3(0.5f, 0.5f, 0.5f), color, // C, top - yellow
+		glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
+		glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
+
+		glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
+
+		glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
+		glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
+
+		glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
+		glm::vec3(0.5f, 0.5f, 0.5f), color, // C
+
+	};
+
+	GLuint VAO, VBO;
+	//create the Vertex Array Object
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	//create Vertex Buffer Object
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+
+	//create position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	//create color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	return VAO;
+}
+
 GLuint compileAndLinkShaders() {
     /* compile and link shader program
     * return shader program id
@@ -191,6 +241,8 @@ GLuint compileAndLinkShaders() {
 }
 
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLuint shaderProgram);
+
+void renderGrid(GLuint shaderProgram);
 
 void executeEvents(GLFWwindow* window, Camera &camera, float dt);
 
@@ -268,6 +320,12 @@ int main(int argc, char* argv[]) {
         renderShapeFromCSV("Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
+	
+	glBindVertexArray(gridVAO);
+
+	renderGrid(shaderProgram);
+
+	glBindVertexArray(0);
 
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
@@ -419,4 +477,21 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
 
         }
     }
+}
+
+void renderGrid(GLuint shaderProgram) {
+
+	GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
+
+	// Draw Grid
+	glm::mat4 pillarWorldMatrix = glm::mat4(1.0f);
+	for (int i = 0; i < 100; ++i)
+	{
+		for (int j = 0; j < 100; ++j)
+		{
+			pillarWorldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f + i * 1.0f, -10.0f, -50.0f + j * 1.0f));
+			glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &pillarWorldMatrix[0][0]);
+			glDrawArrays(GL_LINES, 0, 8);
+		}
+	}
 }
