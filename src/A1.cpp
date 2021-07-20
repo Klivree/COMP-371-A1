@@ -288,6 +288,7 @@ int main(int argc, char* argv[]) {
     //get VAOs - we use two different ones so we can have different colors
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 1.0f, 0.0f));
     GLuint wallVAO = getCubeModel(glm::vec3(0.5f, 0.5f, 0.5f));
+    GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
 
 
     Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
