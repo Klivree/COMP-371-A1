@@ -22,6 +22,7 @@ GLenum drawMode = GL_TRIANGLES;
 
 string JacksShape = "Jack's Shape.csv";
 string MelShape = "MelShape.csv";
+string CedriksShape = "Cedrik's Shape.csv";
 
 
 
@@ -315,6 +316,7 @@ int main(int argc, char* argv[]) {
         glBindVertexArray(shapeVAO);
         renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
         renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV(CedriksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -322,6 +324,7 @@ int main(int argc, char* argv[]) {
 
         renderShapeFromCSV("Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
         renderShapeFromCSV("MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -404,7 +407,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             JacksShape = "Jack's Shape.csv";
     }
 
-    //Shuffle Mélina's shape
+    //Shuffle MÃ©lina's shape
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
         PeriodLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && PeriodLastStateReleased) {
@@ -414,6 +417,17 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         else
             MelShape = "MelShape.csv";
     }
+    
+    //Shuffle Cedrik's shape
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
+		PeriodLastStateReleased = true;
+	else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && PeriodLastStateReleased) {
+		PeriodLastStateReleased = false;
+		if (CedriksShape == "Cedrik's Shape.csv")
+			CedriksShape = "Cedrik's Shape - Shuffle 1.csv";
+		else
+			CedriksShape = "Cedrik's Shape.csv";
+	}
 
 }
 
