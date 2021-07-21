@@ -20,9 +20,10 @@ const float FOV = 90.0f; // FOV of the player view in degrees
 float scale = 0.2f; // initial scale of all the models 
 GLenum drawMode = GL_TRIANGLES;
 
-string JacksShape = "Jack's Shape.csv";
-string MelShape = "MelShape.csv";
-string CedriksShape = "Cedrik's Shape.csv";
+string JacksShape = "../../Shapes/Jack's Shape.csv";
+string MelShape = "../../Shapes/MelShape.csv";
+string CedriksShape = "../../Shapes/Cedrik's Shape.csv";
+string AlexsShape = "../../Shapes/Alex's Shape.csv";
 
 
 
@@ -49,9 +50,9 @@ char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/2
     return chars;
 }
 
-char* getVertexShaderSource() { return readFile("vertexShader.glsl"); }
+char* getVertexShaderSource() { return readFile("../../resources/vertexShader.glsl"); }
 
-char* getFragmentShaderSource() { return readFile("fragmentShader.glsl"); }
+char* getFragmentShaderSource() { return readFile("../../resources/fragmentShader.glsl"); }
 
 GLuint getCubeModel(glm::vec3 color) {
     /* Creates a cube model VAO with the given color.
@@ -317,14 +318,16 @@ int main(int argc, char* argv[]) {
         renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
         renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
         renderShapeFromCSV(CedriksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV(AlexsShape, glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
 
         glBindVertexArray(wallVAO);
 
-        renderShapeFromCSV("Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV("MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV("Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("../../Shapes/MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Alex's Wall.csv", glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -429,6 +432,18 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedriksShape = "Cedrik's Shape - Shuffle 1.csv";
         else
             CedriksShape = "Cedrik's Shape.csv";
+    }
+
+    static bool AlPeriodLastStateReleased = true;
+    //Shuffle Alex's shape
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
+        AlPeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && AlPeriodLastStateReleased) {
+        AlPeriodLastStateReleased = false;
+        if (AlexsShape == "Alex's Shape.csv")
+            AlexsShape = "Alex's Shape - Shuffle 1.csv";
+        else
+            AlexsShape = "Alex's Shape.csv";
     }
 
 }
