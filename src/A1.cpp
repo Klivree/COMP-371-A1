@@ -242,7 +242,7 @@ GLuint compileAndLinkShaders() {
     return shaderProgram;
 }
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLuint shaderProgram);
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLfloat degrees, GLuint shaderProgram);
 
 void renderGrid(GLuint shaderProgram);
 
@@ -315,19 +315,19 @@ int main(int argc, char* argv[]) {
         camera.createMatrices(FOV, 0.01f, 100.0f, shaderProgram); // takes care of the view and projection matrices
 
         glBindVertexArray(shapeVAO);
-        renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV(CedriksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV(AlexsShape, glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, 0.0f shaderProgram);
+        renderShapeFromCSV(CedriksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV(AlexsShape, glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
 
         glBindVertexArray(0);
 
         glBindVertexArray(wallVAO);
 
-        renderShapeFromCSV("../../Shapes/Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV("../../Shapes/MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV("../../Shapes/Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
-        renderShapeFromCSV("../../Shapes/Alex's Wall.csv", glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../../Shapes/MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Alex's Wall.csv", glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -448,7 +448,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
 }
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLuint shaderProgram) {
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLfloat degrees, GLuint shaderProgram) {
     /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
     *
     *   filePath - filePath of the .csv file that defines the shape
@@ -508,11 +508,11 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
                 cubeInfo[k] = scale * cubeInfo[k];
             }
 
+            glm::vec3 positionVec = glm::rotateY(glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]), glm::radians(degrees)); // convert the local positions to the proper degrees
             //now we draw the cube
-            glm::mat4 cubeWorldMatrix =
-                glm::translate(glm::mat4(1.0), glm::vec3(pos.x + cubeInfo[0], pos.y + cubeInfo[1], pos.z + cubeInfo[2]))
-                * glm::scale(glm::mat4(1.0), glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]));
+            glm::mat4 cubeWorldMatrix = glm::translate(glm::mat4(1.0), positionVec + pos) * glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]));
             glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
+
 
 
             // change the draw mode of the model being rendered
