@@ -41,10 +41,10 @@ string MelShape = "../Assets/Shapes/MelShape.csv";
 string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 
-glm::vec3 JackPOS = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 MelPOS = glm::vec3(25.0f, 0.0f, 25.0f);
-glm::vec3 CedrikPOS = glm::vec3(25.0f, 0.0f, -25.0f);
-glm::vec3 AlexPOS = glm::vec3(-25.0f, 0.0f, 25.0f);
+glm::vec3 JackPOS = glm::vec3(0.0f, 10.0f, 0.0f);
+glm::vec3 MelPOS = glm::vec3(20.0f, 10.0f, 20);
+glm::vec3 CedrikPOS = glm::vec3(20.0f, 10.0f, -20.0f);
+glm::vec3 AlexPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
 
 
 char* readFile(const char* filePath);
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
     GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
 
     //generate camera
-    Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+    Camera camera(width, height, glm::vec3(0.0f, 10.0f, 5.0f));
 
     // For frame time
     float lastFrameTime = glfwGetTime();
@@ -155,6 +155,7 @@ int main(int argc, char* argv[]) {
         glBindVertexArray(0);
 
         //render the origin lines
+        //          position                    lenght                      color             scale
         renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, shaderProgram); // x direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
@@ -448,7 +449,7 @@ void renderGrid(GLuint shaderProgram) {
     {
         for (int j = 0; j < 100; ++j)
         {
-            pillarWorldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f + i * 1.0f, -10.0f, -50.0f + j * 1.0f));
+            pillarWorldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f + i * 1.0f, -0.5f, -50.0f + j * 1.0f));
             glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &pillarWorldMatrix[0][0]);
             glDrawArrays(GL_LINES, 0, 8);
         }
