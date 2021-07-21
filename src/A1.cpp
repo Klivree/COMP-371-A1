@@ -13,7 +13,7 @@
 using namespace std;
 
 //dimensions of the window in pixels
-const int width = 1024; 
+const int width = 1024;
 const int height = 768;
 
 const float FOV = 90.0f; // FOV of the player view in degrees
@@ -21,7 +21,7 @@ float scale = 0.2f; // initial scale of all the models
 GLenum drawMode = GL_TRIANGLES;
 
 string JacksShape = "Jack's Shape.csv";
-
+string MelShape = "MelShape.csv";
 
 
 
@@ -42,7 +42,7 @@ char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/2
 
     fileStream.close();
 
-    char *chars = new char[content.length()+1];
+    char* chars = new char[content.length() + 1];
     strcpy(chars, content.c_str());
 
     return chars;
@@ -55,9 +55,9 @@ char* getFragmentShaderSource() { return readFile("fragmentShader.glsl"); }
 GLuint getCubeModel(glm::vec3 color) {
     /* Creates a cube model VAO with the given color.
     * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
-    * 
+    *
     *   color - color vector of the cube
-    * 
+    *
     * returns the GLuint corresponding with the created VAO
     */
 
@@ -123,7 +123,7 @@ GLuint getCubeModel(glm::vec3 color) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
 
     //create position attribute
-    glVertexAttribPointer(0, 3,  GL_FLOAT,  GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
     glEnableVertexAttribArray(0);
 
     //create color attribute
@@ -137,59 +137,59 @@ GLuint getCubeModel(glm::vec3 color) {
 }
 
 GLuint getGridModel(glm::vec3 color) {
-	/* Creates a grid model VAO with the given color.
-	* This method should not be called in any loops as it will create a memory leak. Use before the main program loop
-	*
-	*   color - color vector of the grid
-	*
-	* returns the GLuint corresponding with the created VAO
-	*/
+    /* Creates a grid model VAO with the given color.
+    * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
+    *
+    *   color - color vector of the grid
+    *
+    * returns the GLuint corresponding with the created VAO
+    */
 
-	// Grid Model
+    // Grid Model
 
-	glm::vec3 vertexArray[] = {  // position,          color
-		glm::vec3(0.5f, 0.5f, 0.5f), color, // C, top - yellow
-		glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
-		glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
+    glm::vec3 vertexArray[] = {  // position,          color
+        glm::vec3(0.5f, 0.5f, 0.5f), color, // C, top - yellow
+        glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
+        glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
 
-		glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
+        glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
 
-		glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
-		glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
+        glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
+        glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
 
-		glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
-		glm::vec3(0.5f, 0.5f, 0.5f), color, // C
+        glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
+        glm::vec3(0.5f, 0.5f, 0.5f), color, // C
 
-	};
+    };
 
-	GLuint VAO, VBO;
-	//create the Vertex Array Object
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+    GLuint VAO, VBO;
+    //create the Vertex Array Object
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
 
-	//create Vertex Buffer Object
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
+    //create Vertex Buffer Object
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
 
-	//create position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
-	glEnableVertexAttribArray(0);
+    //create position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(0);
 
-	//create color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
-	glEnableVertexAttribArray(1);
+    //create color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
+    glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
-	return VAO;
+    return VAO;
 }
 
 GLuint compileAndLinkShaders() {
     /* compile and link shader program
     * return shader program id
-    */ 
+    */
 
     // create vertex shader
     const char* vertexShaderSource = getVertexShaderSource();
@@ -244,12 +244,12 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
 
 void renderGrid(GLuint shaderProgram);
 
-void executeEvents(GLFWwindow* window, Camera &camera, float dt);
+void executeEvents(GLFWwindow* window, Camera& camera, float dt);
 
 void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram);
 
 int main(int argc, char* argv[]) {
-	glfwInit(); //initialize GLFW
+    glfwInit(); //initialize GLFW
 
     //determine openGL version to initialize
 #if defined(PLATFORM_OSX)	
@@ -281,15 +281,15 @@ int main(int argc, char* argv[]) {
     }
 
     // Black background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     //get shader program
     GLuint shaderProgram = compileAndLinkShaders();
 
 
     //get VAOs - we use two different ones so we can have different colors
-    GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 1.0f, 0.0f));
-    GLuint wallVAO = getCubeModel(glm::vec3(0.5f, 0.5f, 0.5f));
+    GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
+    GLuint wallVAO = getCubeModel(glm::vec3(0.8f, 0.8f, 0.8f));
     GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
 
 
@@ -313,32 +313,33 @@ int main(int argc, char* argv[]) {
         camera.createMatrices(FOV, 0.01f, 100.0f, shaderProgram); // takes care of the view and projection matrices
 
         glBindVertexArray(shapeVAO);
-
         renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
 
         glBindVertexArray(wallVAO);
 
         renderShapeFromCSV("Jack's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, shaderProgram);
+        renderShapeFromCSV("MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, shaderProgram);
 
         glBindVertexArray(0);
-	
-	glBindVertexArray(gridVAO);
 
-	renderGrid(shaderProgram);
+        glBindVertexArray(gridVAO);
 
-	glBindVertexArray(0);
+        renderGrid(shaderProgram);
 
-	//render the origin lines
+        glBindVertexArray(0);
+
+        //render the origin lines
         renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), scale, shaderProgram); // x direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), scale, shaderProgram); // y direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), scale, shaderProgram); // z direction
-	    
+
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
         glfwPollEvents(); //get inputs
-        
+
         executeEvents(window, camera, dt);
     }
 
@@ -349,10 +350,10 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void executeEvents(GLFWwindow *window, Camera &camera, float dt) {
+void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     /* This function is used to execute all the inputs of the program
     * This program should only be called AFTER glfwPollEvents() was already called
-    * 
+    *
     *   window - current window of the program
     *   camera - camera class of the scene (needed so we can execute the camera inputs)
     *   dt - Frame time
@@ -367,7 +368,7 @@ void executeEvents(GLFWwindow *window, Camera &camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
         ULastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
-        scale *= (float) 8/7; // exponential resizing
+        scale *= (float)8 / 7; // exponential resizing
         ULastStateReleased = false;
     }
 
@@ -375,7 +376,7 @@ void executeEvents(GLFWwindow *window, Camera &camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
         JLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
-        scale *= (float) 7/8; // exponential resizing; used so that negative sizes will not be created
+        scale *= (float)7 / 8; // exponential resizing; used so that negative sizes will not be created
         JLastStateReleased = false;
     }
 
@@ -402,12 +403,12 @@ void executeEvents(GLFWwindow *window, Camera &camera, float dt) {
         else
             JacksShape = "Jack's Shape.csv";
     }
-        
+
 }
 
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLuint shaderProgram) {
     /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
-    * 
+    *
     *   filePath - filePath of the .csv file that defines the shape
     *   pos - coordinates of the object
     *   scale - how much the object is to be scaled by
@@ -424,7 +425,7 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
         cerr << "Could not read file " << filePath << ". File does not exist." << endl;
         return;
     }
-    
+
     string value, line = "";
     float cubeInfo[6] = {};
     int i, j;
@@ -452,7 +453,7 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
             else if (curChar != ' ') // ignore spaces
                 value.append(string(1, curChar)); // add the char to the current value
 
-            // line is finished
+             // line is finished
             if (curChar == '\n' || curChar == '/' || j == 6)
                 break;
         }
@@ -466,9 +467,11 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
             }
 
             //now we draw the cube
-            glm::mat4 cubeWorldMatrix = glm::translate(glm::mat4(1.0), glm::vec3(pos.x + cubeInfo[0], pos.y + cubeInfo[1], pos.z + cubeInfo[2])) * glm::scale(glm::mat4(1.0), glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]));
+            glm::mat4 cubeWorldMatrix =
+                glm::translate(glm::mat4(1.0), glm::vec3(pos.x + cubeInfo[0], pos.y + cubeInfo[1], pos.z + cubeInfo[2]))
+                * glm::scale(glm::mat4(1.0), glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]));
             glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
-            
+
 
             // change the draw mode of the model being rendered
             if (drawMode == GL_TRIANGLES)
@@ -489,19 +492,19 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
 
 void renderGrid(GLuint shaderProgram) {
 
-	GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
+    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
 
-	// Draw Grid
-	glm::mat4 pillarWorldMatrix = glm::mat4(1.0f);
-	for (int i = 0; i < 100; ++i)
-	{
-		for (int j = 0; j < 100; ++j)
-		{
-			pillarWorldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f + i * 1.0f, -10.0f, -50.0f + j * 1.0f));
-			glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &pillarWorldMatrix[0][0]);
-			glDrawArrays(GL_LINES, 0, 8);
-		}
-	}
+    // Draw Grid
+    glm::mat4 pillarWorldMatrix = glm::mat4(1.0f);
+    for (int i = 0; i < 100; ++i)
+    {
+        for (int j = 0; j < 100; ++j)
+        {
+            pillarWorldMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-50.0f + i * 1.0f, -10.0f, -50.0f + j * 1.0f));
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &pillarWorldMatrix[0][0]);
+            glDrawArrays(GL_LINES, 0, 8);
+        }
+    }
 }
 
 void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram) {
@@ -537,7 +540,7 @@ void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, G
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
+
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
 
     //draw the line
