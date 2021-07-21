@@ -106,6 +106,23 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Camera.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Assets\Shaders\fragmentshader.glsl" />
+    <None Include="..\Assets\Shaders\vertexshader.glsl" />
+    <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv" />
+    <None Include="..\Assets\Shapes\Alex%27s Shape.csv" />
+    <None Include="..\Assets\Shapes\Alex%27s Wall.csv" />
+    <None Include="..\Assets\Shapes\Cedrik%27s Shape - Shuffle 1.csv" />
+    <None Include="..\Assets\Shapes\Cedrik%27s Shape.csv" />
+    <None Include="..\Assets\Shapes\Cedrik%27s Wall.csv" />
+    <None Include="..\Assets\Shapes\Jack%27s Shape - Shuffle 1.csv" />
+    <None Include="..\Assets\Shapes\Jack%27s Shape - Shuffle 2.csv" />
+    <None Include="..\Assets\Shapes\Jack%27s Shape.csv" />
+    <None Include="..\Assets\Shapes\Jack%27s Wall.csv" />
+    <None Include="..\Assets\Shapes\MelShape-Shuffle.csv" />
+    <None Include="..\Assets\Shapes\MelShape.csv" />
+    <None Include="..\Assets\Shapes\MelWall.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
