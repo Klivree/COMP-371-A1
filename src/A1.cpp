@@ -363,7 +363,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool ULastStateReleased = true, JLastStateReleased = true, PeriodLastStateReleased = true;
+    static bool ULastStateReleased = true, JLastStateReleased = true;
 
     camera.processInputs(window, dt); // processes all camera inputs
 
@@ -393,12 +393,12 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         drawMode = GL_POINTS;
 
 
-
+    static bool JackPeriodLastStateReleased = true;
     // shuffle Jack's shape function
     if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_RELEASE)
-        PeriodLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS && PeriodLastStateReleased) {
-        PeriodLastStateReleased = false;
+        JackPeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS && JackPeriodLastStateReleased) {
+        JackPeriodLastStateReleased = false;
         if (JacksShape == "Jack's Shape.csv")
             JacksShape = "Jack's Shape - Shuffle 1.csv";
         else if (JacksShape == "Jack's Shape - Shuffle 1.csv")
@@ -407,27 +407,29 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             JacksShape = "Jack's Shape.csv";
     }
 
+    static bool MelPeriodLastStateReleased = true;
     //Shuffle Mélina's shape
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
-        PeriodLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && PeriodLastStateReleased) {
-        PeriodLastStateReleased = false;
+        MelPeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && MelPeriodLastStateReleased) {
+        MelPeriodLastStateReleased = false;
         if (MelShape == "MelShape.csv")
             MelShape = "MelShape-Shuffle.csv";
         else
             MelShape = "MelShape.csv";
     }
-    
+
+    static bool CedPeriodLastStateReleased = true;
     //Shuffle Cedrik's shape
-	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
-		PeriodLastStateReleased = true;
-	else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && PeriodLastStateReleased) {
-		PeriodLastStateReleased = false;
-		if (CedriksShape == "Cedrik's Shape.csv")
-			CedriksShape = "Cedrik's Shape - Shuffle 1.csv";
-		else
-			CedriksShape = "Cedrik's Shape.csv";
-	}
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
+        CedPeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && CedPeriodLastStateReleased) {
+        CedPeriodLastStateReleased = false;
+        if (CedriksShape == "Cedrik's Shape.csv")
+            CedriksShape = "Cedrik's Shape - Shuffle 1.csv";
+        else
+            CedriksShape = "Cedrik's Shape.csv";
+    }
 
 }
 
