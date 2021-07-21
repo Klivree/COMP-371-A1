@@ -1,0 +1,9 @@
+0,0,0,3,1,1, /middle segment front
+-2,0,-0.5,1,1,2, /middle segment back
+2,0,0,1,5,1, /right upright segment
+-2,0,-2,1,5,1, /left upright segment
+2,2,-1,1,1,1, /top segment front
+0,2,-2,3,1,1, /top segment back
+2,-2,-1,1,1,1, /bottom of o
+2,0,-2,1,5,1, /back of o
+-2,-1,0,1,1,1, /left nub

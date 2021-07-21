@@ -1,0 +1,5 @@
+-2.5,-0.5,0,2,9,2, /left wall
+4.5,-0.5,0,2,9,2, /right wall
+1,-4,0,5,2,2, /bottom wall
+1,3,0,5,2,2, /top wall
+1.5,0,0,4,4,2, /middle wall

@@ -1,0 +1,12 @@
+﻿D:\Programs\VS code\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\VS2017\/../Build/Debug/) contains files shared from another project (Labs.vcxproj, Quiz 1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Assignment 1.cpp
+C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Source\Assignment 1.cpp(48,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Source\Assignment 1.cpp(301,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Source\Assignment 1.cpp(309,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Source\Assignment 1.cpp(475,10): warning C4101: 'cubeProcessed': unreferenced local variable
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,float,unsigned int &)" (?createMatrices@Camera@@QAEXMMMAAI@Z)'
+LINK : warning LNK4217: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,float,unsigned int &)" (?createMatrices@Camera@@QAEXMMMAAI@Z)'
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Bin\vc120.pdb'; linking object as if no debug info
+  Labs.vcxproj -> C:\Users\jjtel\Downloads\Lab02\Lab02\Lab_Framework\Bin\COMP 371 - Assignment-Debug.exe

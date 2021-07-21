@@ -1,0 +1,9 @@
+1,-2.5,0,1,1,1, /nub at bottom of L2
+-1,-0.5,0,1,5,1, /bottom of L1
+-1,0,-1.5,1,4,1, /tall of L2
+-1,0,1.5,1,4,1, /tall of L1
+1.5,-2.5,1.5,2,1,1, /top of the O
+-0.5,-2.5,1.5,2,1,1, /bottom of the O
+1.5,-2.5,-1.5,2,1,1, /bottom of the G
+0,-2.5,-1.5,3,1,1, /right side of G
+0,-2.5,0,1,1,1, /nub in the G
