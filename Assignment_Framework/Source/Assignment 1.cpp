@@ -42,9 +42,9 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 
 glm::vec3 JackPOS = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 MelPOS = glm::vec3(75.0f, 0.0f, 75.0f);
-glm::vec3 CedrikPOS = glm::vec3(75.0f, 0.0f, -75.0f);
-glm::vec3 AlexPOS = glm::vec3(-75.0f, 0.0f, 75.0f);
+glm::vec3 MelPOS = glm::vec3(25.0f, 0.0f, 25.0f);
+glm::vec3 CedrikPOS = glm::vec3(25.0f, 0.0f, -25.0f);
+glm::vec3 AlexPOS = glm::vec3(-25.0f, 0.0f, 25.0f);
 
 
 char* readFile(const char* filePath);
@@ -183,7 +183,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastStateReleased = true;
+    static bool JLastStateReleased = true, ULastStateReleased = true, PeriodLastStateReleased = true;;
 
     camera.processInputs(window, dt); // processes all camera inputs
 
@@ -198,34 +198,38 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         currentObject = "Alex";
 
 
-
-
-
     // size up function
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-        if(currentObject == "Jack")
-            JackScale *= (dt * (float)(8 / 7)); // exponential resizing
+    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
+        ULastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
+        if (currentObject == "Jack")
+            JackScale *= (float) 8 / 7; // exponential resizing
         else if (currentObject == "Mel")
-            MelScale *= (dt * (float)(8 / 7));
+            MelScale *= (float) 8 / 7;
         else if (currentObject == "Cedrik")
-            CedrikScale *= (dt * (float)(8 / 7));
+            CedrikScale *= (float) 8 / 7;
         else if (currentObject == "Alex")
-            AlexScale *= (dt * (float)(8 / 7));
+            AlexScale *= (float) 8 / 7;
+        
+        ULastStateReleased = false;
     }
   
 
     // size down function
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
+        JLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
         if (currentObject == "Jack")
-            JackScale *= (dt * (float)(7 / 8)); // exponential resizing
+            JackScale *= (float) 7 / 8; // exponential resizing
         else if (currentObject == "Mel")
-            MelScale *= (dt * (float)(7 / 8));
+            MelScale *= (float) 7 / 8;
         else if (currentObject == "Cedrik")
-            CedrikScale *= (dt * (float)(7 / 8));
+            CedrikScale *= (float) 7 / 8;
         else if (currentObject == "Alex")
-            AlexScale *= (dt * (float)(7 / 8));
-    }
+            AlexScale *= (float) 7 / 8;
 
+        JLastStateReleased = false;
+    }
 
     // change the draw mode
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
@@ -258,10 +262,6 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         else if (currentObject == "Alex")
             AlexDrawMode = GL_POINTS;
     }
-
-
-
-    static bool PeriodLastStateReleased = true;
 
 
     // shuffle the shape function
