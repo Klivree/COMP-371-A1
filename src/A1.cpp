@@ -404,6 +404,17 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             JacksShape = "Jack's Shape.csv";
     }
 
+    //Shuffle Mélina's shape
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
+        PeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && PeriodLastStateReleased) {
+        PeriodLastStateReleased = false;
+        if (MelShape == "MelShape.csv")
+            MelShape = "MelShape-Shuffle.csv";
+        else
+            MelShape = "MelShape.csv";
+    }
+
 }
 
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLuint shaderProgram) {
