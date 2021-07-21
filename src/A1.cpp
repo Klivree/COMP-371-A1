@@ -24,6 +24,7 @@ string JacksShape = "../../Shapes/Jack's Shape.csv";
 string MelShape = "../../Shapes/MelShape.csv";
 string CedriksShape = "../../Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../../Shapes/Alex's Shape.csv";
+string ThapansShape = "../../Shapes/Thapan's Shape.csv";
 
 
 
@@ -316,9 +317,10 @@ int main(int argc, char* argv[]) {
 
         glBindVertexArray(shapeVAO);
         renderShapeFromCSV(JacksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, 0.0f, shaderProgram);
-        renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, 0.0f shaderProgram);
+        renderShapeFromCSV(MelShape, glm::vec3(-10.0f, 0.0f, 0.0f), scale, drawMode, 0.0f, shaderProgram);
         renderShapeFromCSV(CedriksShape, glm::vec3(10.0f, 0.5f, -10.0f), scale, drawMode, 0.0f, shaderProgram);
         renderShapeFromCSV(AlexsShape, glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV(ThapansShape, glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -328,6 +330,7 @@ int main(int argc, char* argv[]) {
         renderShapeFromCSV("../../Shapes/MelWall.csv", glm::vec3(-10.0f, 0.0f, -5.0f), scale, drawMode, 0.0f, shaderProgram);
         renderShapeFromCSV("../../Shapes/Cedrik's Wall.csv", glm::vec3(0.0f, 0.0f, 0.0f), scale, drawMode, 0.0f, shaderProgram);
         renderShapeFromCSV("../../Shapes/Alex's Wall.csv", glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../../Shapes/Thapan's Wall.csv", glm::vec3(10.0f, 0.5f, 10.0f), scale, drawMode, 0.0f, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -444,6 +447,18 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             AlexsShape = "Alex's Shape - Shuffle 1.csv";
         else
             AlexsShape = "Alex's Shape.csv";
+    }
+
+    static bool ThapanPeriodLastStateReleased = true;
+    //Shuffle Thapan's shape
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
+        ThapanPeriodLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && ThapanPeriodLastStateReleased) {
+        ThapanPeriodLastStateReleased = false;
+        if (ThapansShape == "Thapan's Shape.csv")
+            ThapansShape = "Thapan's Shape - Shuffle.csv";
+        else
+            ThapansShape = "Thapan's Shape.csv";
     }
 
 }
