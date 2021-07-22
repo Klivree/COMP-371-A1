@@ -25,26 +25,31 @@ GLfloat JackScale = 1.0f;
 GLfloat MelScale = 1.0f;
 GLfloat CedrikScale = 1.0f;
 GLfloat AlexScale = 1.0f;
+GLfloat ThapanScale = 1.0f;
 
 GLfloat JackRotation = 0.0f;
 GLfloat MelRotation = 0.0f;
 GLfloat CedrikRotation = 0.0f;
 GLfloat AlexRotation = 0.0f;
+GLfloat ThapanRotation = 0.0f;
 
 GLenum JackDrawMode = GL_TRIANGLES;
 GLenum MelDrawMode = GL_TRIANGLES;
 GLenum CedrikDrawMode = GL_TRIANGLES;
 GLenum AlexDrawMode = GL_TRIANGLES;
+GLenum ThapanDrawMode = GL_TRIANGLES;
 
 string JacksShape = "../Assets/Shapes/Jack's Shape.csv";
 string MelShape = "../Assets/Shapes/MelShape.csv";
 string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
+string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
 glm::vec3 JackPOS = glm::vec3(0.0f, 10.0f, 0.0f);
-glm::vec3 MelPOS = glm::vec3(20.0f, 10.0f, 20);
+glm::vec3 MelPOS = glm::vec3(20.0f, 10.0f, 20.0f);
 glm::vec3 CedrikPOS = glm::vec3(20.0f, 10.0f, -20.0f);
 glm::vec3 AlexPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
+glm::vec3 ThapanPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
 
 
 char* readFile(const char* filePath);
@@ -136,6 +141,7 @@ int main(int argc, char* argv[]) {
         renderShapeFromCSV(MelShape, MelPOS, MelScale, MelDrawMode, MelRotation, shaderProgram);
         renderShapeFromCSV(CedriksShape, CedrikPOS, CedrikScale, CedrikDrawMode, CedrikRotation, shaderProgram);
         renderShapeFromCSV(AlexsShape, AlexPOS, AlexScale, AlexDrawMode, AlexRotation, shaderProgram);
+        renderShapeFromCSV(ThapansShape, ThapanPOS, ThapanScale, ThapanDrawMode, ThapanRotation, shaderProgram);
 
         glBindVertexArray(0);
 
@@ -145,6 +151,8 @@ int main(int argc, char* argv[]) {
         renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelScale, MelDrawMode, 0.0f, shaderProgram);
         renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedrikScale, CedrikDrawMode, 0.0f, shaderProgram);
         renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexScale, AlexDrawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapanScale, ThapanDrawMode, 0.0f, shaderProgram);
+
 
         glBindVertexArray(0);
 
@@ -197,6 +205,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         currentObject = "Cedrik";
     else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
         currentObject = "Alex";
+    else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        currentObject = "Thapan";
 
 
     // size up function
@@ -211,6 +221,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedrikScale *= (float) 8 / 7;
         else if (currentObject == "Alex")
             AlexScale *= (float) 8 / 7;
+        else if (currentObject == "Thapan")
+            ThapanScale *= (float)8 / 7;
         
         ULastStateReleased = false;
     }
@@ -228,6 +240,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedrikScale *= (float) 7 / 8;
         else if (currentObject == "Alex")
             AlexScale *= (float) 7 / 8;
+        else if (currentObject == "Thapan")
+            ThapanScale *= (float)7 / 8;
 
         JLastStateReleased = false;
     }
@@ -242,6 +256,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedrikDrawMode = GL_TRIANGLES;
         else if (currentObject == "Alex")
             AlexDrawMode = GL_TRIANGLES;
+        else if (currentObject == "Thapan")
+            ThapanDrawMode = GL_TRIANGLES;
     }
     else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
         if (currentObject == "Jack")
@@ -252,6 +268,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedrikDrawMode = GL_LINES;
         else if (currentObject == "Alex")
             AlexDrawMode = GL_LINES;
+        else if (currentObject == "Thapan")
+            ThapanDrawMode = GL_LINES;
     }
     else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
         if (currentObject == "Jack")
@@ -262,6 +280,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             CedrikDrawMode = GL_POINTS;
         else if (currentObject == "Alex")
             AlexDrawMode = GL_POINTS;
+        else if (currentObject == "Thapan")
+            ThapanDrawMode = GL_POINTS;
     }
 
 
@@ -294,6 +314,12 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
                 AlexsShape = "../Assets/Shapes/Alex's Shape - Shuffle 1.csv";
             else
                 AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
+        }
+        else if (currentObject == "Thapan") {
+            if (ThapansShape == "../Assets/Shapes/Thapan's Shape.csv")
+                ThapansShape = "../Assets/Shapes/Thapan's Shape - Shuffle.csv";
+            else
+                ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
         }
 
         PeriodLastStateReleased = false;
