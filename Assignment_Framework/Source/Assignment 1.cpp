@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include "Camera.hpp"
+#include <math.h>
 
 using namespace std;
 
@@ -244,6 +245,34 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             ThapanScale *= (float)7 / 8;
 
         JLastStateReleased = false;
+    }
+
+    // rotate right function
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        if (currentObject == "Jack")
+            JackRotation += (float)5;
+        else if (currentObject == "Mel")
+            MelRotation += (float)5;
+        else if (currentObject == "Cedrik")
+            CedrikRotation += (float)5;
+        else if (currentObject == "Alex")
+            AlexRotation += (float)5;
+        else if (currentObject == "Thapan")
+            ThapanRotation += (float)5;
+    }
+
+    // rotate left function
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+        if (currentObject == "Jack")
+            JackRotation -= (float)5;
+        else if (currentObject == "Mel")
+            MelRotation -= (float)5;
+        else if (currentObject == "Cedrik")
+            CedrikRotation -= (float)5;
+        else if (currentObject == "Alex")
+            AlexRotation -= (float)5;
+        else if (currentObject == "Thapan")
+            ThapanRotation -= (float)5;
     }
 
     // change the draw mode
