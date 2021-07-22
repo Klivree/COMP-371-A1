@@ -32,18 +32,20 @@ void Camera::processInputs(GLFWwindow *window, float dt) {
 	*/
 
 	// camera positions
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		position += dt * speed * orientation;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		position += dt * speed * -orientation;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		position += dt * speed * glm::normalize(glm::cross(orientation, up));
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		position += dt * speed * -glm::normalize(glm::cross(orientation, up));
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		position += dt * speed * up;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		position += dt * speed * -up;
+	if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) != GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			position += dt * speed * orientation;
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			position += dt * speed * -orientation;
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			position += dt * speed * glm::normalize(glm::cross(orientation, up));
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			position += dt * speed * -glm::normalize(glm::cross(orientation, up));
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			position += dt * speed * up;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			position += dt * speed * -up;
+	}
 
 	// speed ajustments
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)

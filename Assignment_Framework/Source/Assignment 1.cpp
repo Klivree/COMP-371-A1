@@ -250,7 +250,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     // rotate right function
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
         if (currentObject == "Jack")
-            JackRotation += (float)5;
+            JackPOS += (float)5;
         else if (currentObject == "Mel")
             MelRotation += (float)5;
         else if (currentObject == "Cedrik")
@@ -273,6 +273,87 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             AlexRotation -= (float)5;
         else if (currentObject == "Thapan")
             ThapanRotation -= (float)5;
+    }
+
+    // movement function
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+        }
     }
 
     // change the draw mode
