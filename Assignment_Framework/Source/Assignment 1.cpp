@@ -250,7 +250,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     // rotate right function
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
         if (currentObject == "Jack")
-            JackPOS += (float)5;
+            JackRotation += (float)5;
         else if (currentObject == "Mel")
             MelRotation += (float)5;
         else if (currentObject == "Cedrik")
