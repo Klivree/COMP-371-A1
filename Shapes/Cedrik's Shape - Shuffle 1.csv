@@ -1,7 +1,7 @@
--148,-1,1.5,1,4,1, /left front tower of U
--146,-2.5,-1.5,5,1,1, /bottom front of U
--148,-1,-1.5,1,4,1, /left back tower of U
--144,-0.5,-1.5,1,3,1, /right back tower of U
--144,-1,1.5,1,4,1, /left back strip of U
--146,-2.5,0,1,1,2, /middle bar of U
--146,-2.5,1.5,3,1,1, /right top nub attaching front and back
+-3,-1,1.5,1,4,1, /left front tower of U
+-1,-2.5,-1.5,5,1,1, /bottom front of U
+-3,-1,-1.5,1,4,1, /left back tower of U
+1,-0.5,-1.5,1,3,1, /right back tower of U
+1,-1,1.5,1,4,1, /left back strip of U
+-1,-2.5,0,1,1,2, /middle bar of U
+-1,-2.5,1.5,3,1,1, /right top nub attaching front and back
