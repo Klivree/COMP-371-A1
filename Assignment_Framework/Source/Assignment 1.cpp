@@ -213,7 +213,38 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
         currentObject = "Thapan";
 
-
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (currentObject == "Jack") {
+            JackScale = 1.0f;
+            JackRotation = 0.0f;
+            JackDrawMode = GL_TRIANGLES;
+            JackPOS = glm::vec3(0.0f, 10.0f, 0.0f);
+        }
+        else if (currentObject == "Mel") {
+            MelScale = 1.0f;
+            MelRotation = 0.0f;
+            MelDrawMode = GL_TRIANGLES;
+            MelPOS = glm::vec3(20.0f, 10.0f, 20.0f);
+        }
+        if (currentObject == "Cedrik") {
+            CedrikScale = 1.0f;
+            CedrikRotation = 0.0f;
+            CedrikDrawMode = GL_TRIANGLES;
+            CedrikPOS = glm::vec3(20.0f, 10.0f, -20.0f);
+        }
+        if (currentObject == "Alex") {
+            AlexScale = 1.0f;
+            AlexRotation = 0.0f;
+            AlexDrawMode = GL_TRIANGLES;
+            AlexPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
+        }
+        if (currentObject == "Thapan") {
+            ThapanScale = 1.0f;
+            ThapanRotation = 0.0f;
+            ThapanDrawMode = GL_TRIANGLES;
+            ThapanPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
+        }
+    }
 
 
     // size up function
