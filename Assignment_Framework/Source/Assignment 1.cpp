@@ -21,32 +21,14 @@ const int width = 1024;
 const int height = 768;
 
 const float initialFOV = 90.0f; // FOV of the player view in degrees
-
-string currentObject = "Jack";
-
-//initialize model scales, degree rotation, filepaths and drawmodes
-GLfloat initialScale = 1.0f;
-GLfloat JackScale = initialScale;
-GLfloat MelScale = initialScale;
-GLfloat CedrikScale = initialScale;
-GLfloat AlexScale = initialScale;
-GLfloat ThapanScale = initialScale;
-
-glm::vec3 initialRotationVector = glm::vec3(0.0f);
-
-glm::vec3 JackRotationVector = initialRotationVector;
-glm::vec3 MelRotationVector = initialRotationVector;
-glm::vec3 CedrikRotationVector = initialRotationVector;
-glm::vec3 AlexRotationVector = initialRotationVector;
-glm::vec3 ThapanRotationVector = initialRotationVector;
-
-GLenum defaultDrawMode = GL_TRIANGLES;
-
-GLenum JackDrawMode = defaultDrawMode;
-GLenum MelDrawMode = defaultDrawMode;
-GLenum CedrikDrawMode = defaultDrawMode;
-GLenum AlexDrawMode = defaultDrawMode;
-GLenum ThapanDrawMode = defaultDrawMode;
+const GLfloat initialScale = 1.0f;
+const glm::vec3 initialRotationVector = glm::vec3(0.0f);
+const GLenum defaultDrawMode = GL_TRIANGLES;
+const glm::vec3 JackInitialPOS = glm::vec3(0.0f, 10.0f, 0.0f);
+const glm::vec3 MelInitialPOS = glm::vec3(20.0f, 10.0f, 20.0f);
+const glm::vec3 CedrikInitialPOS = glm::vec3(20.0f, 10.0f, -20.0f);
+const glm::vec3 AlexInitialPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
+const glm::vec3 ThapanInitialPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
 
 string JacksShape = "../Assets/Shapes/Jack's Shape.csv";
 string MelShape = "../Assets/Shapes/MelShape.csv";
@@ -54,18 +36,32 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
-glm::vec3 JackInitialPOS = glm::vec3(0.0f, 10.0f, 0.0f);
-glm::vec3 MelInitialPOS = glm::vec3(20.0f, 10.0f, 20.0f);
-glm::vec3 CedrikInitialPOS = glm::vec3(20.0f, 10.0f, -20.0f);
-glm::vec3 AlexInitialPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
-glm::vec3 ThapanInitialPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
+string currentObject = "Jack";
+
+//initialize model scales, degree rotation, filepaths and drawmodes
+GLfloat JackScale = initialScale;
+GLfloat MelScale = initialScale;
+GLfloat CedrikScale = initialScale;
+GLfloat AlexScale = initialScale;
+GLfloat ThapanScale = initialScale;
+
+glm::vec3 JackRotationVector = initialRotationVector;
+glm::vec3 MelRotationVector = initialRotationVector;
+glm::vec3 CedrikRotationVector = initialRotationVector;
+glm::vec3 AlexRotationVector = initialRotationVector;
+glm::vec3 ThapanRotationVector = initialRotationVector;
+
+GLenum JackDrawMode = defaultDrawMode;
+GLenum MelDrawMode = defaultDrawMode;
+GLenum CedrikDrawMode = defaultDrawMode;
+GLenum AlexDrawMode = defaultDrawMode;
+GLenum ThapanDrawMode = defaultDrawMode;
 
 glm::vec3 JackPOS = JackInitialPOS;
 glm::vec3 MelPOS = MelInitialPOS;
 glm::vec3 CedrikPOS = CedrikInitialPOS;
 glm::vec3 AlexPOS = AlexInitialPOS;
 glm::vec3 ThapanPOS = ThapanInitialPOS;
-
 
 char* readFile(const char* filePath);
 
@@ -86,6 +82,8 @@ void renderGrid(GLuint shaderProgram);
 void executeEvents(GLFWwindow* window, Camera& camera, float dt);
 
 void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram);
+
+GLuint loadTexture(const char* filename);
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
@@ -883,4 +881,41 @@ char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/2
     strcpy(chars, content.c_str());
 
     return chars;
+}
+
+GLuint loadTexture(const char* filename) {
+    // Step1 Create and bind textures
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+    
+    glBindTexture(GL_TEXTURE_2D, textureId);
+
+    // Step2 Set filter parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Step3 Load Textures with dimension data
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(filename, &width, &height, &nrChannels, 0);
+    if (!data)
+    {
+        std::cerr << "Error::Texture could not load texture file:" << filename << std::endl;
+        return 0;
+    }
+
+    // Step4 Upload the texture to the PU
+    GLenum format = 0;
+    if (nrChannels == 1)
+        format = GL_RED;
+    else if (nrChannels == 3)
+        format = GL_RGB;
+    else if (nrChannels == 4)
+        format = GL_RGBA;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height,
+        0, format, GL_UNSIGNED_BYTE, data);
+
+    // Step5 Free resources
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureId;
 }
