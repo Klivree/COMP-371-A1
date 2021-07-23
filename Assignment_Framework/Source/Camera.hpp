@@ -18,7 +18,7 @@ public:
 
 	int width, height;
 
-	bool firstLeftClick = true, firstMiddleClick = true, firstRightClick = true;
+	bool firstClick = true;
 	bool HomeLastStateReleased = true;
 
 	float speed = 0.05f;

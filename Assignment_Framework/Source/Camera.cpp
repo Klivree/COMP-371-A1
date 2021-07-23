@@ -56,41 +56,18 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		orientation = glm::rotateY(orientation, glm::radians(-rotationSpeed * dt));
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		orientation = glm::rotateX(orientation, glm::radians(rotationSpeed * dt));
+		orientation = glm::rotate(orientation, glm::radians(rotationSpeed * dt), glm::normalize(glm::cross(orientation, up)));
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		orientation = glm::rotateX(orientation, glm::radians(-rotationSpeed * dt));
+		orientation = glm::rotate(orientation, glm::radians(-rotationSpeed * dt), glm::normalize(glm::cross(orientation, up)));
 
-
-
-	//pan the image
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-		if (firstRightClick) {
-			glfwSetCursorPos(window, (float)width / 2, (float)height / 2); // put cursor in middle of window
-			firstRightClick = false;
-		}
-
-		glfwGetCursorPos(window, &mouseX, &mouseY);
-
-		position += glm::cross(glm::abs(orientation),glm::vec3(-speed * (float)(mouseY - (height / 2)) * dt, -speed * (float)(mouseX - (width / 2)) * dt, 0.0f));
-	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && firstMiddleClick && firstLeftClick) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-		firstRightClick = true;
-	}
-
-
-	
-
-	// tilt the image
+	///////MOUSE INPUTS///////
+	// Tilt the image
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-		if (firstMiddleClick) {
-			glfwSetCursorPos(window, (float) width / 2, (float) height / 2);
-			firstMiddleClick = false;
+		if (firstClick) {
+			glfwSetCursorPos(window, (float)width / 2, (float)height / 2);
+			firstClick = false;
 		}
 
 		glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -98,28 +75,32 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 		float rotX = dt * sensitivity * (float)(mouseY - (height / 2)) / height;
 		float rotY = dt * sensitivity * (float)(mouseX - (height / 2)) / height;
 
-		glm::vec3 newOrientation = glm::rotate(orientation, glm::radians(-rotX), glm::normalize(glm::cross(orientation, up)));
-		
-		if (!((glm::angle(newOrientation, up) <= glm::radians(5.0f)) || (glm::angle(newOrientation, -up) <= glm::radians(5.0f))))
-			orientation = newOrientation;
-		
-	
-		orientation = glm::rotate(orientation, glm::radians(-rotY), up);
-
+		orientation = glm::rotate(orientation, glm::radians(-rotX), glm::normalize(glm::cross(orientation, up))); // right rotate
+		orientation = glm::rotate(orientation, glm::radians(-rotY), up); // up rotate
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick && firstLeftClick) {
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-		firstMiddleClick = true;
-	}
-
-	// Zoom in and out
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+	// pan the image
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-		if (firstLeftClick) {
+		if (firstClick) {
+			glfwSetCursorPos(window, (float)width / 2, (float)height / 2); // put cursor in middle of window
+			firstClick = false;
+		}
+
+		glfwGetCursorPos(window, &mouseX, &mouseY);
+
+		//pan right
+		position += speed * dt * (float)(mouseX - (width / 2)) * glm::normalize(glm::cross(orientation, up));
+		//pan left
+		position += speed * dt * (float)(mouseY - (height / 2)) * glm::cross(orientation, glm::normalize(glm::cross(orientation, up)));
+	}
+	// Zoom in and out
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+		if (firstClick) {
 			glfwSetCursorPos(window, (float)width / 2, (float)height / 2);
-			firstLeftClick = false;
+			firstClick = false;
 		}
 
 		glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -129,9 +110,9 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 		if (newFOV >= 5.0f && newFOV <= 150.0f) //check so that we don't flip the image
 			FOV = newFOV;
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick && firstMiddleClick) {
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE){
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-		firstLeftClick = true;
+		firstClick = true;
 	}
 }
