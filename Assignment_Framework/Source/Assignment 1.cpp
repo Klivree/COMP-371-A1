@@ -299,41 +299,14 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         JLastStateReleased = false;
     }
 
-    // rotate counter-clockwise around positive y-axis
+
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
         ALastStateReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
-        if (currentObject == "Jack")
-            JackRotation += rotationFactor;
-        else if (currentObject == "Mel")
-            MelRotation += rotationFactor;
-        else if (currentObject == "Cedrik")
-            CedrikRotation += rotationFactor;
-        else if (currentObject == "Alex")
-            AlexRotation += rotationFactor;
-        else if (currentObject == "Thapan")
-            ThapanRotation += rotationFactor;
 
-        ALastStateReleased = false;
-    }
 
-    // rotate clockwise around positive y-axis
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
         DLastStateReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
-        if (currentObject == "Jack")
-            JackRotation -= rotationFactor;
-        else if (currentObject == "Mel")
-            MelRotation -= rotationFactor;
-        else if (currentObject == "Cedrik")
-            CedrikRotation -= rotationFactor;
-        else if (currentObject == "Alex")
-            AlexRotation -= rotationFactor;
-        else if (currentObject == "Thapan")
-            ThapanRotation -= rotationFactor;
 
-        DLastStateReleased = false;
-    }
 
     // movement function
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
@@ -413,6 +386,39 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
                 AlexPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
             else if (currentObject == "Thapan")
                 ThapanPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
+        }
+    }
+    else {
+        // rotate counter-clockwise around positive y-axis
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
+            if (currentObject == "Jack")
+                JackRotation += rotationFactor;
+            else if (currentObject == "Mel")
+                MelRotation += rotationFactor;
+            else if (currentObject == "Cedrik")
+                CedrikRotation += rotationFactor;
+            else if (currentObject == "Alex")
+                AlexRotation += rotationFactor;
+            else if (currentObject == "Thapan")
+                ThapanRotation += rotationFactor;
+
+            ALastStateReleased = false;
+        }
+
+        // rotate clockwise around positive y-axis
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
+            if (currentObject == "Jack")
+                JackRotation -= rotationFactor;
+            else if (currentObject == "Mel")
+                MelRotation -= rotationFactor;
+            else if (currentObject == "Cedrik")
+                CedrikRotation -= rotationFactor;
+            else if (currentObject == "Alex")
+                AlexRotation -= rotationFactor;
+            else if (currentObject == "Thapan")
+                ThapanRotation -= rotationFactor;
+
+            DLastStateReleased = false;
         }
     }
 
@@ -509,6 +515,7 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
     *   pos - coordinates of the object
     *   scale - how much the object is to be scaled by
     *   drawMode - renderer mode
+    *   degrees - how many degrees clockwise around the y-axis to rotate the object
     *   shaderProgram - shader program used by the running OpenGL application
     *
     * Each line in the csv file renders a seperate rectangular prism. The line should be formatted as such:
@@ -527,6 +534,11 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
     int i, j;
     char curChar;
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
+
+    //creation of base matrix
+    glm::mat4 baseMatrix = glm::mat4(1.0f);
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
+    baseMatrix = glm::translate(baseMatrix, pos);
 
     while (!fileStream.eof()) {
         getline(fileStream, line); //get line for a cube
@@ -561,10 +573,15 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
                 cubeInfo[k] = scale * cubeInfo[k];
             }
 
-            glm::vec3 positionVec = glm::rotateY(glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]), glm::radians(degrees)); // convert the local positions to the proper degrees
-            //now we draw the cube
-            glm::mat4 cubeWorldMatrix = glm::translate(glm::mat4(1.0), positionVec + pos) * glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::mat4(1.0), glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]));
-            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
+            glm::vec3 localCoord = glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]);
+            glm::vec3 scalingVector = glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]);
+
+            // transformation of the base matrix
+            glm::mat4 cubeWorldMatrix = glm::translate(baseMatrix, localCoord);
+            cubeWorldMatrix = glm::scale(cubeWorldMatrix, scalingVector);
+
+            // draw the cube
+             glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
 
 
 
