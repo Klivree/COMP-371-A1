@@ -11,6 +11,9 @@
 #include "Camera.hpp"
 #include <math.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 using namespace std;
 
 //dimensions of the window in pixels
@@ -29,13 +32,13 @@ GLfloat CedrikScale = initialScale;
 GLfloat AlexScale = initialScale;
 GLfloat ThapanScale = initialScale;
 
-GLfloat initialRotation = 0.0f;
+glm::vec3 initialRotationVector = glm::vec3(0.0f);
 
-GLfloat JackRotation = initialRotation;
-GLfloat MelRotation = initialRotation;
-GLfloat CedrikRotation = initialRotation;
-GLfloat AlexRotation = initialRotation;
-GLfloat ThapanRotation = initialRotation;
+glm::vec3 JackRotationVector = initialRotationVector;
+glm::vec3 MelRotationVector = initialRotationVector;
+glm::vec3 CedrikRotationVector = initialRotationVector;
+glm::vec3 AlexRotationVector = initialRotationVector;
+glm::vec3 ThapanRotationVector = initialRotationVector;
 
 GLenum defaultDrawMode = GL_TRIANGLES;
 
@@ -76,7 +79,7 @@ GLuint getGridModel(glm::vec3 color);
 
 GLuint compileAndLinkShaders();
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLfloat degrees, GLuint shaderProgram);
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram);
 
 void renderGrid(GLuint shaderProgram);
 
@@ -122,6 +125,8 @@ int main(int argc, char* argv[]) {
     //get shader program
     GLuint shaderProgram = compileAndLinkShaders();
 
+    //initialize world matrix
+    glm::mat4 worldMatrix = glm::mat4(1.0);
 
     //get VAOs
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -149,21 +154,21 @@ int main(int argc, char* argv[]) {
         camera.createMatrices(0.01f, 100.0f, shaderProgram); // takes care of the view and projection matrices
 
         glBindVertexArray(shapeVAO);
-        renderShapeFromCSV(JacksShape, JackPOS, JackScale, JackDrawMode, JackRotation, shaderProgram);
-        renderShapeFromCSV(MelShape, MelPOS, MelScale, MelDrawMode, MelRotation, shaderProgram);
-        renderShapeFromCSV(CedriksShape, CedrikPOS, CedrikScale, CedrikDrawMode, CedrikRotation, shaderProgram);
-        renderShapeFromCSV(AlexsShape, AlexPOS, AlexScale, AlexDrawMode, AlexRotation, shaderProgram);
-        renderShapeFromCSV(ThapansShape, ThapanPOS, ThapanScale, ThapanDrawMode, ThapanRotation, shaderProgram);
+        renderShapeFromCSV(JacksShape, JackPOS, JackScale, JackDrawMode, JackRotationVector, shaderProgram);
+        renderShapeFromCSV(MelShape, MelPOS, MelScale, MelDrawMode, MelRotationVector, shaderProgram);
+        renderShapeFromCSV(CedriksShape, CedrikPOS, CedrikScale, CedrikDrawMode, CedrikRotationVector, shaderProgram);
+        renderShapeFromCSV(AlexsShape, AlexPOS, AlexScale, AlexDrawMode, AlexRotationVector, shaderProgram);
+        renderShapeFromCSV(ThapansShape, ThapanPOS, ThapanScale, ThapanDrawMode, ThapanRotationVector, shaderProgram);
 
         glBindVertexArray(0);
 
         glBindVertexArray(wallVAO);
 
-        renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JackScale, JackDrawMode, 0.0f, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelScale, MelDrawMode, 0.0f, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedrikScale, CedrikDrawMode, 0.0f, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexScale, AlexDrawMode, 0.0f, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapanScale, ThapanDrawMode, 0.0f, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JackScale, JackDrawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelScale, MelDrawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedrikScale, CedrikDrawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexScale, AlexDrawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapanScale, ThapanDrawMode, initialRotationVector, shaderProgram);
 
 
         glBindVertexArray(0);
@@ -229,31 +234,31 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastStateReleased) {
         if (currentObject == "Jack") {
             JackScale = initialScale;
-            JackRotation = initialRotation;
+            JackRotationVector = initialRotationVector;
             JackDrawMode = defaultDrawMode;
             JackPOS = JackInitialPOS;
         }
         else if (currentObject == "Mel") {
             MelScale = initialScale;
-            MelRotation = initialRotation;
+            MelRotationVector = initialRotationVector;
             MelDrawMode = defaultDrawMode;
             MelPOS = MelInitialPOS;
         }
         if (currentObject == "Cedrik") {
             CedrikScale = initialScale;
-            CedrikRotation = initialRotation;
+            CedrikRotationVector = initialRotationVector;
             CedrikDrawMode = defaultDrawMode;
             CedrikPOS = CedrikInitialPOS;
         }
         if (currentObject == "Alex") {
             AlexScale = initialScale;
-            AlexRotation = initialRotation;
+            AlexRotationVector = initialRotationVector;
             AlexDrawMode = defaultDrawMode;
             AlexPOS = AlexInitialPOS;
         }
         if (currentObject == "Thapan") {
             ThapanScale = initialScale;
-            ThapanRotation = initialRotation;
+            ThapanRotationVector = initialRotationVector;
             ThapanDrawMode = defaultDrawMode;
             ThapanPOS = ThapanInitialPOS;
         }
@@ -392,15 +397,15 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         // rotate counter-clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
             if (currentObject == "Jack")
-                JackRotation += rotationFactor;
+                JackRotationVector.y += rotationFactor;
             else if (currentObject == "Mel")
-                MelRotation += rotationFactor;
+                MelRotationVector.y += rotationFactor;
             else if (currentObject == "Cedrik")
-                CedrikRotation += rotationFactor;
+                CedrikRotationVector.y += rotationFactor;
             else if (currentObject == "Alex")
-                AlexRotation += rotationFactor;
+                AlexRotationVector.y += rotationFactor;
             else if (currentObject == "Thapan")
-                ThapanRotation += rotationFactor;
+                ThapanRotationVector.y += rotationFactor;
 
             ALastStateReleased = false;
         }
@@ -408,15 +413,15 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         // rotate clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
             if (currentObject == "Jack")
-                JackRotation -= rotationFactor;
+                JackRotationVector.y -= rotationFactor;
             else if (currentObject == "Mel")
-                MelRotation -= rotationFactor;
+                MelRotationVector.y -= rotationFactor;
             else if (currentObject == "Cedrik")
-                CedrikRotation -= rotationFactor;
+                CedrikRotationVector.y -= rotationFactor;
             else if (currentObject == "Alex")
-                AlexRotation -= rotationFactor;
+                AlexRotationVector.y -= rotationFactor;
             else if (currentObject == "Thapan")
-                ThapanRotation -= rotationFactor;
+                ThapanRotationVector.y -= rotationFactor;
 
             DLastStateReleased = false;
         }
@@ -508,14 +513,14 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
 }
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLfloat degrees, GLuint shaderProgram) {
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram) {
     /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
     *
     *   filePath - filePath of the .csv file that defines the shape
     *   pos - coordinates of the object
     *   scale - how much the object is to be scaled by
     *   drawMode - renderer mode
-    *   degrees - how many degrees clockwise around the y-axis to rotate the object
+    *   rotationalVector - how many degrees clockwise around the respective axis to rotate the object around (degrees around x-axis, degrees around y-axis, degrees around z-axis)
     *   shaderProgram - shader program used by the running OpenGL application
     *
     * Each line in the csv file renders a seperate rectangular prism. The line should be formatted as such:
@@ -537,7 +542,9 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
 
     //creation of base matrix
     glm::mat4 baseMatrix = glm::mat4(1.0f);
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
     baseMatrix = glm::translate(baseMatrix, pos);
 
     while (!fileStream.eof()) {
