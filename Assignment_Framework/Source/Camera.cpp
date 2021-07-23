@@ -1,14 +1,17 @@
 #include "Camera.hpp"
 
-Camera::Camera(int w, int h, glm::vec3 pos) {
+Camera::Camera(int w, int h, glm::vec3 pos, float FOVdeg) {
 	width = w;
 	height = h;
 	position = pos;
 	initialPosition = position;
 	orientation = initialOrientation;
+
+	FOV = FOVdeg;
+	initialFOV = FOV;
 }
 
-void Camera::createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram) {
+void Camera::createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram) {
 	/* creates and sends the view and projection matrices to the shader program
 	* 
 	*	FOVdeg - the FOV of the camera in degrees
@@ -22,7 +25,7 @@ void Camera::createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuin
 
 	// creation of view and projection matrices
 	viewMatrix = glm::lookAt(position, position + orientation, up);
-	projectionMatrix = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
+	projectionMatrix = glm::perspective(glm::radians(FOV), (float)width / height, nearPlane, farPlane);
 
 	// sending the view and projection matrices to the vertex shader
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, &viewMatrix[0][0]);
@@ -41,6 +44,7 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 	else if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS && HomeLastStateReleased) {
 		position = initialPosition;
 		orientation = initialOrientation;
+		FOV = initialFOV;
 
 		HomeLastStateReleased = false;
 	}
@@ -56,22 +60,9 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		orientation = glm::rotateX(orientation, glm::radians(-rotationSpeed * dt));
 
-	// camera positions
-	if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) != GLFW_PRESS) {
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			position += dt * speed * orientation;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			position += dt * speed * -orientation;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			position += dt * speed * glm::normalize(glm::cross(orientation, up));
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			position += dt * speed * -glm::normalize(glm::cross(orientation, up));
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			position += dt * speed * up;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-			position += dt * speed * -up;
-	}
 
+
+	//pan the image
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -82,9 +73,9 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
-		position += glm::cross(orientation,glm::vec3(speed * (float)(mouseY - (height / 2)) * dt, speed * (float)(mouseX - (width / 2)) * dt, 0.0f));
+		position += glm::cross(glm::abs(orientation),glm::vec3(-speed * (float)(mouseY - (height / 2)) * dt, -speed * (float)(mouseX - (width / 2)) * dt, 0.0f));
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && firstMiddleClick) {
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && firstMiddleClick && firstLeftClick) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 		firstRightClick = true;
@@ -93,7 +84,7 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 
 	
 
-	// mouse inputs
+	// tilt the image
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -116,9 +107,31 @@ void Camera::processInputs(GLFWwindow* window, float dt) {
 		orientation = glm::rotate(orientation, glm::radians(-rotY), up);
 
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick) {
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick && firstLeftClick) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 		firstMiddleClick = true;
+	}
+
+	// Zoom in and out
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+		if (firstLeftClick) {
+			glfwSetCursorPos(window, (float)width / 2, (float)height / 2);
+			firstLeftClick = false;
+		}
+
+		glfwGetCursorPos(window, &mouseX, &mouseY);
+
+		float newFOV = FOV + dt * (mouseY - (float)(height / 2));
+
+		if (newFOV >= 5.0f && newFOV <= 150.0f) //check so that we don't flip the image
+			FOV = newFOV;
+	}
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick && firstMiddleClick) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		firstLeftClick = true;
 	}
 }

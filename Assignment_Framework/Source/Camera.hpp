@@ -25,9 +25,12 @@ public:
 	float rotationSpeed = 45.0f;
 	float sensitivity = 100.0f;
 
-	Camera(int width, int height, glm::vec3 pos);
+	float FOV;
+	float initialFOV;
 
-	void createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram);
+	Camera(int width, int height, glm::vec3 pos, float FOVdeg);
+
+	void createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram);
 
 	void processInputs(GLFWwindow* window, float dt);	
 
