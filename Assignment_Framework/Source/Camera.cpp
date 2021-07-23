@@ -4,6 +4,8 @@ Camera::Camera(int w, int h, glm::vec3 pos) {
 	width = w;
 	height = h;
 	position = pos;
+	initialPosition = position;
+	orientation = initialOrientation;
 }
 
 void Camera::createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuint& shaderProgram) {
@@ -27,9 +29,32 @@ void Camera::createMatrices(float FOVdeg, float nearPlane, float farPlane, GLuin
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, &projectionMatrix[0][0]);
 }
 
-void Camera::processInputs(GLFWwindow *window, float dt) {
+void Camera::processInputs(GLFWwindow* window, float dt) {
 	/* Handles the inputs that will affect the camera position and view
 	*/
+
+	double mouseX, mouseY;
+
+	// reset camera orientation and position
+	if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_RELEASE)
+		HomeLastStateReleased = true;
+	else if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS && HomeLastStateReleased) {
+		position = initialPosition;
+		orientation = initialOrientation;
+
+		HomeLastStateReleased = false;
+	}
+
+
+	// camera rotations
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		orientation = glm::rotateY(orientation, glm::radians(rotationSpeed * dt));
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		orientation = glm::rotateY(orientation, glm::radians(-rotationSpeed * dt));
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		orientation = glm::rotateX(orientation, glm::radians(rotationSpeed * dt));
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		orientation = glm::rotateX(orientation, glm::radians(-rotationSpeed * dt));
 
 	// camera positions
 	if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) != GLFW_PRESS) {
@@ -47,22 +72,36 @@ void Camera::processInputs(GLFWwindow *window, float dt) {
 			position += dt * speed * -up;
 	}
 
-	// speed ajustments
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-		speed = 5.0f;
-	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-		speed = 1.0f;
-
-	// mouse inputs
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-		if (firstClick) {
-			glfwSetCursorPos(window, (float) width / 2, (float) height / 2);
-			firstClick = false;
+		if (firstRightClick) {
+			glfwSetCursorPos(window, (float)width / 2, (float)height / 2); // put cursor in middle of window
+			firstRightClick = false;
 		}
 
-		double mouseX, mouseY;
+		glfwGetCursorPos(window, &mouseX, &mouseY);
+
+		position += glm::cross(orientation,glm::vec3(speed * (float)(mouseY - (height / 2)) * dt, speed * (float)(mouseX - (width / 2)) * dt, 0.0f));
+	}
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && firstMiddleClick) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		firstRightClick = true;
+	}
+
+
+	
+
+	// mouse inputs
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+		if (firstMiddleClick) {
+			glfwSetCursorPos(window, (float) width / 2, (float) height / 2);
+			firstMiddleClick = false;
+		}
+
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
 		float rotX = dt * sensitivity * (float)(mouseY - (height / 2)) / height;
@@ -77,9 +116,9 @@ void Camera::processInputs(GLFWwindow *window, float dt) {
 		orientation = glm::rotate(orientation, glm::radians(-rotY), up);
 
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && firstRightClick) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-		firstClick = true;
+		firstMiddleClick = true;
 	}
 }

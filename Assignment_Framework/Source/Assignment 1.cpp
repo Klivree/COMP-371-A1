@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
         glBindVertexArray(0);
 
         //render the origin lines
-        //          position                    lenght                      color             scale
+        //          position                    length                      color             scale
         renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, shaderProgram); // x direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
         renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
@@ -193,7 +193,11 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastStateReleased = true, ULastStateReleased = true, PeriodLastStateReleased = true;;
+    static bool JLastStateReleased = true, ULastStateReleased = true, PeriodLastStateReleased = true;
+    float scaleFactor = (float)8 / 7;
+    float rotationFactor = 5.0f;
+    float modelMovementSpeed = 2.0f;
+
 
     camera.processInputs(window, dt); // processes all camera inputs
 
@@ -210,20 +214,22 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         currentObject = "Thapan";
 
 
+
+
     // size up function
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
         ULastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
         if (currentObject == "Jack")
-            JackScale *= (float) 8 / 7; // exponential resizing
+            JackScale *= scaleFactor; // exponential resizing
         else if (currentObject == "Mel")
-            MelScale *= (float) 8 / 7;
+            MelScale *= scaleFactor;
         else if (currentObject == "Cedrik")
-            CedrikScale *= (float) 8 / 7;
+            CedrikScale *= scaleFactor;
         else if (currentObject == "Alex")
-            AlexScale *= (float) 8 / 7;
+            AlexScale *= scaleFactor;
         else if (currentObject == "Thapan")
-            ThapanScale *= (float)8 / 7;
+            ThapanScale *= scaleFactor;
         
         ULastStateReleased = false;
     }
@@ -234,15 +240,15 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         JLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
         if (currentObject == "Jack")
-            JackScale *= (float) 7 / 8; // exponential resizing
+            JackScale *= 1 / scaleFactor; // exponential resizing
         else if (currentObject == "Mel")
-            MelScale *= (float) 7 / 8;
+            MelScale *= 1 / scaleFactor;
         else if (currentObject == "Cedrik")
-            CedrikScale *= (float) 7 / 8;
+            CedrikScale *= 1 / scaleFactor;
         else if (currentObject == "Alex")
-            AlexScale *= (float) 7 / 8;
+            AlexScale *= 1 / scaleFactor;
         else if (currentObject == "Thapan")
-            ThapanScale *= (float)7 / 8;
+            ThapanScale *= 1 / scaleFactor;
 
         JLastStateReleased = false;
     }
@@ -250,111 +256,112 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     // rotate right function
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
         if (currentObject == "Jack")
-            JackRotation += (float)5;
+            JackRotation += rotationFactor * dt;
         else if (currentObject == "Mel")
-            MelRotation += (float)5;
+            MelRotation += rotationFactor * dt;
         else if (currentObject == "Cedrik")
-            CedrikRotation += (float)5;
+            CedrikRotation += rotationFactor * dt;
         else if (currentObject == "Alex")
-            AlexRotation += (float)5;
+            AlexRotation += rotationFactor * dt;
         else if (currentObject == "Thapan")
-            ThapanRotation += (float)5;
+            ThapanRotation += rotationFactor * dt;
     }
 
     // rotate left function
     if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
         if (currentObject == "Jack")
-            JackRotation -= (float)5;
+            JackRotation -= rotationFactor * dt;
         else if (currentObject == "Mel")
-            MelRotation -= (float)5;
+            MelRotation -= rotationFactor * dt;
         else if (currentObject == "Cedrik")
-            CedrikRotation -= (float)5;
+            CedrikRotation -= rotationFactor * dt;
         else if (currentObject == "Alex")
-            AlexRotation -= (float)5;
+            AlexRotation -= rotationFactor * dt;
         else if (currentObject == "Thapan")
-            ThapanRotation -= (float)5;
+            ThapanRotation -= rotationFactor * dt;
     }
 
     // movement function
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+                JackPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+                MelPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+                CedrikPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+                AlexPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, 0.5f, 0.0f);
+                ThapanPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+                JackPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+                MelPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+                CedrikPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+                AlexPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, -0.5f, 0.0f);
+                ThapanPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+                JackPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+                MelPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+                CedrikPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+                AlexPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.5f, 0.0f, 0.0f);
+                ThapanPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+                JackPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+                MelPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+                CedrikPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+                AlexPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(-0.5f, 0.0f, 0.0f);
+                ThapanPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+                JackPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+                MelPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+                CedrikPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+                AlexPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, 0.0f, 0.5f);
+                ThapanPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
         }
 
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+                JackPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
             else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+                MelPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
             else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+                CedrikPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
             else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+                AlexPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
             else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, 0.0f, -0.5f);
+                ThapanPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
         }
     }
+
 
     // change the draw mode
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
@@ -435,6 +442,10 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         PeriodLastStateReleased = false;
     }
 
+    // close the window on escape
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+
 }
 
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, GLfloat degrees, GLuint shaderProgram) {
@@ -461,7 +472,6 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
     float cubeInfo[6] = {};
     int i, j;
     char curChar;
-    bool cubeProcessed;
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
 
     while (!fileStream.eof()) {
