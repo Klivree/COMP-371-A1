@@ -284,8 +284,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         JLastStateReleased = false;
     }
 
-    // rotate right function
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+    // rotate counter-clockwise around positive y-axis
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         if (currentObject == "Jack")
             JackRotation += rotationFactor * dt;
         else if (currentObject == "Mel")
@@ -298,8 +298,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             ThapanRotation += rotationFactor * dt;
     }
 
-    // rotate left function
-    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+    // rotate clockwise around positive y-axis
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         if (currentObject == "Jack")
             JackRotation -= rotationFactor * dt;
         else if (currentObject == "Mel")
@@ -342,19 +342,6 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             if (currentObject == "Jack")
-                JackPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            if (currentObject == "Jack")
                 JackPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Mel")
                 MelPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
@@ -364,6 +351,19 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
                 AlexPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
             else if (currentObject == "Thapan")
                 ThapanPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            if (currentObject == "Jack")
+                JackPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            else if (currentObject == "Mel")
+                MelPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            else if (currentObject == "Cedrik")
+                CedrikPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            else if (currentObject == "Alex")
+                AlexPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            else if (currentObject == "Thapan")
+                ThapanPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
