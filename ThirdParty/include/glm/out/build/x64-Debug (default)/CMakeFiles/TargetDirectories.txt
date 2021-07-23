@@ -1,2 +1,0 @@
-C:/Users/jjtel/source/repos/COMP-371-A1/ThirdParty/glm/glm/out/build/x64-Debug (default)/CMakeFiles/edit_cache.dir
-C:/Users/jjtel/source/repos/COMP-371-A1/ThirdParty/glm/glm/out/build/x64-Debug (default)/CMakeFiles/rebuild_cache.dir
