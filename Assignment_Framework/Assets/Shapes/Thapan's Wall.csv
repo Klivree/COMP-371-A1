@@ -1,10 +1,10 @@
-1,0,-5,1,4,3, /left wall
-7,0,-5,1,4,3, /right wall
-4,-2,-5,7,1,3, /bottom wall
-3,-1,-5,1,1,3, /bottom left plank
-5,-1,-5,1,1,3, /bottom right plank
-4,-2,-5,1,1,1, /bottom middle plank
-3,0.5,-5,1,1,3, /top left plank
-5,0.5,-5,1,1,3, /top right plank
-4,1.5,-5,3,1,1, /atop middle plank
-4,0,-5,5,1,3, /top wall
+1,0,-15,1,4,3, /left wall
+7,0,-15,1,4,3, /right wall
+4,-2,-15,7,1,3, /bottom wall
+3,-1,-15,1,1,3, /bottom left plank
+5,-1,-15,1,1,3, /bottom right plank
+4,-2,-15,1,1,1, /bottom middle plank
+3,0.5,-15,1,1,3, /top left plank
+5,0.5,-15,1,1,3, /top right plank
+4,1.5,-15,3,1,1, /atop middle plank
+4,0,-15,5,1,3, /top wall
