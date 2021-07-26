@@ -10,33 +10,30 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 class Model {
 public:
-	Model(std::string pFilePath, GLuint pVAO, glm::vec3 pPosition, GLenum pDrawMode);
+    Model(std::string pFilePath, int pNumOfShuffles, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
 
-	void render(GLuint shaderProgram);
+    void resetModel();
 
-	void resetModel();
+    void shuffle();
+
+    glm::vec3 POS;
+    glm::vec3 rotationVector;
+    std::string filePath;
+    GLfloat scale;
+    GLenum drawMode;
 
 private:
-	glm::vec3 position;
-	glm::vec3 rotationVector;
-	GLfloat scale;
-	GLenum drawMode;
-
-	GLfloat initialScale = 1.0f;
-	glm::vec3 initialRotationVector = glm::vec3(0.0f);
-	GLenum defaultDrawMode;
-	glm::vec3 initialPOS;
-	std::string filepath;
-	GLuint VAO;
+    glm::vec3 initialPOS;
+    glm::vec3 initialRotationVector;
+    GLfloat initialScale;
+    GLenum initialDrawMode;
+    std::string initialFilePath;
+    int numOfShuffles;
+    int shuffleNumber = 0;
 };
-
-
-
-
-
-
 
 #endif

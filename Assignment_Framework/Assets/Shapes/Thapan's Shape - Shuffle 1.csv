@@ -1,0 +1,6 @@
+4,-1,0,1,5,1, /middle pillar
+4,1,0,4,1,1, /top horizontal pillar
+4,-1,0,3,1,1, /middle horizontal pillar
+4,-3,0,4,1,1, /bottom horizontal pillar
+4,1,0,1,1,5, /top front pillar
+4,-3,0,1,1,5, /bottom front pillar

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include "Camera.hpp"
+#include "Model.hpp"
 #include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -36,32 +37,14 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
-string currentObject = "Jack";
 
-//initialize model scales, degree rotation, filepaths and drawmodes
-GLfloat JackScale = initialScale;
-GLfloat MelScale = initialScale;
-GLfloat CedrikScale = initialScale;
-GLfloat AlexScale = initialScale;
-GLfloat ThapanScale = initialScale;
+Model JacksModel = Model(JacksShape, 3, JackInitialPOS, initialScale, GL_TRIANGLES);
+Model MelModel = Model(MelShape, 2, MelInitialPOS, initialScale, GL_TRIANGLES);
+Model CedriksModel = Model(CedriksShape, 2, CedrikInitialPOS, initialScale, GL_TRIANGLES);
+Model AlexsModel = Model(AlexsShape, 2, AlexInitialPOS, initialScale, GL_TRIANGLES);
+Model ThapansModel = Model(ThapansShape, 2, ThapanInitialPOS, initialScale, GL_TRIANGLES);
 
-glm::vec3 JackRotationVector = initialRotationVector;
-glm::vec3 MelRotationVector = initialRotationVector;
-glm::vec3 CedrikRotationVector = initialRotationVector;
-glm::vec3 AlexRotationVector = initialRotationVector;
-glm::vec3 ThapanRotationVector = initialRotationVector;
-
-GLenum JackDrawMode = defaultDrawMode;
-GLenum MelDrawMode = defaultDrawMode;
-GLenum CedrikDrawMode = defaultDrawMode;
-GLenum AlexDrawMode = defaultDrawMode;
-GLenum ThapanDrawMode = defaultDrawMode;
-
-glm::vec3 JackPOS = JackInitialPOS;
-glm::vec3 MelPOS = MelInitialPOS;
-glm::vec3 CedrikPOS = CedrikInitialPOS;
-glm::vec3 AlexPOS = AlexInitialPOS;
-glm::vec3 ThapanPOS = ThapanInitialPOS;
+Model *currentObject = &JacksModel;
 
 char* readFile(const char* filePath);
 
@@ -123,9 +106,6 @@ int main(int argc, char* argv[]) {
     //get shader program
     GLuint shaderProgram = compileAndLinkShaders();
 
-    //initialize world matrix
-    glm::mat4 worldMatrix = glm::mat4(1.0);
-
     //get VAOs
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
     GLuint wallVAO = getCubeModel(glm::vec3(0.8f, 0.8f, 0.8f));
@@ -151,22 +131,24 @@ int main(int argc, char* argv[]) {
 
         camera.createMatrices(0.01f, 100.0f, shaderProgram); // takes care of the view and projection matrices
 
+
         glBindVertexArray(shapeVAO);
-        renderShapeFromCSV(JacksShape, JackPOS, JackScale, JackDrawMode, JackRotationVector, shaderProgram);
-        renderShapeFromCSV(MelShape, MelPOS, MelScale, MelDrawMode, MelRotationVector, shaderProgram);
-        renderShapeFromCSV(CedriksShape, CedrikPOS, CedrikScale, CedrikDrawMode, CedrikRotationVector, shaderProgram);
-        renderShapeFromCSV(AlexsShape, AlexPOS, AlexScale, AlexDrawMode, AlexRotationVector, shaderProgram);
-        renderShapeFromCSV(ThapansShape, ThapanPOS, ThapanScale, ThapanDrawMode, ThapanRotationVector, shaderProgram);
+
+        renderShapeFromCSV(JacksModel.filePath, JacksModel.POS, JacksModel.scale, JacksModel.drawMode, JacksModel.rotationVector, shaderProgram);
+        renderShapeFromCSV(MelModel.filePath, MelModel.POS, MelModel.scale, MelModel.drawMode, MelModel.rotationVector, shaderProgram);
+        renderShapeFromCSV(CedriksModel.filePath, CedriksModel.POS, CedriksModel.scale, CedriksModel.drawMode, CedriksModel.rotationVector, shaderProgram);
+        renderShapeFromCSV(AlexsModel.filePath, AlexsModel.POS, AlexsModel.scale, AlexsModel.drawMode, AlexsModel.rotationVector, shaderProgram);
+        renderShapeFromCSV(ThapansModel.filePath, ThapansModel.POS, ThapansModel.scale, ThapansModel.drawMode, ThapansModel.rotationVector, shaderProgram);
 
         glBindVertexArray(0);
 
         glBindVertexArray(wallVAO);
 
-        renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JackScale, JackDrawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelScale, MelDrawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedrikScale, CedrikDrawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexScale, AlexDrawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapanScale, ThapanDrawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JacksModel.scale, JacksModel.drawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelModel.scale, MelModel.drawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedriksModel.scale, CedriksModel.drawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexsModel.scale, AlexsModel.drawMode, initialRotationVector, shaderProgram);
+        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapansModel.scale, ThapansModel.drawMode, initialRotationVector, shaderProgram);
 
 
         glBindVertexArray(0);
@@ -217,50 +199,20 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     //change object
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
-        currentObject = "Jack";
+        currentObject = &JacksModel;
     else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        currentObject = "Mel";
+        currentObject = &MelModel;
     else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-        currentObject = "Cedrik";
+        currentObject = &CedriksModel;
     else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-        currentObject = "Alex";
+        currentObject = &AlexsModel;
     else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-        currentObject = "Thapan";
+        currentObject = &ThapansModel;
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
         SpaceLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastStateReleased) {
-        if (currentObject == "Jack") {
-            JackScale = initialScale;
-            JackRotationVector = initialRotationVector;
-            JackDrawMode = defaultDrawMode;
-            JackPOS = JackInitialPOS;
-        }
-        else if (currentObject == "Mel") {
-            MelScale = initialScale;
-            MelRotationVector = initialRotationVector;
-            MelDrawMode = defaultDrawMode;
-            MelPOS = MelInitialPOS;
-        }
-        if (currentObject == "Cedrik") {
-            CedrikScale = initialScale;
-            CedrikRotationVector = initialRotationVector;
-            CedrikDrawMode = defaultDrawMode;
-            CedrikPOS = CedrikInitialPOS;
-        }
-        if (currentObject == "Alex") {
-            AlexScale = initialScale;
-            AlexRotationVector = initialRotationVector;
-            AlexDrawMode = defaultDrawMode;
-            AlexPOS = AlexInitialPOS;
-        }
-        if (currentObject == "Thapan") {
-            ThapanScale = initialScale;
-            ThapanRotationVector = initialRotationVector;
-            ThapanDrawMode = defaultDrawMode;
-            ThapanPOS = ThapanInitialPOS;
-        }
-
+        currentObject->resetModel();
         SpaceLastStateReleased = false;
     }
 
@@ -269,17 +221,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
         ULastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
-        if (currentObject == "Jack")
-            JackScale *= scaleFactor; // exponential resizing
-        else if (currentObject == "Mel")
-            MelScale *= scaleFactor;
-        else if (currentObject == "Cedrik")
-            CedrikScale *= scaleFactor;
-        else if (currentObject == "Alex")
-            AlexScale *= scaleFactor;
-        else if (currentObject == "Thapan")
-            ThapanScale *= scaleFactor;
-        
+        currentObject->scale *= scaleFactor;
         ULastStateReleased = false;
     }
   
@@ -288,17 +230,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
         JLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
-        if (currentObject == "Jack")
-            JackScale *= 1 / scaleFactor; // exponential resizing
-        else if (currentObject == "Mel")
-            MelScale *= 1 / scaleFactor;
-        else if (currentObject == "Cedrik")
-            CedrikScale *= 1 / scaleFactor;
-        else if (currentObject == "Alex")
-            AlexScale *= 1 / scaleFactor;
-        else if (currentObject == "Thapan")
-            ThapanScale *= 1 / scaleFactor;
-
+        currentObject->scale *= 1 / scaleFactor;
         JLastStateReleased = false;
     }
 
@@ -313,163 +245,55 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     // movement function
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-        }
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
+            currentObject->POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
 
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
+            currentObject->POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
 
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
+            currentObject->POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
+           
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
+            currentObject->POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
 
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-        }
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+            currentObject->POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-            if (currentObject == "Jack")
-                JackPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-            else if (currentObject == "Mel")
-                MelPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-            else if (currentObject == "Cedrik")
-                CedrikPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-            else if (currentObject == "Alex")
-                AlexPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-            else if (currentObject == "Thapan")
-                ThapanPOS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-        }
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            currentObject->POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
     }
     else {
         // rotate counter-clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
-            if (currentObject == "Jack")
-                JackRotationVector.y += rotationFactor;
-            else if (currentObject == "Mel")
-                MelRotationVector.y += rotationFactor;
-            else if (currentObject == "Cedrik")
-                CedrikRotationVector.y += rotationFactor;
-            else if (currentObject == "Alex")
-                AlexRotationVector.y += rotationFactor;
-            else if (currentObject == "Thapan")
-                ThapanRotationVector.y += rotationFactor;
-
+            currentObject->rotationVector.y += rotationFactor;
             ALastStateReleased = false;
         }
 
         // rotate clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
-            if (currentObject == "Jack")
-                JackRotationVector.y -= rotationFactor;
-            else if (currentObject == "Mel")
-                MelRotationVector.y -= rotationFactor;
-            else if (currentObject == "Cedrik")
-                CedrikRotationVector.y -= rotationFactor;
-            else if (currentObject == "Alex")
-                AlexRotationVector.y -= rotationFactor;
-            else if (currentObject == "Thapan")
-                ThapanRotationVector.y -= rotationFactor;
-
+            currentObject->rotationVector.y -= rotationFactor;
             DLastStateReleased = false;
         }
     }
 
 
     // change the draw mode
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
-        if (currentObject == "Jack")
-            JackDrawMode = GL_TRIANGLES;
-        else if (currentObject == "Mel")
-            MelDrawMode = GL_TRIANGLES;
-        else if (currentObject == "Cedrik")
-            CedrikDrawMode = GL_TRIANGLES;
-        else if (currentObject == "Alex")
-            AlexDrawMode = GL_TRIANGLES;
-        else if (currentObject == "Thapan")
-            ThapanDrawMode = GL_TRIANGLES;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-        if (currentObject == "Jack")
-            JackDrawMode = GL_LINES;
-        else if (currentObject == "Mel")
-            MelDrawMode = GL_LINES;
-        else if (currentObject == "Cedrik")
-            CedrikDrawMode = GL_LINES;
-        else if (currentObject == "Alex")
-            AlexDrawMode = GL_LINES;
-        else if (currentObject == "Thapan")
-            ThapanDrawMode = GL_LINES;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        if (currentObject == "Jack")
-            JackDrawMode = GL_POINTS;
-        else if (currentObject == "Mel")
-            MelDrawMode = GL_POINTS;
-        else if (currentObject == "Cedrik")
-            CedrikDrawMode = GL_POINTS;
-        else if (currentObject == "Alex")
-            AlexDrawMode = GL_POINTS;
-        else if (currentObject == "Thapan")
-            ThapanDrawMode = GL_POINTS;
-    }
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+        currentObject->drawMode = GL_TRIANGLES;
+    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+        currentObject->drawMode = GL_LINES;
+    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
+        currentObject->drawMode = GL_POINTS;
 
 
     // shuffle the shape function
     if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_RELEASE) 
         PeriodLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS && PeriodLastStateReleased == true) {
-        if (currentObject == "Jack") {
+        currentObject->shuffle();
+        
+        /*if (currentObject == "Jack") {
             if (JacksShape == "../Assets/Shapes/Jack's Shape.csv")
                 JacksShape = "../Assets/Shapes/Jack's Shape - Shuffle 1.csv";
             else if (JacksShape == "../Assets/Shapes/Jack's Shape - Shuffle 1.csv")
@@ -500,7 +324,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
                 ThapansShape = "../Assets/Shapes/Thapan's Shape - Shuffle.csv";
             else
                 ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
-        }
+        }*/
 
         PeriodLastStateReleased = false;
     }
