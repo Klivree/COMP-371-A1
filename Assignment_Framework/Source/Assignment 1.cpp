@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Camera.hpp"
 #include "Model.hpp"
+#include "Light.hpp"
 #include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -46,17 +47,17 @@ Model ThapansModel = Model(ThapansShape, 2, ThapanInitialPOS, initialScale, GL_T
 
 Model *currentObject = &JacksModel;
 
-char* readFile(const char* filePath);
+char* readFile(string filePath);
 
-char* getVertexShaderSource() { return readFile("../Assets/Shaders/vertexShader.glsl"); }
+char* getVertexShaderSource(string vertexShaderFilePath) { return readFile(vertexShaderFilePath); }
 
-char* getFragmentShaderSource() { return readFile("../Assets/Shaders/fragmentShader.glsl"); }
+char* getFragmentShaderSource(string fragmentShaderFilePath) { return readFile(fragmentShaderFilePath); }
 
 GLuint getCubeModel(glm::vec3 color);
 
 GLuint getGridModel(glm::vec3 color);
 
-GLuint compileAndLinkShaders();
+GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath);
 
 void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram);
 
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     //get shader program
-    GLuint shaderProgram = compileAndLinkShaders();
+    GLuint shaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
 
     //get VAOs
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -113,6 +114,9 @@ int main(int argc, char* argv[]) {
 
     //generate camera
     Camera camera(width, height, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
+
+    //generate light
+    Light light(glm::vec3(0.0f, 10.0f, 0.0f), 50.0f, 0.01f, 200.0f, glm::vec3(0.0f, 0.0f, -1.0f), 1024);
 
     // For frame time
     float lastFrameTime = glfwGetTime();
@@ -292,40 +296,6 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         PeriodLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS && PeriodLastStateReleased == true) {
         currentObject->shuffle();
-        
-        /*if (currentObject == "Jack") {
-            if (JacksShape == "../Assets/Shapes/Jack's Shape.csv")
-                JacksShape = "../Assets/Shapes/Jack's Shape - Shuffle 1.csv";
-            else if (JacksShape == "../Assets/Shapes/Jack's Shape - Shuffle 1.csv")
-                JacksShape = "../Assets/Shapes/Jack's Shape - Shuffle 2.csv";
-            else
-                JacksShape = "../Assets/Shapes/Jack's Shape.csv";
-        }
-        else if (currentObject == "Mel") {
-            if (MelShape == "../Assets/Shapes/MelShape.csv")
-                MelShape = "../Assets/Shapes/MelShape-Shuffle.csv";
-            else
-                MelShape = "../Assets/Shapes/MelShape.csv";
-        }
-        else if (currentObject == "Cedrik") {
-            if (CedriksShape == "../Assets/Shapes/Cedrik's Shape.csv")
-                CedriksShape = "../Assets/Shapes/Cedrik's Shape - Shuffle 1.csv";
-            else
-                CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
-        }
-        else if (currentObject == "Alex") {
-            if (AlexsShape == "../Assets/Shapes/Alex's Shape.csv")
-                AlexsShape = "../Assets/Shapes/Alex's Shape - Shuffle 1.csv";
-            else
-                AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
-        }
-        else if (currentObject == "Thapan") {
-            if (ThapansShape == "../Assets/Shapes/Thapan's Shape.csv")
-                ThapansShape = "../Assets/Shapes/Thapan's Shape - Shuffle.csv";
-            else
-                ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
-        }*/
-
         PeriodLastStateReleased = false;
     }
 
@@ -431,13 +401,13 @@ void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum dr
     }
 }
 
-GLuint compileAndLinkShaders() {
+GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
     /* compile and link shader program
     * return shader program id
     */
 
     // create vertex shader
-    const char* vertexShaderSource = getVertexShaderSource();
+    const char* vertexShaderSource = readFile(vertexShaderFilePath);
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -452,7 +422,7 @@ GLuint compileAndLinkShaders() {
     }
 
     // create fragment shader
-    const char* fragmentShaderSource = getFragmentShaderSource();
+    const char* fragmentShaderSource = readFile(fragmentShaderFilePath);
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
@@ -684,7 +654,7 @@ GLuint getGridModel(glm::vec3 color) {
     return VAO;
 }
 
-char* readFile(const char* filePath) { //credit: https://badvertex.com/2012/11/20/how-to-load-a-glsl-shader-in-opengl-using-c.html
+char* readFile(string filePath) { //credit: https://badvertex.com/2012/11/20/how-to-load-a-glsl-shader-in-opengl-using-c.html
     string content;
     ifstream fileStream(filePath, ios::in);
 
