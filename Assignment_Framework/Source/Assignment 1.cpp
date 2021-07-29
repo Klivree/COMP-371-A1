@@ -10,20 +10,66 @@
 #include <iostream>
 #include "Camera.hpp"
 #include "Model.hpp"
-#include "Light.hpp"
+#include "PointLight.hpp"
 #include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 using namespace std;
+using namespace glm;
 
-//dimensions of the window in pixels
-const int width = 1024;
-const int height = 768;
+struct TexturedColoredVertex
+{
+    TexturedColoredVertex(vec3 _position, vec3 _color, vec2 _uv, vec3 _normal)
+        : position(_position), color(_color), uv(_uv), normal(_normal) {}
 
-const float initialFOV = 90.0f; // FOV of the player view in degrees
-const GLfloat initialScale = 1.0f;
+    vec3 position;
+    vec3 color;
+    vec2 uv;
+    vec3 normal;
+};
+
+char* readFile(string filePath);
+
+char* getVertexShaderSource(string vertexShaderFilePath) { return readFile(vertexShaderFilePath); }
+
+char* getFragmentShaderSource(string fragmentShaderFilePath) { return readFile(fragmentShaderFilePath); }
+
+GLuint getCubeModel(glm::vec3 color);
+
+GLuint getGridModel(glm::vec3 color);
+
+GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath);
+
+GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderFilePath, string fragmentShaderFilePath);
+
+void getShadowDepthMap(GLuint *frameBufferPtr, GLuint *texturePtr);
+
+void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr);
+
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram);
+
+void renderGrid(GLuint shaderProgram);
+
+void executeEvents(GLFWwindow* window, Camera& camera, float dt);
+
+void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram);
+
+GLuint loadTexture(const char* filename);
+
+void renderScene(GLuint shapeVAO, GLuint wallVAO, GLuint gridVAO, GLuint shaderProgram);
+
+// dimensions of the window in pixels
+const int WINDOW_WIDTH = 1024;
+const int WINDOW_HEIGHT = 768;
+
+// dimensions of the shadow 
+const int SHADOW_WIDTH = 1024;
+const int SHADOW_HEIGHT = 1024;
+
+const float initialFOV = 90.0f; // FOV of the initial player view in degrees
+const GLfloat initialScale = 1.0f; // initial object scale
 const glm::vec3 initialRotationVector = glm::vec3(0.0f);
 const GLenum defaultDrawMode = GL_TRIANGLES;
 const glm::vec3 JackInitialPOS = glm::vec3(0.0f, 10.0f, 0.0f);
@@ -38,36 +84,15 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
-
+//creation of model objects to remove switch statements in the executeEvents method
 Model JacksModel = Model(JacksShape, 3, JackInitialPOS, initialScale, GL_TRIANGLES);
 Model MelModel = Model(MelShape, 2, MelInitialPOS, initialScale, GL_TRIANGLES);
 Model CedriksModel = Model(CedriksShape, 2, CedrikInitialPOS, initialScale, GL_TRIANGLES);
 Model AlexsModel = Model(AlexsShape, 2, AlexInitialPOS, initialScale, GL_TRIANGLES);
 Model ThapansModel = Model(ThapansShape, 2, ThapanInitialPOS, initialScale, GL_TRIANGLES);
 
-Model *currentObject = &JacksModel;
+Model *currentObject = &JacksModel; // we use a pointer to the current object to do object manipulations
 
-char* readFile(string filePath);
-
-char* getVertexShaderSource(string vertexShaderFilePath) { return readFile(vertexShaderFilePath); }
-
-char* getFragmentShaderSource(string fragmentShaderFilePath) { return readFile(fragmentShaderFilePath); }
-
-GLuint getCubeModel(glm::vec3 color);
-
-GLuint getGridModel(glm::vec3 color);
-
-GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath);
-
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram);
-
-void renderGrid(GLuint shaderProgram);
-
-void executeEvents(GLFWwindow* window, Camera& camera, float dt);
-
-void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram);
-
-GLuint loadTexture(const char* filename);
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
@@ -85,7 +110,7 @@ int main(int argc, char* argv[]) {
 #endif
 
     // Create Window and rendering context using GLFW, resolution is 800x600
-    GLFWwindow* window = glfwCreateWindow(width, height, "Comp371 - Assignment 1", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Comp371 - Assignment 1", NULL, NULL);
     if (window == NULL) {
         cerr << "Failed to create GLFW window" << endl;
         glfwTerminate();
@@ -105,18 +130,28 @@ int main(int argc, char* argv[]) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     //get shader program
-    GLuint shaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
+    GLuint sceneShaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
+    //GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
+    GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowgeometryshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
 
-    //get VAOs
+    GLuint shadowDepthMapFBO, shadowDepthMapTexture;
+    getShadowCubeMap(&shadowDepthMapFBO, &shadowDepthMapTexture);
+
+    // get VAOs
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
     GLuint wallVAO = getCubeModel(glm::vec3(0.8f, 0.8f, 0.8f));
     GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
+    GLuint lightVAO = getCubeModel(vec3(1.0f, 1.0f, 1.0f));
+
+    // generate the textures needed
+    GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
+    GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
 
     //generate camera
-    Camera camera(width, height, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
+    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     //generate light
-    Light light(glm::vec3(0.0f, 10.0f, 0.0f), 50.0f, 0.01f, 200.0f, glm::vec3(0.0f, 0.0f, -1.0f), 1024);
+    PointLight light(vec3(0.0f, 30.0f, 0.0f), 90.0f, 1.0f, 0.007f, 0.0002f, vec3(0.0f, -1.0f, 0.0f), vec3(1.0f), 1024);
 
     // For frame time
     float lastFrameTime = glfwGetTime();
@@ -130,44 +165,37 @@ int main(int argc, char* argv[]) {
         float dt = glfwGetTime() - lastFrameTime;
         lastFrameTime += dt;
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear the window each frame
-        glUseProgram(shaderProgram);
-
-        camera.createMatrices(0.01f, 100.0f, shaderProgram); // takes care of the view and projection matrices
-
-
-        glBindVertexArray(shapeVAO);
-
-        renderShapeFromCSV(JacksModel.filePath, JacksModel.POS, JacksModel.scale, JacksModel.drawMode, JacksModel.rotationVector, shaderProgram);
-        renderShapeFromCSV(MelModel.filePath, MelModel.POS, MelModel.scale, MelModel.drawMode, MelModel.rotationVector, shaderProgram);
-        renderShapeFromCSV(CedriksModel.filePath, CedriksModel.POS, CedriksModel.scale, CedriksModel.drawMode, CedriksModel.rotationVector, shaderProgram);
-        renderShapeFromCSV(AlexsModel.filePath, AlexsModel.POS, AlexsModel.scale, AlexsModel.drawMode, AlexsModel.rotationVector, shaderProgram);
-        renderShapeFromCSV(ThapansModel.filePath, ThapansModel.POS, ThapansModel.scale, ThapansModel.drawMode, ThapansModel.rotationVector, shaderProgram);
-
-        glBindVertexArray(0);
-
-        glBindVertexArray(wallVAO);
-
-        renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JacksModel.scale, JacksModel.drawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelModel.scale, MelModel.drawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedriksModel.scale, CedriksModel.drawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexsModel.scale, AlexsModel.drawMode, initialRotationVector, shaderProgram);
-        renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapansModel.scale, ThapansModel.drawMode, initialRotationVector, shaderProgram);
+        // update values in shadow shader
+        light.updateShadowShader(shadowShaderProgram); 
+        //update the values in the scene shader
+        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram);
+        light.updateSceneShader(sceneShaderProgram);
 
 
-        glBindVertexArray(0);
+        // render the depth map
+        glUseProgram(shadowShaderProgram); // use proper shaders
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthMapFBO); // bind the framebuffer
+        glClear(GL_DEPTH_BUFFER_BIT);
+        renderScene(shapeVAO, wallVAO, gridVAO, shadowShaderProgram); // render to make the texture
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind depth map FBO
 
-        glBindVertexArray(gridVAO);
+        // render the scene as normal with the shadow mapping using the depth map
+        glUseProgram(sceneShaderProgram);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT); // reset viewport tot hte size of the window
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+       
+        glBindTexture(GL_TEXTURE_2D, brickTexture);
+      //  glBindTexture(GL_TEXTURE_CUBE_MAP, shadowDepthMapTexture);
 
-        renderGrid(shaderProgram);
+        renderScene(shapeVAO, wallVAO, gridVAO, sceneShaderProgram);
 
-        glBindVertexArray(0);
 
-        //render the origin lines
-        //          position                    length                      color             scale
-        renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, shaderProgram); // x direction
-        renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
-        renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
+        glBindTexture(GL_TEXTURE_2D, blankTexture);
+        glBindVertexArray(lightVAO);
+        mat4 lightWorldMatrix = translate(mat4(1.0f), light.POS);
+        glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "worldMatrix"), 1, GL_FALSE, &lightWorldMatrix[0][0]);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
@@ -455,6 +483,75 @@ GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderF
     return shaderProgram;
 }
 
+GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderFilePath, string fragmentShaderFilePath) {
+    /* compile and link shader program
+* return shader program id
+*/
+
+// create vertex shader
+    const char* vertexShaderSource = readFile(vertexShaderFilePath);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    // check for shader compile errors
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
+    }
+
+    // create geometry shader
+    const char* geometryShaderSource = readFile(geometryShaderFilePath);
+    GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
+    glCompileShader(geometryShader);
+
+    // check for shader compile errors
+    glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
+    }
+
+    // create fragment shader
+    const char* fragmentShaderSource = readFile(fragmentShaderFilePath);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // check for shader compile errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
+    }
+
+    //create shader program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, geometryShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    //link the shader program
+    glLinkProgram(shaderProgram);
+
+    // check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
+    }
+
+    //delete shaders since they are already in the program
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 void renderGrid(GLuint shaderProgram) {
 
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
@@ -530,54 +627,54 @@ GLuint getCubeModel(glm::vec3 color) {
     */
 
     // Cube model
-    glm::vec3 vertexArray[] = {  // position,                            color
-        glm::vec3(-0.5f,-0.5f,-0.5f), color, // left
-        glm::vec3(-0.5f,-0.5f, 0.5f), color,
-        glm::vec3(-0.5f, 0.5f, 0.5f), color,
+    TexturedColoredVertex vertexArray[] = {  // position,                            color
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)), //left 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
 
-        glm::vec3(-0.5f,-0.5f,-0.5f), color,
-        glm::vec3(-0.5f, 0.5f, 0.5f), color,
-        glm::vec3(-0.5f, 0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)),
 
-        glm::vec3(0.5f, 0.5f,-0.5f), color, // far
-        glm::vec3(-0.5f,-0.5f,-0.5f), color,
-        glm::vec3(-0.5f, 0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)), // far 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)),
 
-        glm::vec3(0.5f, 0.5f,-0.5f), color,
-        glm::vec3(0.5f,-0.5f,-0.5f), color,
-        glm::vec3(-0.5f,-0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
 
-        glm::vec3(0.5f,-0.5f, 0.5f), color, // bottom
-        glm::vec3(-0.5f,-0.5f,-0.5f), color,
-        glm::vec3(0.5f,-0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)), // bottom
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
 
-        glm::vec3(0.5f,-0.5f, 0.5f), color,
-        glm::vec3(-0.5f,-0.5f, 0.5f), color,
-        glm::vec3(-0.5f,-0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
 
-        glm::vec3(-0.5f, 0.5f, 0.5f), color, // near
-        glm::vec3(-0.5f,-0.5f, 0.5f), color,
-        glm::vec3(0.5f,-0.5f, 0.5f), color,
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)), // near
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
 
-        glm::vec3(0.5f, 0.5f, 0.5f), color,
-        glm::vec3(-0.5f, 0.5f, 0.5f), color,
-        glm::vec3(0.5f,-0.5f, 0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
 
-        glm::vec3(0.5f, 0.5f, 0.5f), color, // right
-        glm::vec3(0.5f,-0.5f,-0.5f), color,
-        glm::vec3(0.5f, 0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)), // right
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
 
-        glm::vec3(0.5f,-0.5f,-0.5f), color,
-        glm::vec3(0.5f, 0.5f, 0.5f), color,
-        glm::vec3(0.5f,-0.5f, 0.5f), color,
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)),
 
-        glm::vec3(0.5f, 0.5f, 0.5f), color, // top
-        glm::vec3(0.5f, 0.5f,-0.5f), color,
-        glm::vec3(-0.5f, 0.5f,-0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f)), // top
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
 
-        glm::vec3(0.5f, 0.5f, 0.5f), color,
-        glm::vec3(-0.5f, 0.5f,-0.5f), color,
-        glm::vec3(-0.5f, 0.5f, 0.5f), color,
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f))
     };
 
     GLuint VAO, VBO;
@@ -591,12 +688,20 @@ GLuint getCubeModel(glm::vec3 color) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
 
     //create position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)0);
     glEnableVertexAttribArray(0);
 
     //create color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)sizeof(vec3));
     glEnableVertexAttribArray(1);
+
+    //create texture coordinates attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2*sizeof(vec3)));
+    glEnableVertexAttribArray(2);
+
+    //create normals attribute
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2 * sizeof(vec3) + sizeof(vec2)));
+    glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -712,4 +817,98 @@ GLuint loadTexture(const char* filename) {
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureId;
+}
+
+void getShadowDepthMap(GLuint *frameBufferPtr, GLuint *texturePtr) {
+    
+    glGenFramebuffers(1, frameBufferPtr);
+    glGenTextures(1, texturePtr);
+
+    glBindTexture(GL_TEXTURE_2D, *texturePtr);
+
+    //generate the shadow texture
+    glTexImage2D(GL_TEXTURE_2D, // type of texture
+        0,                      // texture level of detail
+        GL_DEPTH_COMPONENT,     // internal format of the color components
+        SHADOW_WIDTH,           // width of texture
+        SHADOW_HEIGHT,          // height of texture
+        0,                      // border - reference says this must be 0???
+        GL_DEPTH_COMPONENT,     // format of the pixel data
+        GL_FLOAT,               // data type of the pixel data
+        NULL);                  // pointer to image data
+
+    // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // defining how to wrap the texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, *frameBufferPtr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, *texturePtr, 0);
+    // since we only need depth information, we tell frame buffer we dont need a color buffer
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+}
+
+void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
+
+    glGenFramebuffers(1, frameBufferPtr);
+
+    glGenTextures(1, texturePtr);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *texturePtr);
+    for (int i = 0; i < 6; i++) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }
+
+    // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // defining how to wrap the texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, *frameBufferPtr);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *texturePtr, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
+void renderScene(GLuint shapeVAO, GLuint wallVAO, GLuint gridVAO, GLuint shaderProgram) {
+    glBindVertexArray(shapeVAO);
+
+    renderShapeFromCSV(JacksModel.filePath, JacksModel.POS, JacksModel.scale, JacksModel.drawMode, JacksModel.rotationVector, shaderProgram);
+    renderShapeFromCSV(MelModel.filePath, MelModel.POS, MelModel.scale, MelModel.drawMode, MelModel.rotationVector, shaderProgram);
+    renderShapeFromCSV(CedriksModel.filePath, CedriksModel.POS, CedriksModel.scale, CedriksModel.drawMode, CedriksModel.rotationVector, shaderProgram);
+    renderShapeFromCSV(AlexsModel.filePath, AlexsModel.POS, AlexsModel.scale, AlexsModel.drawMode, AlexsModel.rotationVector, shaderProgram);
+    renderShapeFromCSV(ThapansModel.filePath, ThapansModel.POS, ThapansModel.scale, ThapansModel.drawMode, ThapansModel.rotationVector, shaderProgram);
+
+    glBindVertexArray(0);
+
+    glBindVertexArray(wallVAO);
+
+    renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JacksModel.scale, JacksModel.drawMode, initialRotationVector, shaderProgram);
+    renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelModel.scale, MelModel.drawMode, initialRotationVector, shaderProgram);
+    renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedriksModel.scale, CedriksModel.drawMode, initialRotationVector, shaderProgram);
+    renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexsModel.scale, AlexsModel.drawMode, initialRotationVector, shaderProgram);
+    renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapansModel.scale, ThapansModel.drawMode, initialRotationVector, shaderProgram);
+
+
+    glBindVertexArray(0);
+
+    glBindVertexArray(gridVAO);
+
+    renderGrid(shaderProgram);
+
+    glBindVertexArray(0);
+
+    //render the origin lines
+    //          position                    length                      color             scale
+    renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, shaderProgram); // x direction
+    renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
+    renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
+
 }

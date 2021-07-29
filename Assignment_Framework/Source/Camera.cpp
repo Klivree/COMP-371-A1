@@ -30,6 +30,9 @@ void Camera::createMatrices(float nearPlane, float farPlane, GLuint& shaderProgr
 	// sending the view and projection matrices to the vertex shader
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMatrix"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectionMatrix"), 1, GL_FALSE, &projectionMatrix[0][0]);
+
+	//fragment shader
+	glUniform3fv(glGetUniformLocation(shaderProgram, "viewPosition"), 1, &position[0]);
 }
 
 void Camera::processInputs(GLFWwindow* window, float dt) {
