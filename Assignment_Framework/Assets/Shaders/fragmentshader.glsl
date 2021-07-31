@@ -26,23 +26,6 @@ uniform float lightLinearTerm;
 uniform float lightQuadTerm;
 uniform float lightFarPlane;
 
-/*float shadow_scalar() {
-	//returns 1.0 if the surface should recieve light, and 0.0 when it is in shadow
-
-	//perspective divide
-	vec3 projectedCoords = fragmentPositionLightSpace.xyz / fragmentPositionLightSpace.w;
-	//transform to [0,1] range
-	projectedCoords = projectedCoords * 0.5 + 0.5;
-	//get closest depth value
-	float closestDepth = texture(shadowMap, projectedCoords.xy).r;
-	//get depth of current fragment from the light
-	float currentDepth = projectedCoords.z;
-	//check if current frag is in shadow
-	float bias = 0.005; // bias is used to remove shadow acne
-	return ((currentDepth - bias) > closestDepth) ? 1.0:0.0;
-}*/
-
-
 
 //THIS IS PROBABLT MESSED UP STILL
 float cubeShadowScalar() {
@@ -55,7 +38,8 @@ float cubeShadowScalar() {
 	//get depth of current fragment from the light
 	float currentDepth = length(fragmentToLight);
 	//check if current frag is in shadow
-	float bias = 0.005; // bias is used to remove shadow acne
+	float bias = 0.05; // bias is used to remove shadow acne
+        
 	return ((currentDepth - bias) > closestDepth) ? 1.0:0.0;
 }
 
@@ -80,7 +64,6 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 32.0f);
     vec3 specular = shadingSpecularStrength * spec * lightColor;
 
-    float shadow = cubeShadowScalar(); // getting shadow value
 
     //point light attenuation modifications so that the light will fade with distance
     float distanceFromLight = length(lightPosition - fragmentPosition);
@@ -88,8 +71,9 @@ void main()
     diffuse *= attenuation;
     specular *= attenuation;
 
+    float shadow = cubeShadowScalar(); // getting shadow value
 
-    vec3 lighting = (ambient + (1.0f - 0.0) * (diffuse + specular)) * color; // NOTE: SHADOW IS PRETTY MESSED UP RN, REPLACE shadow WITH 0.0 TO SEE LIGHTING IN ACTION   
+    vec3 lighting = (ambient + (1.0f - shadow) * (diffuse + specular)) * color; // NOTE: SHADOW IS PRETTY MESSED UP RN, REPLACE shadow WITH 0.0 TO SEE LIGHTING IN ACTION   
     
 
     FragColor = vec4(lighting, 1.0f);

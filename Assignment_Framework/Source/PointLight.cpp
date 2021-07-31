@@ -1,5 +1,6 @@
 #include "PointLight.hpp"
 #include <vector>
+#include <string>
 
 PointLight::PointLight(glm::vec3 lightPOS, GLfloat lightFOV, GLfloat lightConstantTerm, GLfloat lightLinearTerm, GLfloat lightQuadTerm, glm::vec3 lightFocus, glm::vec3 lightColor, int depthMapTextureSize){
 	/* Contructor for the PointLight object
@@ -15,7 +16,7 @@ PointLight::PointLight(glm::vec3 lightPOS, GLfloat lightFOV, GLfloat lightConsta
 	POS = lightPOS;
 	FOV = lightFOV;
 	nearPlane = 1.0f;
-	farPlane = 100.0f;
+	farPlane = 25.0f;
 	orientation = lightFocus;
 	DEPTH_MAP_TEXTURE_SIZE = depthMapTextureSize;
 	color = lightColor;
@@ -32,22 +33,21 @@ void PointLight::updateShadowShader(GLuint& shaderProgram) {
 
 	glm::mat4 lightProjMatrix = glm::perspective(glm::radians(90.0f), (float)DEPTH_MAP_TEXTURE_SIZE / (float)DEPTH_MAP_TEXTURE_SIZE, nearPlane, farPlane);
 	
-
-	// values for all 6 sides of the point light
-	glm::mat4 shadowTransform1 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
-	glm::mat4 shadowTransform2 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
-	glm::mat4 shadowTransform3 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
-	glm::mat4 shadowTransform4 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0));
-	glm::mat4 shadowTransform5 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0));
-	glm::mat4 shadowTransform6 = lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0));
+	std::vector<glm::mat4> shadowTransforms;
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(lightProjMatrix * glm::lookAt(POS, POS + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	
-	// updating the values to the shadow geometry shader
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices1"), 1, GL_FALSE, &shadowTransform1[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices2"), 1, GL_FALSE, &shadowTransform2[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices3"), 1, GL_FALSE, &shadowTransform3[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices4"), 1, GL_FALSE, &shadowTransform4[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices5"), 1, GL_FALSE, &shadowTransform5[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shadowMatrices6"), 1, GL_FALSE, &shadowTransform6[0][0]);
+	for (int i = 0; i < 6; ++i) {
+		std::string uniformName = "shadowMatrices[" + std::to_string(i) + "]";
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, uniformName.c_str()), 1, GL_FALSE, &shadowTransforms[i][0][0]);
+	}
+
+	glUniform1f(glGetUniformLocation(shaderProgram, "lightFarPlane"), farPlane);
+	glUniform3fv(glGetUniformLocation(shaderProgram, "lightPosition"), 1, &POS[0]);
 
 }
 

@@ -21,13 +21,13 @@ using namespace glm;
 
 struct TexturedColoredVertex
 {
-    TexturedColoredVertex(vec3 _position, vec3 _color, vec2 _uv, vec3 _normal)
+    TexturedColoredVertex(vec3 _position, vec3 _normal, vec2 _uv, vec3 _color )
         : position(_position), color(_color), uv(_uv), normal(_normal) {}
 
     vec3 position;
-    vec3 color;
-    vec2 uv;
     vec3 normal;
+    vec2 uv;
+    vec3 color;
 };
 
 char* readFile(string filePath);
@@ -58,7 +58,8 @@ void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, G
 
 GLuint loadTexture(const char* filename);
 
-void renderScene(GLuint shapeVAO, GLuint wallVAO, GLuint gridVAO, GLuint shaderProgram);
+void renderScene(GLuint shaderProgram);
+
 
 // dimensions of the window in pixels
 const int WINDOW_WIDTH = 1024;
@@ -84,12 +85,26 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
+vec3 wallPosOffset = vec3(0.0f, 0.0f, 10.0f);
+string JacksWallPath = "../Assets/Shapes/Jack's Wall.csv";
+string MelWallPath = "../Assets/Shapes/MelWall.csv";
+string CedriksWallPath = "../Assets/Shapes/Cedrik's Wall.csv";
+string AlexsWallPath = "../Assets/Shapes/Alex's Wall.csv";
+string ThapansWallPath = "../Assets/Shapes/Thapan's Wall.csv";
+
 //creation of model objects to remove switch statements in the executeEvents method
-Model JacksModel = Model(JacksShape, 3, JackInitialPOS, initialScale, GL_TRIANGLES);
-Model MelModel = Model(MelShape, 2, MelInitialPOS, initialScale, GL_TRIANGLES);
-Model CedriksModel = Model(CedriksShape, 2, CedrikInitialPOS, initialScale, GL_TRIANGLES);
-Model AlexsModel = Model(AlexsShape, 2, AlexInitialPOS, initialScale, GL_TRIANGLES);
-Model ThapansModel = Model(ThapansShape, 2, ThapanInitialPOS, initialScale, GL_TRIANGLES);
+Model JacksModel = Model(JacksShape, JackInitialPOS, initialScale, GL_TRIANGLES);
+Model MelModel = Model(MelShape, MelInitialPOS, initialScale, GL_TRIANGLES);
+Model CedriksModel = Model(CedriksShape, CedrikInitialPOS, initialScale, GL_TRIANGLES);
+Model AlexsModel = Model(AlexsShape, AlexInitialPOS, initialScale, GL_TRIANGLES);
+Model ThapansModel = Model(ThapansShape, ThapanInitialPOS, initialScale, GL_TRIANGLES);
+
+Model JacksWall = Model(JacksWallPath, JackInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model MelWall = Model(MelWallPath, MelInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model CedriksWall = Model(CedriksWallPath, CedrikInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model AlexsWall = Model(AlexsWallPath, AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model ThapansWall = Model(ThapansWallPath, ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+
 
 Model *currentObject = &JacksModel; // we use a pointer to the current object to do object manipulations
 
@@ -129,13 +144,10 @@ int main(int argc, char* argv[]) {
     // Black background
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    //get shader program
+    //get shader programs
     GLuint sceneShaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
-    //GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
     GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowgeometryshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
 
-    GLuint shadowDepthMapFBO, shadowDepthMapTexture;
-    getShadowCubeMap(&shadowDepthMapFBO, &shadowDepthMapTexture);
 
     // get VAOs
     GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -151,7 +163,7 @@ int main(int argc, char* argv[]) {
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     //generate light
-    PointLight light(vec3(0.0f, 30.0f, 0.0f), 90.0f, 1.0f, 0.007f, 0.0002f, vec3(0.0f, -1.0f, 0.0f), vec3(1.0f), 1024);
+    PointLight light(vec3(0.0f, 10.0f, 20.0f), 90.0f, 1.0f, 0.007f, 0.0002f, vec3(0.0f, -1.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f), 1024);
 
     // For frame time
     float lastFrameTime = glfwGetTime();
@@ -159,36 +171,94 @@ int main(int argc, char* argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+
+    //////////////////SHADOW MAKING////////////////
+    GLuint depthMapFBO, depthCubeMap;
+    glGenFramebuffers(1, &depthMapFBO);
+
+    glGenTextures(1, &depthCubeMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
+    for (int i = 0; i < 6; ++i) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }
+
+    // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // defining how to wrap the texture
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+    // Initialize the models
+    JacksModel.linkVAO(shapeVAO, 36);
+    MelModel.linkVAO(shapeVAO, 36);
+    CedriksModel.linkVAO(shapeVAO, 36);
+    AlexsModel.linkVAO(shapeVAO, 36);
+    ThapansModel.linkVAO(shapeVAO, 36);
+
+    JacksWall.linkVAO(wallVAO, 36);
+    MelWall.linkVAO(wallVAO, 36);
+    CedriksWall.linkVAO(wallVAO, 36);
+    AlexsWall.linkVAO(wallVAO, 36);
+    ThapansWall.linkVAO(wallVAO, 36);
+
+    JacksModel.linkTexture(brickTexture);
+    MelModel.linkTexture(brickTexture);
+    CedriksModel.linkTexture(brickTexture);
+    AlexsModel.linkTexture(brickTexture);
+    ThapansModel.linkTexture(brickTexture);
+
+    JacksWall.linkTexture(brickTexture);
+    MelWall.linkTexture(brickTexture);
+    CedriksWall.linkTexture(brickTexture);
+    AlexsWall.linkTexture(brickTexture);
+    ThapansWall.linkTexture(brickTexture);
+
+
+
+
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
         float dt = glfwGetTime() - lastFrameTime;
         lastFrameTime += dt;
 
-        // update values in shadow shader
-        light.updateShadowShader(shadowShaderProgram); 
-        //update the values in the scene shader
-        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram);
-        light.updateSceneShader(sceneShaderProgram);
 
 
         // render the depth map
-        glUseProgram(shadowShaderProgram); // use proper shaders
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthMapFBO); // bind the framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO); // bind the framebuffer
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderScene(shapeVAO, wallVAO, gridVAO, shadowShaderProgram); // render to make the texture
+        glUseProgram(shadowShaderProgram); // use proper shaders
+        // update values in shadow shader
+        light.updateShadowShader(shadowShaderProgram);
+        renderScene(shadowShaderProgram); // render to make the texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind depth map FBO
 
+
+
         // render the scene as normal with the shadow mapping using the depth map
-        glUseProgram(sceneShaderProgram);
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT); // reset viewport tot hte size of the window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       
-        glBindTexture(GL_TEXTURE_2D, brickTexture);
-      //  glBindTexture(GL_TEXTURE_CUBE_MAP, shadowDepthMapTexture);
+        glUseProgram(sceneShaderProgram);
+        //update the values in the scene shader
+        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram);
+        light.updateSceneShader(sceneShaderProgram);
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 
-        renderScene(shapeVAO, wallVAO, gridVAO, sceneShaderProgram);
+        renderScene(sceneShaderProgram);
+
 
 
         glBindTexture(GL_TEXTURE_2D, blankTexture);
@@ -196,6 +266,10 @@ int main(int argc, char* argv[]) {
         mat4 lightWorldMatrix = translate(mat4(1.0f), light.POS);
         glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "worldMatrix"), 1, GL_FALSE, &lightWorldMatrix[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glBindVertexArray(gridVAO);
+        renderGrid(sceneShaderProgram);
+        glBindVertexArray(0);
 
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
@@ -221,7 +295,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastStateReleased = true, ULastStateReleased = true, PeriodLastStateReleased = true, ALastStateReleased = true, DLastStateReleased = true, SpaceLastStateReleased = true;
+    static bool JLastStateReleased = true, ULastStateReleased = true, ALastStateReleased = true, DLastStateReleased = true, SpaceLastStateReleased = true;
     float scaleFactor = (float)8 / 7;
     float rotationFactor = 5.0f;
     float modelMovementSpeed = 2.0f;
@@ -318,116 +392,13 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
         currentObject->drawMode = GL_POINTS;
 
-
-    // shuffle the shape function
-    if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_RELEASE) 
-        PeriodLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS && PeriodLastStateReleased == true) {
-        currentObject->shuffle();
-        PeriodLastStateReleased = false;
-    }
-
     // close the window on escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 
 }
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram) {
-    /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
-    *
-    *   filePath - filePath of the .csv file that defines the shape
-    *   pos - coordinates of the object
-    *   scale - how much the object is to be scaled by
-    *   drawMode - renderer mode
-    *   rotationalVector - how many degrees clockwise around the respective axis to rotate the object around (degrees around x-axis, degrees around y-axis, degrees around z-axis)
-    *   shaderProgram - shader program used by the running OpenGL application
-    *
-    * Each line in the csv file renders a seperate rectangular prism. The line should be formatted as such:
-    * local x coordinate, local y coordinate, local z coordinate, local x scale, local y scale, local z scale
-    **/
 
-    ifstream fileStream(filePath, ios::in);
-
-    if (!fileStream.is_open()) {
-        cerr << "Could not read file " << filePath << ". File does not exist." << endl;
-        return;
-    }
-
-    string value, line = "";
-    float cubeInfo[6] = {};
-    int i, j;
-    char curChar;
-    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
-
-    //creation of base matrix
-    glm::mat4 baseMatrix = glm::mat4(1.0f);
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
-    baseMatrix = glm::translate(baseMatrix, pos);
-
-    while (!fileStream.eof()) {
-        getline(fileStream, line); //get line for a cube
-        line.append("\n");
-
-        value = "";
-        i = 0; // curChar index
-        j = 0; // cubeInfo index
-
-        // parse the line to get cube info in the form of: 
-        //(local x coord,       local y coord,      local z coord,      size in x dir,      size in y dir,      size in z dir)
-        while (true) {
-            curChar = line[i++];
-
-            if (curChar == '\n' || curChar == ',') {//need to push the info when these chars appear
-                cubeInfo[j++] = stof(value); // push float value to the array
-                value = "";
-            }
-            else if (curChar != ' ') // ignore spaces
-                value.append(string(1, curChar)); // add the char to the current value
-
-             // line is finished
-            if (curChar == '\n' || curChar == '/' || j == 6)
-                break;
-        }
-
-        if (j < 6)  //if we didnt get to 6 then we either have too little values per line
-            cout << "There are not enough values to fully define an object" << endl;
-        else {
-            //scale the values
-            for (int k = 0; k < 6; k++) {
-                cubeInfo[k] = scale * cubeInfo[k];
-            }
-
-            glm::vec3 localCoord = glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]);
-            glm::vec3 scalingVector = glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]);
-
-            // transformation of the base matrix
-            glm::mat4 cubeWorldMatrix = glm::translate(baseMatrix, localCoord);
-            cubeWorldMatrix = glm::scale(cubeWorldMatrix, scalingVector);
-
-            // draw the cube
-             glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
-
-
-
-            // change the draw mode of the model being rendered
-            if (drawMode == GL_TRIANGLES)
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            else if (drawMode == GL_LINES) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // turn on wireframe
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // turn off wireframe
-            }
-            else if (drawMode == GL_POINTS)
-                glDrawArrays(GL_POINTS, 0, 36);
-            else
-                cerr << "Invalid draw type. Reader supports: GL_TRIANGLES, GL_LINES, GL_POINTS" << endl;
-
-        }
-    }
-}
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
     /* compile and link shader program
@@ -513,7 +484,7 @@ GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderF
     glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
-        cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
+        cerr << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << endl;
     }
 
     // create fragment shader
@@ -627,54 +598,54 @@ GLuint getCubeModel(glm::vec3 color) {
     */
 
     // Cube model
-    TexturedColoredVertex vertexArray[] = {  // position,                            color
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)), //left 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex vertexArray[] = {  // position, normal, UV, color
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color), //left 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(-1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(-1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)), // far 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f), color), // far 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 1.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, -1.0f)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)), // bottom
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f),color), // bottom
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)), // near
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f), color), // near
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 0.0f, 1.0f)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f),  color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)), // right
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f),  color), // right
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(1.0f, 0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f)), // top
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f), color), // top
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f), color),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f), vec3(0.0f, 1.0f, 0.0f))
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 1.0f), color)
     };
 
     GLuint VAO, VBO;
@@ -877,33 +848,19 @@ void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
 
 }
 
-void renderScene(GLuint shapeVAO, GLuint wallVAO, GLuint gridVAO, GLuint shaderProgram) {
-    glBindVertexArray(shapeVAO);
+void renderScene(GLuint shaderProgram) {
 
-    renderShapeFromCSV(JacksModel.filePath, JacksModel.POS, JacksModel.scale, JacksModel.drawMode, JacksModel.rotationVector, shaderProgram);
-    renderShapeFromCSV(MelModel.filePath, MelModel.POS, MelModel.scale, MelModel.drawMode, MelModel.rotationVector, shaderProgram);
-    renderShapeFromCSV(CedriksModel.filePath, CedriksModel.POS, CedriksModel.scale, CedriksModel.drawMode, CedriksModel.rotationVector, shaderProgram);
-    renderShapeFromCSV(AlexsModel.filePath, AlexsModel.POS, AlexsModel.scale, AlexsModel.drawMode, AlexsModel.rotationVector, shaderProgram);
-    renderShapeFromCSV(ThapansModel.filePath, ThapansModel.POS, ThapansModel.scale, ThapansModel.drawMode, ThapansModel.rotationVector, shaderProgram);
+    JacksModel.render(shaderProgram);
+    MelModel.render(shaderProgram);
+    CedriksModel.render(shaderProgram);
+    AlexsModel.render(shaderProgram);
+    ThapansModel.render(shaderProgram);
 
-    glBindVertexArray(0);
-
-    glBindVertexArray(wallVAO);
-
-    renderShapeFromCSV("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), JacksModel.scale, JacksModel.drawMode, initialRotationVector, shaderProgram);
-    renderShapeFromCSV("../Assets/Shapes/MelWall.csv", MelInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), MelModel.scale, MelModel.drawMode, initialRotationVector, shaderProgram);
-    renderShapeFromCSV("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), CedriksModel.scale, CedriksModel.drawMode, initialRotationVector, shaderProgram);
-    renderShapeFromCSV("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), AlexsModel.scale, AlexsModel.drawMode, initialRotationVector, shaderProgram);
-    renderShapeFromCSV("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + glm::vec3(0.0f, 0.0f, 10.0f), ThapansModel.scale, ThapansModel.drawMode, initialRotationVector, shaderProgram);
-
-
-    glBindVertexArray(0);
-
-    glBindVertexArray(gridVAO);
-
-    renderGrid(shaderProgram);
-
-    glBindVertexArray(0);
+    JacksWall.render(shaderProgram);
+    MelWall.render(shaderProgram);
+    CedriksWall.render(shaderProgram);
+    AlexsWall.render(shaderProgram);
+    ThapansWall.render(shaderProgram);
 
     //render the origin lines
     //          position                    length                      color             scale
@@ -911,4 +868,101 @@ void renderScene(GLuint shapeVAO, GLuint wallVAO, GLuint gridVAO, GLuint shaderP
     renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
     renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
 
+}
+
+
+void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram) {
+    /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
+    *
+    *   filePath - filePath of the .csv file that defines the shape
+    *   pos - coordinates of the object
+    *   scale - how much the object is to be scaled by
+    *   drawMode - renderer mode
+    *   rotationalVector - how many degrees clockwise around the respective axis to rotate the object around (degrees around x-axis, degrees around y-axis, degrees around z-axis)
+    *   shaderProgram - shader program used by the running OpenGL application
+    *
+    * Each line in the csv file renders a seperate rectangular prism. The line should be formatted as such:
+    * local x coordinate, local y coordinate, local z coordinate, local x scale, local y scale, local z scale
+    **/
+    
+    ifstream fileStream(filePath, ios::in);
+
+    if (!fileStream.is_open()) {
+        cerr << "Could not read file " << filePath << ". File does not exist." << endl;
+        return;
+    }
+
+    string value, line = "";
+    float cubeInfo[6] = {};
+    int i, j;
+    char curChar;
+    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
+
+    //creation of base matrix
+    glm::mat4 baseMatrix = glm::mat4(1.0f);
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
+    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
+    baseMatrix = glm::translate(baseMatrix, pos);
+
+    while (!fileStream.eof()) {
+        getline(fileStream, line); //get line for a cube
+        line.append("\n");
+
+        value = "";
+        i = 0; // curChar index
+        j = 0; // cubeInfo index
+
+        // parse the line to get cube info in the form of: 
+        //(local x coord,       local y coord,      local z coord,      size in x dir,      size in y dir,      size in z dir)
+        while (true) {
+            curChar = line[i++];
+
+            if (curChar == '\n' || curChar == ',') {//need to push the info when these chars appear
+                cubeInfo[j++] = stof(value); // push float value to the array
+                value = "";
+            }
+            else if (curChar != ' ') // ignore spaces
+                value.append(string(1, curChar)); // add the char to the current value
+
+             // line is finished
+            if (curChar == '\n' || curChar == '/' || j == 6)
+                break;
+        }
+
+        if (j < 6)  //if we didnt get to 6 then we either have too little values per line
+            cout << "There are not enough values to fully define an object" << endl;
+        else {
+            //scale the values
+            for (int k = 0; k < 6; k++) {
+                cubeInfo[k] = scale * cubeInfo[k];
+            }
+
+            glm::vec3 localCoord = glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]);
+            glm::vec3 scalingVector = glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]);
+
+            // transformation of the base matrix
+            glm::mat4 cubeWorldMatrix = glm::translate(baseMatrix, localCoord);
+            cubeWorldMatrix = glm::scale(cubeWorldMatrix, scalingVector);
+
+            // draw the cube
+            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
+
+
+
+            // change the draw mode of the model being rendered
+            if (drawMode == GL_TRIANGLES)
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            else if (drawMode == GL_LINES) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // turn on wireframe
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // turn off wireframe
+            }
+            else if (drawMode == GL_POINTS)
+                glDrawArrays(GL_POINTS, 0, 36);
+            else
+                cerr << "Invalid draw type. Reader supports: GL_TRIANGLES, GL_LINES, GL_POINTS" << endl;
+
+        }
+    }
 }

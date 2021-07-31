@@ -26,10 +26,7 @@ public:
 
 	GLfloat FOV;
 	int DEPTH_MAP_TEXTURE_SIZE;
-
-	//temporary
-	GLfloat cutoffInner = glm::cos(glm::radians(20.0f));
-	GLfloat cutoffOuter = glm::cos(glm::radians(30.0f));
+	
 };
 
 

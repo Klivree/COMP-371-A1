@@ -11,14 +11,38 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
+
+struct cubeInfo {
+    GLfloat posX;
+    GLfloat posY;
+    GLfloat posZ;
+    GLfloat scaleX;
+    GLfloat scaleY;
+    GLfloat scaleZ;
+
+    cubeInfo(GLfloat _posX, GLfloat _posY, GLfloat _posZ, GLfloat _scaleX, GLfloat _scaleY, GLfloat _scaleZ) {
+        posX = _posX;
+        posY = _posY;
+        posZ = _posZ;
+        scaleX = _scaleX;
+        scaleY = _scaleY;
+        scaleZ = _scaleZ;
+    }
+};
 
 class Model {
 public:
-    Model(std::string pFilePath, int pNumOfShuffles, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
+    Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
 
     void resetModel();
 
-    void shuffle();
+
+    void render(GLuint shaderProgram);
+
+    void linkVAO(GLuint pVAO, int pActiveVertices);
+
+    void linkTexture(GLuint pTexture);
 
     glm::vec3 POS;
     glm::vec3 rotationVector;
@@ -26,14 +50,24 @@ public:
     GLfloat scale;
     GLenum drawMode;
 
+
+
 private:
     glm::vec3 initialPOS;
     glm::vec3 initialRotationVector;
     GLfloat initialScale;
     GLenum initialDrawMode;
-    std::string initialFilePath;
+
+    std::vector<cubeInfo> information;
     int numOfShuffles;
     int shuffleNumber = 0;
+
+    GLuint VAO;
+    int activeVertices;
+
+    GLuint texture;
+
+    void initializeModel();
 };
 
 #endif
