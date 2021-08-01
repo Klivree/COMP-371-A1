@@ -2,7 +2,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormals;
 layout (location = 2) in vec2 aTexCoords;
-layout (location = 3) in vec3 aColor;
+//layout (location = 3) in vec3 aColor;
 
 
 out vec3 vertexColor;
@@ -14,7 +14,6 @@ out vec2 textureCoords;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix = mat4(1.0);
-uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -23,10 +22,9 @@ void main()
 	// fragment position should be in world space so we need to not multiply the proj or view matrices
     fragmentPosition = vec3(worldMatrix * vec4(aPos, 1.0)); 
 
-    fragmentPositionLightSpace = lightSpaceMatrix * vec4(fragmentPosition, 1.0);
 	textureCoords = aTexCoords;
 
-	vertexColor = aColor;
+	//vertexColor = aColor;
 	// the position on the screen of the vertices
 	gl_Position = projectionMatrix * viewMatrix * worldMatrix * vec4(aPos, 1.0);
 }
