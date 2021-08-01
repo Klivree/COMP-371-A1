@@ -183,11 +183,13 @@ int main(int argc, char* argv[]) {
     // generate the textures needed
     GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
     GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
+    GLuint tileTexture = loadTexture("../Assets/Textures/tile.png");
 
     // initialize Materials
     vec3 goldVec(0.780392f, 0.568627f, 0.113725f);
     Material goldMaterial(goldVec, 0.8f);
     Material brickMaterial = Material(vec3(1.0f), 0.01f);
+    Material tileMaterial = Material(vec3(1.0f), 0.01f);
 
     objectModels.push_back(&JacksModel);
     objectModels.push_back(&MelModel);
@@ -218,8 +220,8 @@ int main(int argc, char* argv[]) {
 
     for (Model* ground : groundModels) {
         ground->linkVAO(cubeModelVAO, 36);
-        ground->linkTexture(brickTexture);
-        ground->setMaterial(brickMaterial);
+        ground->linkTexture(tileTexture);
+        ground->setMaterial(tileMaterial);
     }
 
 
