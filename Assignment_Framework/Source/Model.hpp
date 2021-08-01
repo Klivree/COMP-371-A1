@@ -14,22 +14,16 @@
 #include <vector>
 
 struct Material { // sample material values can be obtained from : http://devernay.free.fr/cours/opengl/materials.html
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    glm::vec3 color;
     float shininess;
 
     Material() { // default white plastice material
-        ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-        diffuse = glm::vec3(0.55f, 0.55f, 0.55f);
-        specular = glm::vec3(0.70f, 0.70f, 0.70f);
+        color = glm::vec3(1.0f, 1.0f, 1.0f);
         shininess = 0.1f;
     }
 
-    Material(glm::vec3 _ambient, glm::vec3 _diffuse, glm::vec3 _specular, float _shininess) {
-        ambient = _ambient;
-        diffuse = _diffuse;
-        specular = _specular;
+    Material(glm::vec3 _color, float _shininess) {
+        color = _color;
         shininess = _shininess;
     }
 };

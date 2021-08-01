@@ -105,9 +105,7 @@ void Model::linkVAO(GLuint pVAO, int pActiveVertices) {
 
 void Model::render(GLuint shaderProgram, bool enableTextures) {
     initializeModel(); // will make the model reread the csv file every draw - Uncomment if you want to make the objects in real time
-    glUniform3fv(glGetUniformLocation(shaderProgram, "material.ambient"), 1, &material.ambient[0]);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &material.diffuse[0]);
-    glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, &material.specular[0]);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "material.color"), 1, &material.color[0]);
     glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "enableTextures"), enableTextures);

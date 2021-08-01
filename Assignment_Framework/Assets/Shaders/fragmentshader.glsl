@@ -3,9 +3,7 @@
 out vec4 FragColor;
 
 struct Material {
-    vec3 ambient; //or color
-    vec3 diffuse;
-    vec3 specular;
+    vec3 color;
     float shininess;
 };
 
@@ -61,21 +59,21 @@ void main() {
     // get fragment color from the texture and times it by the vertex color
     vec3 color;
     if(enableTextures)
-        color = texture(modelTexture, textureCoords).rgb * material.ambient;
+        color = texture(modelTexture, textureCoords).rgb * material.color;
     else 
-        color =  material.ambient;
+        color =  material.color;
 
     // ambient light taken from the color from object textures
     vec3 ambient = shadingAmbientStrength * color; 
     
     // diffused light
-    vec3 diffuse = max(dot(lightDir, fragmentNormal), 0.0f) * lightColor * material.diffuse;
+    vec3 diffuse = max(dot(lightDir, fragmentNormal), 0.0f) * lightColor;// * material.diffuse;
 
     // specular light
     vec3 viewDir = normalize(viewPosition - fragmentPosition);
     vec3 reflectDir = reflect(-lightDir, fragmentNormal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess * 128.0);
-    vec3 specular = shadingSpecularStrength * spec * lightColor * material.specular;
+    vec3 specular = shadingSpecularStrength * spec * lightColor;// * material.specular;
 
 
     //point light attenuation modifications so that the light will fade with distance

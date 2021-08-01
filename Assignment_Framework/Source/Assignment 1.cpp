@@ -11,7 +11,6 @@
 #include "Camera.hpp"
 #include "Model.hpp"
 #include "PointLight.hpp"
-#include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -42,8 +41,6 @@ GLuint getGridModel(glm::vec3 color);
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath);
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderFilePath, string fragmentShaderFilePath);
-
-void getShadowDepthMap(GLuint *frameBufferPtr, GLuint *texturePtr);
 
 void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr);
 
@@ -183,17 +180,15 @@ int main(int argc, char* argv[]) {
     GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
 
     // initialize Materials
-    vec3 goldVec((float)212 / 255, (float)175 / 255, (float)55 / 255);
-    Material goldMaterial(goldVec * vec3(0.8), goldVec *vec3(0.8), goldVec, 0.8f);
-    Material brickMaterial = Material();
+    vec3 goldVec(0.780392f, 0.568627f, 0.113725f);
+    Material goldMaterial(goldVec, 0.8f);
+    Material brickMaterial = Material(vec3(1.0f), 0.01f);
 
     objectModels.push_back(&JacksModel);
     objectModels.push_back(&MelModel);
     objectModels.push_back(&CedriksModel);
     objectModels.push_back(&AlexsModel);
-    objectModels.push_back(&ThapansModel);
-
-    
+    objectModels.push_back(&ThapansModel);   
 
     wallModels.push_back(&JacksWall);
     wallModels.push_back(&MelWall);
@@ -220,8 +215,8 @@ int main(int argc, char* argv[]) {
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     //generate light
-    PointLight light(vec3(0.0f, 15.0f, 0.0f), 90.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f, 1.0f, 1.0f), SHADOW_HEIGHT);
-    Material lightMaterial = Material(light.color, light.color, light.color, 0.01f);
+    PointLight light(vec3(0.0f, 30.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f, 1.0f, 1.0f), SHADOW_HEIGHT);
+    Material lightMaterial = Material(light.color, 0.01f);
 
     Model lightSource = Model("", light.POS, blankTexture);
     lightSource.linkVAO(cubeModelVAO, 36);
@@ -269,7 +264,7 @@ int main(int argc, char* argv[]) {
 
 
         //render light not in two pass so it does not create shadows
-        //lightSource.render(sceneShaderProgram, true);
+        lightSource.render(sceneShaderProgram, true);
 
         glBindVertexArray(gridVAO);
         renderGrid(sceneShaderProgram);
@@ -921,38 +916,6 @@ GLuint loadTexture(const char* filename) {
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
     return textureId;
-}
-
-void getShadowDepthMap(GLuint *frameBufferPtr, GLuint *texturePtr) {
-    
-    glGenFramebuffers(1, frameBufferPtr);
-    glGenTextures(1, texturePtr);
-
-    glBindTexture(GL_TEXTURE_2D, *texturePtr);
-
-    //generate the shadow texture
-    glTexImage2D(GL_TEXTURE_2D, // type of texture
-        0,                      // texture level of detail
-        GL_DEPTH_COMPONENT,     // internal format of the color components
-        SHADOW_WIDTH,           // width of texture
-        SHADOW_HEIGHT,          // height of texture
-        0,                      // border - reference says this must be 0???
-        GL_DEPTH_COMPONENT,     // format of the pixel data
-        GL_FLOAT,               // data type of the pixel data
-        NULL);                  // pointer to image data
-
-    // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // defining how to wrap the texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, *frameBufferPtr);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, *texturePtr, 0);
-    // since we only need depth information, we tell frame buffer we dont need a color buffer
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
 }
 
 void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
