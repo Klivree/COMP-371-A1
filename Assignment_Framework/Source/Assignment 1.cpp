@@ -85,9 +85,12 @@ string CedriksWallPath = "../Assets/Shapes/Cedrik's Wall.csv";
 string AlexsWallPath = "../Assets/Shapes/Alex's Wall.csv";
 string ThapansWallPath = "../Assets/Shapes/Thapan's Wall.csv";
 
+string GroundPath = "../Assets/Shapes/Ground.csv";
+
 //creation of model objects to remove switch statements in the executeEvents method
 std::vector<Model *> objectModels;
 std::vector<Model*> wallModels;
+std::vector<Model*> groundModels;
 
 Model JacksModel = Model(JacksShape, JackInitialPOS, initialScale, GL_TRIANGLES);
 Model MelModel = Model(MelShape, MelInitialPOS, initialScale, GL_TRIANGLES);
@@ -100,6 +103,8 @@ Model MelWall = Model(MelWallPath, MelInitialPOS + wallPosOffset, initialScale, 
 Model CedriksWall = Model(CedriksWallPath, CedrikInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 Model AlexsWall = Model(AlexsWallPath, AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 Model ThapansWall = Model(ThapansWallPath, ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+
+Model GroundFloor = Model(GroundPath, glm::vec3(0.0f, 0.0f, 0.0f), initialScale, GL_TRIANGLES);
 
 bool ModelSelection[] = { true, false, false, false, false };
 
@@ -196,6 +201,8 @@ int main(int argc, char* argv[]) {
     wallModels.push_back(&AlexsWall);
     wallModels.push_back(&ThapansWall);
 
+    groundModels.push_back(&GroundFloor);
+
 
     for (Model *object : objectModels) {
         object->linkVAO(cubeModelVAO, 36);
@@ -209,6 +216,11 @@ int main(int argc, char* argv[]) {
         wall->setMaterial(brickMaterial);
     }
 
+    for (Model* ground : groundModels) {
+        ground->linkVAO(cubeModelVAO, 36);
+        ground->linkTexture(brickTexture);
+        ground->setMaterial(brickMaterial);
+    }
 
 
     //generate camera
@@ -951,6 +963,9 @@ void renderScene(GLuint shaderProgram) {
 
     for (Model* wall : wallModels)
         wall->render(shaderProgram, enableTextures);
+
+    for (Model* ground : groundModels)
+        ground->render(shaderProgram, enableTextures);
 
     //render the origin lines
     //          position                    length                      color             scale
