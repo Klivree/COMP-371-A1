@@ -209,9 +209,7 @@ void Model::initializeModel() {
                 break;
         }
 
-        if (j < 6)  //if we didnt get to 6 then we either have too little values per line
-            std::cout << "There are not enough values to fully define an object" << std::endl;
-        else
+        if (!(j < 6))
             information.push_back(cubeInfo(cubeInformation[0], cubeInformation[1], cubeInformation[2], cubeInformation[3], cubeInformation[4], cubeInformation[5]));
     }
 }
