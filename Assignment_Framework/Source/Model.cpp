@@ -3,6 +3,28 @@
 
 
 
+Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLuint pTexture, GLenum pDrawMode) {
+    filePath = pFilePath;
+
+    initialPOS = pPOS;
+    POS = initialPOS;
+
+    initialScale = pScale;
+    scale = initialScale;
+
+    initialDrawMode = pDrawMode;
+    drawMode = initialDrawMode;
+
+    initialRotationVector = glm::vec3(0.0f);
+    rotationVector = initialRotationVector;
+
+    material = Material(); // default white plastic material
+
+    texture = pTexture;
+
+    initializeModel();
+}
+
 Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode) {
     filePath = pFilePath;
 
@@ -17,6 +39,54 @@ Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDraw
 
     initialRotationVector = glm::vec3(0.0f);
     rotationVector = initialRotationVector;
+
+    material = Material(); // default white plastic material
+
+    initializeModel();
+}
+
+Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture) {
+    filePath = pFilePath;
+
+    initialPOS = pPOS;
+    POS = initialPOS;
+
+    initialScale = 1.0f;
+    scale = initialScale;
+
+    initialDrawMode = GL_TRIANGLES;
+    drawMode = initialDrawMode;
+
+    initialRotationVector = glm::vec3(0.0f);
+    rotationVector = initialRotationVector;
+
+    material = Material(); // default white plastic material
+
+    texture = pTexture;
+
+    initializeModel();
+}
+
+Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pVAO, GLuint pTexture, Material pMaterial) {
+    filePath = pFilePath;
+
+    initialPOS = pPOS;
+    POS = initialPOS;
+
+    VAO = pVAO;
+
+    initialScale = 1.0f;
+    scale = initialScale;
+
+    initialDrawMode = GL_TRIANGLES;
+    drawMode = initialDrawMode;
+
+    initialRotationVector = glm::vec3(0.0f);
+    rotationVector = initialRotationVector;
+
+    material = pMaterial; 
+
+    texture = pTexture;
 
     initializeModel();
 }
@@ -33,7 +103,16 @@ void Model::linkVAO(GLuint pVAO, int pActiveVertices) {
     activeVertices = pActiveVertices;
 }
 
-void Model::render(GLuint shaderProgram) {
+void Model::render(GLuint shaderProgram, bool enableTextures) {
+    initializeModel(); // will make the model reread the csv file every draw - Uncomment if you want to make the objects in real time
+    glUniform3fv(glGetUniformLocation(shaderProgram, "material.ambient"), 1, &material.ambient[0]);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, &material.diffuse[0]);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, &material.specular[0]);
+    glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
+
+    glUniform1i(glGetUniformLocation(shaderProgram, "enableTextures"), enableTextures);
+
+
     glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -71,16 +150,27 @@ void Model::render(GLuint shaderProgram) {
         else
             std::cerr << "Invalid draw type. Renderer supports: GL_TRIANGLES, GL_LINES, GL_POINTS" << std::endl;
     }
-    
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 }
+
+void Model::render(GLuint shaderProgram) { render(shaderProgram, true); }
 
 void Model::linkTexture(GLuint pTexture) {
     texture = pTexture;
 }
 
+void Model::setMaterial(Material pMaterial) {
+    material = pMaterial;
+}
+
 void Model::initializeModel() {
+    information.clear();
+    if (filePath.empty()) { // add support for simple shapes
+        information.push_back(cubeInfo(0, 0, 0, 1, 1, 1));
+        return;
+    }
 
     std::ifstream fileStream(filePath, std::ios::in);
 

@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-PointLight::PointLight(glm::vec3 lightPOS, GLfloat lightFOV, GLfloat lightConstantTerm, GLfloat lightLinearTerm, GLfloat lightQuadTerm, glm::vec3 lightFocus, glm::vec3 lightColor, int depthMapTextureSize){
+PointLight::PointLight(glm::vec3 lightPOS, GLfloat lightFarPlane, GLfloat lightConstantTerm, GLfloat lightLinearTerm, GLfloat lightQuadTerm, glm::vec3 lightColor, int depthMapTextureSize){
 	/* Contructor for the PointLight object
 	*		lightPOS - position of the light
 	*		lightFOV - field of view of the light in degrees
@@ -14,10 +14,8 @@ PointLight::PointLight(glm::vec3 lightPOS, GLfloat lightFOV, GLfloat lightConsta
 	*		depthMapTextureSize - size of the light's depth map
 	*/ 
 	POS = lightPOS;
-	FOV = lightFOV;
-	nearPlane = 1.0f;
-	farPlane = 25.0f;
-	orientation = lightFocus;
+	nearPlane = 0.1f;
+	farPlane = lightFarPlane;
 	DEPTH_MAP_TEXTURE_SIZE = depthMapTextureSize;
 	color = lightColor;
 
@@ -52,15 +50,9 @@ void PointLight::updateShadowShader(GLuint& shaderProgram) {
 }
 
 
-void PointLight::updateSceneShader(GLuint& shaderProgram) {
-	////////////////	VERTEX SHADER	////////////////
-	// sending the view and projection matrices to the vertex shader
-	glm::mat4 lightProjMatrix = glm::perspective(glm::radians(90.0f), (float) (768 / 1024), nearPlane, farPlane);
-	glm::mat4 lightViewMatrix = glm::lookAt(POS, orientation, up);
-	glm::mat4 lightSpaceMatrix = lightProjMatrix * lightViewMatrix;
+void PointLight::updateSceneShader(GLuint& shaderProgram) { updateSceneShader(shaderProgram, false); }
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
-
+void PointLight::updateSceneShader(GLuint& shaderProgram, bool enableShadows) {
 	////////////////	FRAGMENT SHADER	////////////////
 	glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, &color[0]);
 	glUniform3fv(glGetUniformLocation(shaderProgram, "lightPosition"), 1, &POS[0]);
@@ -70,4 +62,5 @@ void PointLight::updateSceneShader(GLuint& shaderProgram) {
 	glUniform1f(glGetUniformLocation(shaderProgram, "lightQuadTerm"), QuadTerm);
 	glUniform1f(glGetUniformLocation(shaderProgram, "lightFarPlane"), farPlane);
 
+	glUniform1i(glGetUniformLocation(shaderProgram, "enableShadows"), enableShadows);
 }

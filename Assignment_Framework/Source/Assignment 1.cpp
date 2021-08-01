@@ -21,13 +21,12 @@ using namespace glm;
 
 struct TexturedColoredVertex
 {
-    TexturedColoredVertex(vec3 _position, vec3 _normal, vec2 _uv, vec3 _color )
-        : position(_position), color(_color), uv(_uv), normal(_normal) {}
+    TexturedColoredVertex(vec3 _position, vec3 _normal, vec2 _uv)
+        : position(_position), uv(_uv), normal(_normal) {}
 
     vec3 position;
     vec3 normal;
     vec2 uv;
-    vec3 color;
 };
 
 char* readFile(string filePath);
@@ -36,7 +35,7 @@ char* getVertexShaderSource(string vertexShaderFilePath) { return readFile(verte
 
 char* getFragmentShaderSource(string fragmentShaderFilePath) { return readFile(fragmentShaderFilePath); }
 
-GLuint getCubeModel(glm::vec3 color);
+GLuint getCubeModel();
 
 GLuint getGridModel(glm::vec3 color);
 
@@ -48,8 +47,6 @@ void getShadowDepthMap(GLuint *frameBufferPtr, GLuint *texturePtr);
 
 void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr);
 
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram);
-
 void renderGrid(GLuint shaderProgram);
 
 void executeEvents(GLFWwindow* window, Camera& camera, float dt);
@@ -60,19 +57,18 @@ GLuint loadTexture(const char* filename);
 
 void renderScene(GLuint shaderProgram);
 
-
 // dimensions of the window in pixels
 const int WINDOW_WIDTH = 1024;
 const int WINDOW_HEIGHT = 768;
 
-// dimensions of the shadow 
+// dimensions of the shadow map
 const int SHADOW_WIDTH = 1024;
 const int SHADOW_HEIGHT = 1024;
 
 const float initialFOV = 90.0f; // FOV of the initial player view in degrees
 const GLfloat initialScale = 1.0f; // initial object scale
-const glm::vec3 initialRotationVector = glm::vec3(0.0f);
 const GLenum defaultDrawMode = GL_TRIANGLES;
+
 const glm::vec3 JackInitialPOS = glm::vec3(0.0f, 10.0f, 0.0f);
 const glm::vec3 MelInitialPOS = glm::vec3(20.0f, 10.0f, 20.0f);
 const glm::vec3 CedrikInitialPOS = glm::vec3(20.0f, 10.0f, -20.0f);
@@ -85,7 +81,7 @@ string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
 string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
 string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
 
-vec3 wallPosOffset = vec3(0.0f, 0.0f, 10.0f);
+vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
 string JacksWallPath = "../Assets/Shapes/Jack's Wall.csv";
 string MelWallPath = "../Assets/Shapes/MelWall.csv";
 string CedriksWallPath = "../Assets/Shapes/Cedrik's Wall.csv";
@@ -93,6 +89,9 @@ string AlexsWallPath = "../Assets/Shapes/Alex's Wall.csv";
 string ThapansWallPath = "../Assets/Shapes/Thapan's Wall.csv";
 
 //creation of model objects to remove switch statements in the executeEvents method
+std::vector<Model *> objectModels;
+std::vector<Model*> wallModels;
+
 Model JacksModel = Model(JacksShape, JackInitialPOS, initialScale, GL_TRIANGLES);
 Model MelModel = Model(MelShape, MelInitialPOS, initialScale, GL_TRIANGLES);
 Model CedriksModel = Model(CedriksShape, CedrikInitialPOS, initialScale, GL_TRIANGLES);
@@ -105,8 +104,10 @@ Model CedriksWall = Model(CedriksWallPath, CedrikInitialPOS + wallPosOffset, ini
 Model AlexsWall = Model(AlexsWallPath, AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 Model ThapansWall = Model(ThapansWallPath, ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 
+bool ModelSelection[] = { true, false, false, false, false };
 
-Model *currentObject = &JacksModel; // we use a pointer to the current object to do object manipulations
+bool enableShadows = true;
+bool enableTextures = true;
 
 
 int main(int argc, char* argv[]) {
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     glfwMakeContextCurrent(window);
-
+  
     // Initialize GLEW
     glewExperimental = true; // Needed for core profile
     if (glewInit() != GLEW_OK) {
@@ -148,37 +149,13 @@ int main(int argc, char* argv[]) {
     GLuint sceneShaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
     GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowgeometryshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
 
-
-    // get VAOs
-    GLuint shapeVAO = getCubeModel(glm::vec3(1.0f, 0.0f, 0.0f));
-    GLuint wallVAO = getCubeModel(glm::vec3(0.8f, 0.8f, 0.8f));
-    GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
-    GLuint lightVAO = getCubeModel(vec3(1.0f, 1.0f, 1.0f));
-
-    // generate the textures needed
-    GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
-    GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
-
-    //generate camera
-    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
-
-    //generate light
-    PointLight light(vec3(0.0f, 10.0f, 20.0f), 90.0f, 1.0f, 0.007f, 0.0002f, vec3(0.0f, -1.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f), 1024);
-
-    // For frame time
-    float lastFrameTime = glfwGetTime();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-
-    //////////////////SHADOW MAKING////////////////
+    // creation of the depth map framebuffer and texture [cube map is used since this is a point light and light is in 360 degrees around it]
     GLuint depthMapFBO, depthCubeMap;
     glGenFramebuffers(1, &depthMapFBO);
 
     glGenTextures(1, &depthCubeMap);
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6; ++i) { //generating the 6 sides of the cube map
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }
 
@@ -186,9 +163,9 @@ int main(int argc, char* argv[]) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // defining how to wrap the texture
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
@@ -197,35 +174,66 @@ int main(int argc, char* argv[]) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+    // get VAOs
+    GLuint cubeModelVAO = getCubeModel();
+    GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
 
-    // Initialize the models
-    JacksModel.linkVAO(shapeVAO, 36);
-    MelModel.linkVAO(shapeVAO, 36);
-    CedriksModel.linkVAO(shapeVAO, 36);
-    AlexsModel.linkVAO(shapeVAO, 36);
-    ThapansModel.linkVAO(shapeVAO, 36);
+    // generate the textures needed
+    GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
+    GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
 
-    JacksWall.linkVAO(wallVAO, 36);
-    MelWall.linkVAO(wallVAO, 36);
-    CedriksWall.linkVAO(wallVAO, 36);
-    AlexsWall.linkVAO(wallVAO, 36);
-    ThapansWall.linkVAO(wallVAO, 36);
+    // initialize Materials
+    vec3 goldVec((float)212 / 255, (float)175 / 255, (float)55 / 255);
+    Material goldMaterial(goldVec * vec3(0.8), goldVec *vec3(0.8), goldVec, 0.8f);
+    Material brickMaterial = Material();
 
-    JacksModel.linkTexture(brickTexture);
-    MelModel.linkTexture(brickTexture);
-    CedriksModel.linkTexture(brickTexture);
-    AlexsModel.linkTexture(brickTexture);
-    ThapansModel.linkTexture(brickTexture);
+    objectModels.push_back(&JacksModel);
+    objectModels.push_back(&MelModel);
+    objectModels.push_back(&CedriksModel);
+    objectModels.push_back(&AlexsModel);
+    objectModels.push_back(&ThapansModel);
 
-    JacksWall.linkTexture(brickTexture);
-    MelWall.linkTexture(brickTexture);
-    CedriksWall.linkTexture(brickTexture);
-    AlexsWall.linkTexture(brickTexture);
-    ThapansWall.linkTexture(brickTexture);
+    
+
+    wallModels.push_back(&JacksWall);
+    wallModels.push_back(&MelWall);
+    wallModels.push_back(&CedriksWall);
+    wallModels.push_back(&AlexsWall);
+    wallModels.push_back(&ThapansWall);
 
 
+    for (Model *object : objectModels) {
+        object->linkVAO(cubeModelVAO, 36);
+        object->linkTexture(blankTexture);
+        object->setMaterial(goldMaterial);
+    }
+
+    for (Model *wall : wallModels) {
+        wall->linkVAO(cubeModelVAO, 36);
+        wall->linkTexture(brickTexture);
+        wall->setMaterial(brickMaterial);
+    }
 
 
+
+    //generate camera
+    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
+
+    //generate light
+    PointLight light(vec3(0.0f, 15.0f, 0.0f), 90.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f, 1.0f, 1.0f), SHADOW_HEIGHT);
+    Material lightMaterial = Material(light.color, light.color, light.color, 0.01f);
+
+    Model lightSource = Model("", light.POS, blankTexture);
+    lightSource.linkVAO(cubeModelVAO, 36);
+    lightSource.setMaterial(lightMaterial);
+    lightSource.scale = 3.0f;
+
+    // For frame time
+    float lastFrameTime = glfwGetTime();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+ 
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
@@ -252,7 +260,7 @@ int main(int argc, char* argv[]) {
         glUseProgram(sceneShaderProgram);
         //update the values in the scene shader
         camera.createMatrices(0.01f, 100.0f, sceneShaderProgram);
-        light.updateSceneShader(sceneShaderProgram);
+        light.updateSceneShader(sceneShaderProgram, enableShadows);
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -260,12 +268,8 @@ int main(int argc, char* argv[]) {
         renderScene(sceneShaderProgram);
 
 
-
-        glBindTexture(GL_TEXTURE_2D, blankTexture);
-        glBindVertexArray(lightVAO);
-        mat4 lightWorldMatrix = translate(mat4(1.0f), light.POS);
-        glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "worldMatrix"), 1, GL_FALSE, &lightWorldMatrix[0][0]);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //render light not in two pass so it does not create shadows
+        //lightSource.render(sceneShaderProgram, true);
 
         glBindVertexArray(gridVAO);
         renderGrid(sceneShaderProgram);
@@ -295,7 +299,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastStateReleased = true, ULastStateReleased = true, ALastStateReleased = true, DLastStateReleased = true, SpaceLastStateReleased = true;
+    static bool JLastStateReleased = true, ULastStateReleased = true, ALastStateReleased = true, DLastStateReleased = true, SpaceLastStateReleased = true, BLastStateReleased = true, XLastStateReleased = true;
     float scaleFactor = (float)8 / 7;
     float rotationFactor = 5.0f;
     float modelMovementSpeed = 2.0f;
@@ -305,29 +309,52 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     //change object
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
-        currentObject = &JacksModel;
+        ModelSelection[0] = !ModelSelection[0];
     else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        currentObject = &MelModel;
+        ModelSelection[1] = !ModelSelection[1];
     else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-        currentObject = &CedriksModel;
+        ModelSelection[2] = !ModelSelection[2];
     else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-        currentObject = &AlexsModel;
+        ModelSelection[3] = !ModelSelection[3];
     else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-        currentObject = &ThapansModel;
+        ModelSelection[4] = !ModelSelection[4];
 
+    // reset the current model
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
         SpaceLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastStateReleased) {
-        currentObject->resetModel();
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->resetModel();
+        }
+            
         SpaceLastStateReleased = false;
     }
 
+    // toggle shadows off and on
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+        BLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && BLastStateReleased) {
+        enableShadows = abs(enableShadows - 1); // hacky way to toggle between true and false
+        BLastStateReleased = false;
+    }
+
+    // toggle textures off and on
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE)
+        XLastStateReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS && XLastStateReleased) {
+        enableTextures = abs(enableTextures - 1); // hacky way to toggle between true and false
+        XLastStateReleased = false;
+    }
 
     // size up function
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
         ULastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
-        currentObject->scale *= scaleFactor;
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->scale *= scaleFactor;
+        }
         ULastStateReleased = false;
     }
   
@@ -336,7 +363,10 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
         JLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
-        currentObject->scale *= 1 / scaleFactor;
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->scale *= 1 / scaleFactor;
+        }
         JLastStateReleased = false;
     }
 
@@ -351,54 +381,94 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     // movement function
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
+            }
+        }
 
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
+            }
+        }
 
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
+            }
+        }
            
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            }
+        }
 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            currentObject->POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
+            }
+        }
 
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            currentObject->POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
+            }
+        }
     }
     else {
         // rotate counter-clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
-            currentObject->rotationVector.y += rotationFactor;
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.y += rotationFactor;
+            }
             ALastStateReleased = false;
         }
 
         // rotate clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
-            currentObject->rotationVector.y -= rotationFactor;
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.y -= rotationFactor;
+            }
             DLastStateReleased = false;
         }
     }
 
 
     // change the draw mode
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-        currentObject->drawMode = GL_TRIANGLES;
-    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-        currentObject->drawMode = GL_LINES;
-    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
-        currentObject->drawMode = GL_POINTS;
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->drawMode = GL_TRIANGLES;
+        }
+    }
+    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->drawMode = GL_LINES;
+        }
+    }
+    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        for (int i = 0; i < objectModels.size(); i++) {
+            if (ModelSelection[i])
+                objectModels[i]->drawMode = GL_POINTS;
+        }
+    }
 
     // close the window on escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 
 }
-
-
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
     /* compile and link shader program
@@ -588,64 +658,62 @@ void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, G
     glDeleteBuffers(1, &VBO);
 }
 
-GLuint getCubeModel(glm::vec3 color) {
-    /* Creates a cube model VAO with the given color.
+GLuint getCubeModel() {
+    /* Creates a cube model VAO.
     * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
-    *
-    *   color - color vector of the cube
     *
     * returns the GLuint corresponding with the created VAO
     */
 
     // Cube model
     TexturedColoredVertex vertexArray[] = {  // position, normal, UV, color
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color), //left 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f)), //left 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f)),
 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f), color), // far 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f)), // far 
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 1.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f),color), // bottom
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f)), // bottom
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f), color), // near
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f)), // near
+    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f),  color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f),  color), // right
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f)), // right
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f), color),
+    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 1.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f), color), // top
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f), color),
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f)), // top
+    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f)),
 
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f), color),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 1.0f), color)
+    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f, 1.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 0.0f)),
+    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f, 1.0f))
     };
 
     GLuint VAO, VBO;
@@ -662,17 +730,13 @@ GLuint getCubeModel(glm::vec3 color) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //create color attribute
+    //create normals attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)sizeof(vec3));
     glEnableVertexAttribArray(1);
 
     //create texture coordinates attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2*sizeof(vec3)));
     glEnableVertexAttribArray(2);
-
-    //create normals attribute
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2 * sizeof(vec3) + sizeof(vec2)));
-    glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -850,17 +914,11 @@ void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
 
 void renderScene(GLuint shaderProgram) {
 
-    JacksModel.render(shaderProgram);
-    MelModel.render(shaderProgram);
-    CedriksModel.render(shaderProgram);
-    AlexsModel.render(shaderProgram);
-    ThapansModel.render(shaderProgram);
+    for (Model* object : objectModels)
+        object->render(shaderProgram, enableTextures);
 
-    JacksWall.render(shaderProgram);
-    MelWall.render(shaderProgram);
-    CedriksWall.render(shaderProgram);
-    AlexsWall.render(shaderProgram);
-    ThapansWall.render(shaderProgram);
+    for (Model* wall : wallModels)
+        wall->render(shaderProgram, enableTextures);
 
     //render the origin lines
     //          position                    length                      color             scale
@@ -870,99 +928,3 @@ void renderScene(GLuint shaderProgram) {
 
 }
 
-
-void renderShapeFromCSV(string filePath, glm::vec3 pos, GLfloat scale, GLenum drawMode, glm::vec3 rotationalVector, GLuint shaderProgram) {
-    /** Renders the shape specified in the CSV file provided by using transformed cube models. A cube model should be binded before this method is called.
-    *
-    *   filePath - filePath of the .csv file that defines the shape
-    *   pos - coordinates of the object
-    *   scale - how much the object is to be scaled by
-    *   drawMode - renderer mode
-    *   rotationalVector - how many degrees clockwise around the respective axis to rotate the object around (degrees around x-axis, degrees around y-axis, degrees around z-axis)
-    *   shaderProgram - shader program used by the running OpenGL application
-    *
-    * Each line in the csv file renders a seperate rectangular prism. The line should be formatted as such:
-    * local x coordinate, local y coordinate, local z coordinate, local x scale, local y scale, local z scale
-    **/
-    
-    ifstream fileStream(filePath, ios::in);
-
-    if (!fileStream.is_open()) {
-        cerr << "Could not read file " << filePath << ". File does not exist." << endl;
-        return;
-    }
-
-    string value, line = "";
-    float cubeInfo[6] = {};
-    int i, j;
-    char curChar;
-    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
-
-    //creation of base matrix
-    glm::mat4 baseMatrix = glm::mat4(1.0f);
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationalVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
-    baseMatrix = glm::translate(baseMatrix, pos);
-
-    while (!fileStream.eof()) {
-        getline(fileStream, line); //get line for a cube
-        line.append("\n");
-
-        value = "";
-        i = 0; // curChar index
-        j = 0; // cubeInfo index
-
-        // parse the line to get cube info in the form of: 
-        //(local x coord,       local y coord,      local z coord,      size in x dir,      size in y dir,      size in z dir)
-        while (true) {
-            curChar = line[i++];
-
-            if (curChar == '\n' || curChar == ',') {//need to push the info when these chars appear
-                cubeInfo[j++] = stof(value); // push float value to the array
-                value = "";
-            }
-            else if (curChar != ' ') // ignore spaces
-                value.append(string(1, curChar)); // add the char to the current value
-
-             // line is finished
-            if (curChar == '\n' || curChar == '/' || j == 6)
-                break;
-        }
-
-        if (j < 6)  //if we didnt get to 6 then we either have too little values per line
-            cout << "There are not enough values to fully define an object" << endl;
-        else {
-            //scale the values
-            for (int k = 0; k < 6; k++) {
-                cubeInfo[k] = scale * cubeInfo[k];
-            }
-
-            glm::vec3 localCoord = glm::vec3(cubeInfo[0], cubeInfo[1], cubeInfo[2]);
-            glm::vec3 scalingVector = glm::vec3(cubeInfo[3], cubeInfo[4], cubeInfo[5]);
-
-            // transformation of the base matrix
-            glm::mat4 cubeWorldMatrix = glm::translate(baseMatrix, localCoord);
-            cubeWorldMatrix = glm::scale(cubeWorldMatrix, scalingVector);
-
-            // draw the cube
-            glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &cubeWorldMatrix[0][0]);
-
-
-
-            // change the draw mode of the model being rendered
-            if (drawMode == GL_TRIANGLES)
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            else if (drawMode == GL_LINES) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // turn on wireframe
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // turn off wireframe
-            }
-            else if (drawMode == GL_POINTS)
-                glDrawArrays(GL_POINTS, 0, 36);
-            else
-                cerr << "Invalid draw type. Reader supports: GL_TRIANGLES, GL_LINES, GL_POINTS" << endl;
-
-        }
-    }
-}

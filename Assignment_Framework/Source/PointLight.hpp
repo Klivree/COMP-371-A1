@@ -10,21 +10,20 @@
 
 class PointLight {
 public:
-	PointLight(glm::vec3 lightPOS, GLfloat lightFOV, GLfloat lightConstantTerm, GLfloat lightLinearTerm, GLfloat lightQuadTerm, glm::vec3 lightFocus, glm::vec3 lightColor, int depthMapTextureSize);
+	PointLight(glm::vec3 lightPOS, GLfloat lightFarPlane, GLfloat lightConstantTerm, GLfloat lightLinearTerm, GLfloat lightQuadTerm, glm::vec3 lightColor, int depthMapTextureSize);
 
 	void updateShadowShader(GLuint& shaderProgram);
 
 	void updateSceneShader(GLuint& shaderProgram);
 
+	void updateSceneShader(GLuint& shaderProgram, bool enableShadows);
+
 
 	glm::vec3 POS;
-	glm::vec3 orientation;
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 color;
 	GLfloat constTerm, linearTerm, QuadTerm, nearPlane, farPlane;
 
-
-	GLfloat FOV;
 	int DEPTH_MAP_TEXTURE_SIZE;
 	
 };

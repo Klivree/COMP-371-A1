@@ -13,6 +13,27 @@
 #include <string>
 #include <vector>
 
+struct Material { // sample material values can be obtained from : http://devernay.free.fr/cours/opengl/materials.html
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+
+    Material() { // default white plastice material
+        ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+        diffuse = glm::vec3(0.55f, 0.55f, 0.55f);
+        specular = glm::vec3(0.70f, 0.70f, 0.70f);
+        shininess = 0.1f;
+    }
+
+    Material(glm::vec3 _ambient, glm::vec3 _diffuse, glm::vec3 _specular, float _shininess) {
+        ambient = _ambient;
+        diffuse = _diffuse;
+        specular = _specular;
+        shininess = _shininess;
+    }
+};
+
 struct cubeInfo {
     GLfloat posX;
     GLfloat posY;
@@ -35,14 +56,23 @@ class Model {
 public:
     Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
 
+    Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLuint pTexture, GLenum pDrawMode);
+
+    Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture);
+
+    Model(std::string pFilePath, glm::vec3 pPOS, GLuint pVAO, GLuint pTexture, Material pMaterial);
+
     void resetModel();
 
-
     void render(GLuint shaderProgram);
+
+    void render(GLuint shaderProgram, bool enableTextures);
 
     void linkVAO(GLuint pVAO, int pActiveVertices);
 
     void linkTexture(GLuint pTexture);
+
+    void setMaterial(Material pMaterial);
 
     glm::vec3 POS;
     glm::vec3 rotationVector;
@@ -59,13 +89,13 @@ private:
     GLenum initialDrawMode;
 
     std::vector<cubeInfo> information;
-    int numOfShuffles;
-    int shuffleNumber = 0;
 
     GLuint VAO;
     int activeVertices;
 
     GLuint texture;
+
+    Material material;
 
     void initializeModel();
 };
