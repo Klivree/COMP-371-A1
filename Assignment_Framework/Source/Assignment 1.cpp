@@ -106,7 +106,8 @@ Model AlexsWall = Model(AlexsWallPath, AlexInitialPOS + wallPosOffset, initialSc
 Model ThapansWall = Model(ThapansWallPath, ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 
 
-Model *currentObject = &JacksModel; // we use a pointer to the current object to do object manipulations
+bool ModelSelection[] = { true, false, false, false, false };
+Model ModelList[] = { JacksModel, MelModel, CedriksModel, AlexsModel, ThapansModel };
 
 
 int main(int argc, char* argv[]) {
@@ -305,20 +306,23 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     //change object
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
-        currentObject = &JacksModel;
+        ModelSelection[0] = !ModelSelection[0];
     else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-        currentObject = &MelModel;
+        ModelSelection[1] = !ModelSelection[1];
     else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-        currentObject = &CedriksModel;
+        ModelSelection[2] = !ModelSelection[2];
     else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-        currentObject = &AlexsModel;
+        ModelSelection[3] = !ModelSelection[3];
     else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-        currentObject = &ThapansModel;
+        ModelSelection[4] = !ModelSelection[4];
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
         SpaceLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastStateReleased) {
-        currentObject->resetModel();
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].resetModel();
+        }
         SpaceLastStateReleased = false;
     }
 
@@ -327,7 +331,10 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
         ULastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
-        currentObject->scale *= scaleFactor;
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].scale *= scaleFactor;
+        }
         ULastStateReleased = false;
     }
   
@@ -336,7 +343,10 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
         JLastStateReleased = true;
     else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
-        currentObject->scale *= 1 / scaleFactor;
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].scale *= 1 / scaleFactor;
+        }
         JLastStateReleased = false;
     }
 
@@ -351,46 +361,83 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
     // movement function
     if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-           
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
-            currentObject->POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            currentObject->POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            currentObject->POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
+            }
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
+            }
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
+            }
+        }           
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
+            }
+        }
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
+            }
+        }
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
+            }
+        }
     }
     else {
         // rotate counter-clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
-            currentObject->rotationVector.y += rotationFactor;
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].rotationVector.y += rotationFactor;
+            }
             ALastStateReleased = false;
         }
 
         // rotate clockwise around positive y-axis
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
-            currentObject->rotationVector.y -= rotationFactor;
+            for (int i = 0; i < 5; i++) {
+                if (ModelSelection[i])
+                    ModelList[i].rotationVector.y -= rotationFactor;
+            }
             DLastStateReleased = false;
         }
     }
 
 
     // change the draw mode
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-        currentObject->drawMode = GL_TRIANGLES;
-    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-        currentObject->drawMode = GL_LINES;
-    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) 
-        currentObject->drawMode = GL_POINTS;
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].drawMode = GL_TRIANGLES;
+        }
+    }
+    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].drawMode = GL_LINES;
+        }
+    }
+    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        for (int i = 0; i < 5; i++) {
+            if (ModelSelection[i])
+                ModelList[i].drawMode = GL_POINTS;
+        }
+    }
 
     // close the window on escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
