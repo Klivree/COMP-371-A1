@@ -47,7 +47,8 @@ float cubeShadowScalar() {
 	//get depth of current fragment from the light
 	float currentDepth = length(fragmentToLight);
 
-	float bias = 0.05; // bias is used to remove shadow acne
+	// bias is used to remove shadow acne, we do the max so we can accomidate bias for high and low angles
+	float bias = max(0.05 * (1.0 - dot(fragmentNormal, fragmentToLight)), 0.005); 
         
 	return ((currentDepth - bias) > closestDepth) ? 1.0:0.0;  // check if current frag is in shadow
 }
