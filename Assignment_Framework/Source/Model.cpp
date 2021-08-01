@@ -118,10 +118,11 @@ void Model::render(GLuint shaderProgram, bool enableTextures) {
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glm::mat4 baseMatrix = glm::mat4(1.0f);
+    baseMatrix = glm::translate(baseMatrix, POS);
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
-    baseMatrix = glm::translate(baseMatrix, POS);
+
 
 
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");

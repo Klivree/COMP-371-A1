@@ -299,7 +299,9 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastStateReleased = true, ULastStateReleased = true, ALastStateReleased = true, DLastStateReleased = true, SpaceLastStateReleased = true, BLastStateReleased = true, XLastStateReleased = true;
+    static bool JLastReleased = true, ULastReleased = true,  SpaceLastReleased = true, BLastReleased = true, XLastReleased = true;
+    static bool ALastReleased = true, DLastReleased = true, SLastReleased = true, WLastReleased = true, QLastReleased = true, ELastReleased = true;
+    static bool ONELastReleased = true, TWOLastReleased = true, THREELastReleased = true, FOURLastReleased = true, FIVELastReleased = true;
     float scaleFactor = (float)8 / 7;
     float rotationFactor = 5.0f;
     float modelMovementSpeed = 2.0f;
@@ -308,75 +310,106 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     camera.processInputs(window, dt); // processes all camera inputs
 
     //change object
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) 
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE)
+        ONELastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ONELastReleased) {
         ModelSelection[0] = !ModelSelection[0];
-    else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        ONELastReleased = false;
+    }
+
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE)
+        TWOLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && TWOLastReleased) {
         ModelSelection[1] = !ModelSelection[1];
-    else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        TWOLastReleased = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE)
+        THREELastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && THREELastReleased) {
         ModelSelection[2] = !ModelSelection[2];
-    else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        THREELastReleased = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE)
+        FOURLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && FOURLastReleased) {
         ModelSelection[3] = !ModelSelection[3];
-    else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        FOURLastReleased = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE)
+        FIVELastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && FIVELastReleased) {
         ModelSelection[4] = !ModelSelection[4];
+        FIVELastReleased = false;
+    }
 
     // reset the current model
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
-        SpaceLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastStateReleased) {
+        SpaceLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastReleased) {
         for (int i = 0; i < objectModels.size(); i++) {
             if (ModelSelection[i])
                 objectModels[i]->resetModel();
         }
             
-        SpaceLastStateReleased = false;
+        SpaceLastReleased = false;
     }
 
     // toggle shadows off and on
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
-        BLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && BLastStateReleased) {
+        BLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && BLastReleased) {
         enableShadows = abs(enableShadows - 1); // hacky way to toggle between true and false
-        BLastStateReleased = false;
+        BLastReleased = false;
     }
 
     // toggle textures off and on
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE)
-        XLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS && XLastStateReleased) {
+        XLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS && XLastReleased) {
         enableTextures = abs(enableTextures - 1); // hacky way to toggle between true and false
-        XLastStateReleased = false;
+        XLastReleased = false;
     }
 
     // size up function
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
-        ULastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastStateReleased) {
+        ULastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastReleased) {
         for (int i = 0; i < objectModels.size(); i++) {
             if (ModelSelection[i])
                 objectModels[i]->scale *= scaleFactor;
         }
-        ULastStateReleased = false;
+        ULastReleased = false;
     }
   
 
     // size down function
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
-        JLastStateReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastStateReleased) {
+        JLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastReleased) {
         for (int i = 0; i < objectModels.size(); i++) {
             if (ModelSelection[i])
                 objectModels[i]->scale *= 1 / scaleFactor;
         }
-        JLastStateReleased = false;
+        JLastReleased = false;
     }
 
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
-        ALastStateReleased = true;
-
-
+        ALastReleased = true;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
-        DLastStateReleased = true;
+        DLastReleased = true;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+        WLastReleased = true;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+        SLastReleased = true;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE)
+        QLastReleased = true;
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
+        ELastReleased = true;
 
 
     // movement function
@@ -425,21 +458,57 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     }
     else {
         // rotate counter-clockwise around positive y-axis
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastStateReleased) {
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastReleased) {
             for (int i = 0; i < objectModels.size(); i++) {
                 if (ModelSelection[i])
                     objectModels[i]->rotationVector.y += rotationFactor;
             }
-            ALastStateReleased = false;
+            ALastReleased = false;
         }
 
         // rotate clockwise around positive y-axis
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastStateReleased) {
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastReleased) {
             for (int i = 0; i < objectModels.size(); i++) {
                 if (ModelSelection[i])
                     objectModels[i]->rotationVector.y -= rotationFactor;
             }
-            DLastStateReleased = false;
+            DLastReleased = false;
+        }
+
+        // rotate counter-clockwise around positive z-axis
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && ELastReleased) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.z += rotationFactor;
+            }
+            ELastReleased = false;
+        }
+
+        // rotate clockwise around positive z-axis
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && QLastReleased) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.z -= rotationFactor;
+            }
+            QLastReleased = false;
+        }
+
+        // rotate counter-clockwise around positive x-axis
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && WLastReleased) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.x += rotationFactor;
+            }
+            WLastReleased = false;
+        }
+
+        // rotate clockwise around positive x-axis
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && SLastReleased) {
+            for (int i = 0; i < objectModels.size(); i++) {
+                if (ModelSelection[i])
+                    objectModels[i]->rotationVector.x -= rotationFactor;
+            }
+            SLastReleased = false;
         }
     }
 
