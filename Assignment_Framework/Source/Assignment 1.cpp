@@ -184,6 +184,7 @@ int main(int argc, char* argv[]) {
     GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
     GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
     GLuint tileTexture = loadTexture("../Assets/Textures/tile.png");
+    GLuint goldTexture = loadTexture("../Assets/Textures/gold.jpg");
 
     // initialize Materials
     vec3 goldVec(0.780392f, 0.568627f, 0.113725f);
@@ -208,7 +209,7 @@ int main(int argc, char* argv[]) {
 
     for (Model *object : objectModels) {
         object->linkVAO(cubeModelVAO, 36);
-        object->linkTexture(blankTexture);
+        object->linkTexture(goldTexture);
         object->setMaterial(goldMaterial);
     }
 
