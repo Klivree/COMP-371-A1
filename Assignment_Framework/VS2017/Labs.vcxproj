@@ -103,13 +103,18 @@
     <ClCompile Include="..\Source\Assignment 1.cpp" />
     <ClCompile Include="..\Source\Camera.cpp" />
     <ClCompile Include="..\Source\Model.cpp" />
+    <ClCompile Include="..\Source\PointLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Camera.hpp" />
     <ClInclude Include="..\Source\Model.hpp" />
+    <ClInclude Include="..\Source\PointLight.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\fragmentshader.glsl" />
+    <None Include="..\Assets\Shaders\shadowfragmentshader.glsl" />
+    <None Include="..\Assets\Shaders\shadowgeometryshader.glsl" />
+    <None Include="..\Assets\Shaders\shadowvertexshader.glsl" />
     <None Include="..\Assets\Shaders\vertexshader.glsl" />
     <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Alex%27s Shape.csv" />
@@ -117,6 +122,7 @@
     <None Include="..\Assets\Shapes\Cedrik%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Cedrik%27s Shape.csv" />
     <None Include="..\Assets\Shapes\Cedrik%27s Wall.csv" />
+    <None Include="..\Assets\Shapes\Ground.csv" />
     <None Include="..\Assets\Shapes\Jack%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Jack%27s Shape - Shuffle 2.csv" />
     <None Include="..\Assets\Shapes\Jack%27s Shape.csv" />
@@ -124,6 +130,14 @@
     <None Include="..\Assets\Shapes\MelShape-Shuffle.csv" />
     <None Include="..\Assets\Shapes\MelShape.csv" />
     <None Include="..\Assets\Shapes\MelWall.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Assets\Textures\arrow.png" />
+    <Image Include="..\Assets\Textures\blank.jpg" />
+    <Image Include="..\Assets\Textures\brick.jpg" />
+    <Image Include="..\Assets\Textures\cement.jpg" />
+    <Image Include="..\Assets\Textures\gold.jpg" />
+    <Image Include="..\Assets\Textures\tile.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

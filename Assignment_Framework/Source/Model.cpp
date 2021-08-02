@@ -121,7 +121,9 @@ void Model::render(GLuint shaderProgram, bool enableTextures) {
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
 
-
+    // allow for texture wrapping
+    glUniform1f(glGetUniformLocation(shaderProgram, "texWrapX"), texWrapX);
+    glUniform1f(glGetUniformLocation(shaderProgram, "texWrapY"), texWrapY);
 
     GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
 

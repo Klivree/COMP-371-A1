@@ -1,12 +1,24 @@
-﻿D:\Programs\VS code\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (C:\Users\jjtel\Source\Repos\COMP-371-A1\Assignment_Framework\VS2017\/../Build/Debug/) contains files shared from another project (Labs.vcxproj, Quiz 1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿D:\Programs\VS code\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (C:\Users\jjtel\Source\Repos\Klivree\COMP-371-A1\Assignment_Framework\VS2017\/../Build/Debug/) contains files shared from another project (Labs.vcxproj, Quiz 1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Assignment 1.cpp
-C:\Users\jjtel\source\repos\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(118,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(126,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(327,10): warning C4101: 'cubeProcessed': unreferenced local variable
-C:\Users\jjtel\source\repos\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(658,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,float,unsigned int &)" (?createMatrices@Camera@@QAEXMMMAAI@Z)'
-LINK : warning LNK4217: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,float,unsigned int &)" (?createMatrices@Camera@@QAEXMMMAAI@Z)'
-glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\jjtel\Source\Repos\COMP-371-A1\Assignment_Framework\Bin\vc120.pdb'; linking object as if no debug info
-  Labs.vcxproj -> C:\Users\jjtel\Source\Repos\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(248,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(256,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(369,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(397,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(409,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(434,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(441,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(448,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(455,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(462,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(469,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(478,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(487,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(496,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(505,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(514,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(523,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(534,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(540,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(546,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(986,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Labs.vcxproj -> C:\Users\jjtel\Source\Repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe

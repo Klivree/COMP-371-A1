@@ -74,6 +74,10 @@ public:
     GLfloat scale;
     GLenum drawMode;
 
+    // amount of times to repeat the texture
+    float texWrapX = 1.0f;
+    float texWrapY = 1.0f;
+
 
 
 private:

@@ -9,6 +9,10 @@ struct Material {
 
 uniform Material material;
 
+// used so we can repeat the textures as needed
+uniform float texWrapX = 1.0f;
+uniform float texWrapY = 1.0f;
+
 in vec2 textureCoords;
 in vec3 vertexColor;
 in vec3 fragmentNormal; // we need the normal in world space and not view space for lighting calcs
@@ -60,7 +64,7 @@ void main() {
     // get fragment color from the texture and times it by the vertex color
     vec3 color;
     if(enableTextures)
-        color = texture(modelTexture, textureCoords).rgb * material.color;
+        color = texture(modelTexture, vec2(textureCoords.x * texWrapX, textureCoords.y * texWrapY)).rgb * material.color;
     else 
         color =  material.color;
 
