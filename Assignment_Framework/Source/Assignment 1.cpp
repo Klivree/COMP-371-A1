@@ -56,9 +56,11 @@ GLuint loadTexture(const char* filename);
 
 void renderScene(GLuint shaderProgram);
 
+void window_size_callback(GLFWwindow* window, int width, int height);
+
 // dimensions of the window in pixels
-const int WINDOW_WIDTH = 1024;
-const int WINDOW_HEIGHT = 768;
+int WINDOW_WIDTH = 1024;
+int WINDOW_HEIGHT = 768;
 
 // dimensions of the shadow map
 const int SHADOW_WIDTH = 1024;
@@ -256,7 +258,8 @@ int main(int argc, char* argv[]) {
         float dt = glfwGetTime() - lastFrameTime;
         lastFrameTime += dt;
 
-
+		// window size callback called when window size changes
+		glfwSetWindowSizeCallback(window, window_size_callback);
 
         // render the depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
@@ -275,7 +278,7 @@ int main(int argc, char* argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(sceneShaderProgram);
         //update the values in the scene shader
-        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram);
+        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
         light.updateSceneShader(sceneShaderProgram, enableShadows);
         
         glActiveTexture(GL_TEXTURE1);
@@ -1070,3 +1073,8 @@ void renderScene(GLuint shaderProgram) {
 
 }
 
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
+	WINDOW_WIDTH = width;
+	WINDOW_HEIGHT = height;
+}
