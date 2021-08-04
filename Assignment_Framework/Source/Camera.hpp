@@ -30,7 +30,7 @@ public:
 
 	Camera(int width, int height, glm::vec3 pos, float FOVdeg);
 
-	void createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram);
+	void createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram, int width, int height);
 
 	void processInputs(GLFWwindow* window, float dt);	
 
