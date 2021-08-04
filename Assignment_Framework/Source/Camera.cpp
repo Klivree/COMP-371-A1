@@ -11,7 +11,7 @@ Camera::Camera(int w, int h, glm::vec3 pos, float FOVdeg) {
 	initialFOV = FOV;
 }
 
-void Camera::createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram) {
+void Camera::createMatrices(float nearPlane, float farPlane, GLuint& shaderProgram, int width, int height) {
 	/* creates and sends the view and projection matrices to the shader program
 	* 
 	*	FOVdeg - the FOV of the camera in degrees
