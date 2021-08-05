@@ -1,24 +1,60 @@
-﻿D:\Programs\VS code\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (C:\Users\jjtel\Source\Repos\Klivree\COMP-371-A1\Assignment_Framework\VS2017\/../Build/Debug/) contains files shared from another project (Labs.vcxproj, Quiz 1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿D:\Programs\VS code\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(491,5): warning MSB8028: The intermediate directory (C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\VS2017\/../Build/Debug/) contains files shared from another project (Labs.vcxproj, Quiz 1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Assignment 1.cpp
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(248,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(256,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(369,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(397,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(409,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(434,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(441,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(448,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(455,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(462,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(469,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(478,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(487,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(496,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(505,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(514,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(523,31): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(534,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(540,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(546,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(986,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  Labs.vcxproj -> C:\Users\jjtel\Source\Repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(23,9): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(34,13): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(42,4): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(47,4): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(53,4): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(63,18): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(66,15): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(69,16): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(72,17): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(148,9): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(159,13): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(167,10): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(173,10): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(182,10): warning C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(200,18): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(203,15): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(206,16): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(209,17): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(264,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(272,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(386,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(414,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(426,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(451,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(458,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(465,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(472,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(479,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(486,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(495,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(504,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(513,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(522,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(531,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(540,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(551,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(557,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(563,27): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(1003,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
+LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
+LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
+LINK : warning LNK4217: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
+LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
+LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
+LINK : warning LNK4217: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
+LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
+LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
+LINK : warning LNK4217: symbol '___glewActiveTexture' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
+LINK : warning LNK4217: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
+LINK : warning LNK4286: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
+LINK : warning LNK4217: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
+LINK : warning LNK4286: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
+LINK : warning LNK4217: symbol '___glewBindVertexArray' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
+glew32s.lib(glew.obj) : warning LNK4099: PDB '' was not found with 'glew32s.lib(glew.obj)' or at ''; linking object as if no debug info
+  Labs.vcxproj -> C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe

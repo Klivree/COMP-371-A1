@@ -21,6 +21,9 @@
     <Filter Include="Resource Files\Textures">
       <UniqueIdentifier>{d2769732-3b11-4f54-8ecc-ca2094639ac1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Models">
+      <UniqueIdentifier>{a8848266-81ed-4307-a46d-d370eeeaad95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Assignment 1.cpp">
@@ -44,6 +47,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\PointLight.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\OBJLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

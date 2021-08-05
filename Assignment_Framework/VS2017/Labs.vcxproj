@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClInclude Include="..\Source\Camera.hpp" />
     <ClInclude Include="..\Source\Model.hpp" />
+    <ClInclude Include="..\Source\OBJLoader.hpp" />
     <ClInclude Include="..\Source\PointLight.hpp" />
   </ItemGroup>
   <ItemGroup>
