@@ -343,6 +343,60 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     float rotationFactor = 5.0f;
     float modelMovementSpeed = 2.0f;
 
+    ////////////////////////////// 90 DEGREE ROTATIONS FOR SUPERHYPERCUBE GAME - DO NOT REMOVE - WILL BE UNCOMMENTED FOR FINAL PROJECT ////////////////////////////
+    /*
+    //variables for game
+    static float currentDeg = 0.0f;
+    float goalDeg = 90.0f;
+    float rateOfRotation = 180.0f;
+    static bool rotating = false;
+    static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
+    static vec3 initialRotationAxis = JacksModel.rotationVector;
+
+
+    if (rotating) {
+        if (currentDeg < goalDeg) { // continue rotation loop
+            currentDeg += rateOfRotation * dt;
+            JacksModel.rotationVector += rateOfRotation * dt * rotationAxis; // rotate model
+        }
+        else { // end rotation loop
+            // make sure that the model rotates exactly the amount of degrees that we want (shouldn't look too jank since it should be fairly close to the desired degree)
+            JacksModel.rotationVector = initialRotationAxis + (goalDeg * rotationAxis);
+
+            // reset flags for next rotation
+            currentDeg = 0;
+            rotating = false;
+        }
+    }
+    else{
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(1.0f, 0.0f, 0.0f); // direction of rotation
+        }
+        else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(-1.0f, 0.0f, 0.0f); // direction of rotation
+        }
+        else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
+        }
+        else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(0.0f, -1.0f, 0.0f); // direction of rotation
+        }
+        else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(0.0f, 0.0f, -1.0f); // direction of rotation
+        }
+        else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            rotating = true;
+            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
+        }
+
+        if(rotating)
+            initialRotationAxis = JacksModel.rotationVector; // to ensure we do a full 90 degree rotation
+    } */
 
     camera.processInputs(window, dt); // processes all camera inputs
 
@@ -548,7 +602,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             SLastReleased = false;
         }
     }
-
+    
 
     // change the draw mode
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
@@ -1074,7 +1128,7 @@ void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
 
 void renderScene(GLuint shaderProgram) {
 
-    pepeModel.render(shaderProgram);
+    //pepeModel.render(shaderProgram);
 
     for (Model* object : objectModels)
         object->render(shaderProgram, enableTextures);
