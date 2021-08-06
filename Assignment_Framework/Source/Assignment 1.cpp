@@ -67,6 +67,8 @@ GLuint setupModelVBO(string path, int& vertexCount);
 int WINDOW_WIDTH = 1024;
 int WINDOW_HEIGHT = 768;
 
+const float pi = 3.14159265359;
+
 // dimensions of the shadow map
 const int SHADOW_WIDTH = 1024;
 const int SHADOW_HEIGHT = 1024;
@@ -122,6 +124,24 @@ bool ModelSelection[] = { true, false, false, false, false };
 bool enableShadows = true;
 bool enableTextures = true;
 
+// placed in case we want to cycle through light colors in SUPERHYPERCUBE game
+vec3 lightColors[] = {
+    vec3((float)128 / 255, (float)0 / 255, (float)0 / 255), // maroon
+    vec3((float)170 / 255, (float)110 / 255, (float)40 / 255), // brown
+    vec3((float)128 / 255, (float)128 / 255, (float)0 / 255), // olive
+    vec3((float)0 / 255, (float)128 / 255, (float)128 / 255), // teal
+    vec3((float)0 / 255, (float)0 / 255, (float)128 / 255), // navy
+    vec3((float)230 / 255, (float)25 / 255, (float)75 / 255), // red
+    vec3((float)245 / 255, (float)130 / 255, (float)48 / 255), // orange
+    vec3((float)255 / 255, (float)225 / 255, (float)25 / 255), // yellow
+    vec3((float)60 / 255, (float)180 / 255, (float)75 / 255), // green
+    vec3((float)70 / 255, (float)240 / 255, (float)240 / 255), // cyan
+    vec3((float)0 / 255, (float)130 / 255, (float)200 / 255), // blue
+    vec3((float)145 / 255, (float)30 / 255, (float)180 / 255), // purple
+    vec3((float)240 / 255, (float)50 / 255, (float)230 / 255), // magenta
+    vec3((float)255 / 255, (float)255 / 255, (float)255 / 255), // white
+};
+int lightColorIndex = 0;
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
@@ -269,7 +289,9 @@ int main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
- 
+
+
+
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
