@@ -198,7 +198,7 @@ void Model::initializeModel() {
         while (true) {
             curChar = line[i++];
 
-            if (curChar == '\n' || curChar == ',') {//need to push the info when these chars appear
+            if (curChar == ',' || (curChar == '\n' && j >= 5)) {//need to push the info when these chars appear
                 cubeInformation[j++] = stof(value); // push float value to the array
                 value = "";
             }
