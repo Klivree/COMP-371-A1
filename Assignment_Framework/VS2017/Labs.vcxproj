@@ -110,12 +110,16 @@
     <ClInclude Include="..\Source\Model.hpp" />
     <ClInclude Include="..\Source\OBJLoader.hpp" />
     <ClInclude Include="..\Source\PointLight.hpp" />
+    <ClInclude Include="..\Source\TextRenderer.hpp" />
+    <ClInclude Include="..\Source\WallBuilder.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shaders\fragmentshader.glsl" />
     <None Include="..\Assets\Shaders\shadowfragmentshader.glsl" />
     <None Include="..\Assets\Shaders\shadowgeometryshader.glsl" />
     <None Include="..\Assets\Shaders\shadowvertexshader.glsl" />
+    <None Include="..\Assets\Shaders\textfragmentshader.glsl" />
+    <None Include="..\Assets\Shaders\textvertexshader.glsl" />
     <None Include="..\Assets\Shaders\vertexshader.glsl" />
     <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Alex%27s Shape.csv" />

@@ -13,6 +13,7 @@
 #include "PointLight.hpp"
 #include "OBJLoader.hpp"
 #include "WallBuilder.hpp"
+#include "TextRenderer.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -181,6 +182,7 @@ int main(int argc, char* argv[]) {
     //get shader programs
     GLuint sceneShaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
     GLuint shadowShaderProgram = compileAndLinkShaders("../Assets/Shaders/shadowvertexshader.glsl", "../Assets/Shaders/shadowgeometryshader.glsl", "../Assets/Shaders/shadowfragmentshader.glsl");
+    GLuint textShaderProgram = compileAndLinkShaders("../Assets/Shaders/textvertexshader.glsl", "../Assets/Shaders/textfragmentshader.glsl");
 
     // creation of the depth map framebuffer and texture [cube map is used since this is a point light and light is in 360 degrees around it]
     GLuint depthMapFBO, depthCubeMap;
