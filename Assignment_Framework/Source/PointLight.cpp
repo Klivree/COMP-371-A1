@@ -50,17 +50,17 @@ void PointLight::updateShadowShader(GLuint& shaderProgram) {
 }
 
 
-void PointLight::updateSceneShader(GLuint& shaderProgram) { updateSceneShader(shaderProgram, false); }
+void PointLight::updateSceneShader(GLuint& shaderProgram, std::string lightName) { updateSceneShader(shaderProgram, lightName, false); }
 
-void PointLight::updateSceneShader(GLuint& shaderProgram, bool enableShadows) {
-	////////////////	FRAGMENT SHADER	////////////////
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, &color[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lightPosition"), 1, &POS[0]);
+void PointLight::updateSceneShader(GLuint& shaderProgram, std::string lightName, bool enableShadows) {
+	////////////////	FRAGMENT SHADER	///////////////
+	glUniform3fv(glGetUniformLocation(shaderProgram, &(lightName + ".lightColor")[0]), 1, &color[0]);
+	glUniform3fv(glGetUniformLocation(shaderProgram, &(lightName + ".POS")[0]), 1, &POS[0]);
 
-	glUniform1f(glGetUniformLocation(shaderProgram, "lightConstTerm"), constTerm);
-	glUniform1f(glGetUniformLocation(shaderProgram, "lightLinearTerm"), linearTerm);
-	glUniform1f(glGetUniformLocation(shaderProgram, "lightQuadTerm"), QuadTerm);
-	glUniform1f(glGetUniformLocation(shaderProgram, "lightFarPlane"), farPlane);
+	glUniform1f(glGetUniformLocation(shaderProgram, &(lightName + ".lightConstTerm")[0]), constTerm);
+	glUniform1f(glGetUniformLocation(shaderProgram, &(lightName + ".lightLinearTerm")[0]), linearTerm);
+	glUniform1f(glGetUniformLocation(shaderProgram, &(lightName + ".lightQuadTerm")[0]), QuadTerm);
+	glUniform1f(glGetUniformLocation(shaderProgram, &(lightName + ".lightFarPlane")[0]), farPlane);
 
 	glUniform1i(glGetUniformLocation(shaderProgram, "enableShadows"), enableShadows);
 }

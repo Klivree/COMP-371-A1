@@ -50,11 +50,7 @@ class Model {
 public:
     Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
 
-    Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLuint pTexture, GLenum pDrawMode);
-
     Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture);
-
-    Model(std::string pFilePath, glm::vec3 pPOS, GLuint pVAO, GLuint pTexture, Material pMaterial);
 
     void resetModel();
 
@@ -68,9 +64,10 @@ public:
 
     void setMaterial(Material pMaterial);
 
+    void updateFilePath(std::string pFilePath);
+
     glm::vec3 POS;
     glm::vec3 rotationVector;
-    std::string filePath;
     GLfloat scale;
     GLenum drawMode;
 
@@ -85,6 +82,7 @@ private:
     glm::vec3 initialRotationVector;
     GLfloat initialScale;
     GLenum initialDrawMode;
+    std::string filePath;
 
     std::vector<cubeInfo> information;
 

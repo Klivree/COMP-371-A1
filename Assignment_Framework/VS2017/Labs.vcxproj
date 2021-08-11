@@ -107,9 +107,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Camera.hpp" />
+    <ClInclude Include="..\Source\DirectionalLight.hpp" />
     <ClInclude Include="..\Source\Model.hpp" />
     <ClInclude Include="..\Source\OBJLoader.hpp" />
     <ClInclude Include="..\Source\PointLight.hpp" />
+    <ClInclude Include="..\Source\SpotLight.hpp" />
     <ClInclude Include="..\Source\TextRenderer.hpp" />
     <ClInclude Include="..\Source\WallBuilder.hpp" />
   </ItemGroup>
@@ -124,6 +126,9 @@
     <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Alex%27s Shape.csv" />
     <None Include="..\Assets\Shapes\Alex%27s Wall.csv" />
+    <None Include="..\Assets\Shapes\Axis\XLine.csv" />
+    <None Include="..\Assets\Shapes\Axis\YLine.csv" />
+    <None Include="..\Assets\Shapes\Axis\ZLine.csv" />
     <None Include="..\Assets\Shapes\Cedrik%27s Shape - Shuffle 1.csv" />
     <None Include="..\Assets\Shapes\Cedrik%27s Shape.csv" />
     <None Include="..\Assets\Shapes\Cedrik%27s Wall.csv" />

@@ -1,30 +1,5 @@
 #include "Model.hpp"
 
-
-
-
-Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLuint pTexture, GLenum pDrawMode) {
-    filePath = pFilePath;
-
-    initialPOS = pPOS;
-    POS = initialPOS;
-
-    initialScale = pScale;
-    scale = initialScale;
-
-    initialDrawMode = pDrawMode;
-    drawMode = initialDrawMode;
-
-    initialRotationVector = glm::vec3(0.0f);
-    rotationVector = initialRotationVector;
-
-    material = Material(); // default white plastic material
-
-    texture = pTexture;
-
-    initializeModel();
-}
-
 Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode) {
     filePath = pFilePath;
 
@@ -67,30 +42,6 @@ Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture) {
     initializeModel();
 }
 
-Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pVAO, GLuint pTexture, Material pMaterial) {
-    filePath = pFilePath;
-
-    initialPOS = pPOS;
-    POS = initialPOS;
-
-    VAO = pVAO;
-
-    initialScale = 1.0f;
-    scale = initialScale;
-
-    initialDrawMode = GL_TRIANGLES;
-    drawMode = initialDrawMode;
-
-    initialRotationVector = glm::vec3(0.0f);
-    rotationVector = initialRotationVector;
-
-    material = pMaterial; 
-
-    texture = pTexture;
-
-    initializeModel();
-}
-
 void Model::resetModel() {
     POS = initialPOS;
     rotationVector = initialRotationVector;
@@ -104,7 +55,7 @@ void Model::linkVAO(GLuint pVAO, int pActiveVertices) {
 }
 
 void Model::render(GLuint shaderProgram, bool enableTextures) {
-    initializeModel(); // will make the model reread the csv file every draw - Uncomment if you want to make the objects in real time
+    //initializeModel(); // will make the model reread the csv file every draw - Uncomment if you want to make the objects in real time
     glUniform3fv(glGetUniformLocation(shaderProgram, "material.color"), 1, &material.color[0]);
     glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
 
@@ -164,6 +115,11 @@ void Model::linkTexture(GLuint pTexture) {
 
 void Model::setMaterial(Material pMaterial) {
     material = pMaterial;
+}
+
+void Model::updateFilePath(std::string pFilePath) {
+    filePath = pFilePath;
+    initializeModel(); // have to reread the file
 }
 
 void Model::initializeModel() {

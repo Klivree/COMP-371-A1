@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <string>
 
 class PointLight {
 public:
@@ -14,9 +15,9 @@ public:
 
 	void updateShadowShader(GLuint& shaderProgram);
 
-	void updateSceneShader(GLuint& shaderProgram);
+	void updateSceneShader(GLuint& shaderProgram, std::string lightName);
 
-	void updateSceneShader(GLuint& shaderProgram, bool enableShadows);
+	void updateSceneShader(GLuint& shaderProgram, std::string lightName, bool enableShadows);
 
 
 	glm::vec3 POS;

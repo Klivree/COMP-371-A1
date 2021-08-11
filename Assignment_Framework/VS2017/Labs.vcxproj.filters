@@ -52,6 +52,18 @@
     <ClInclude Include="..\Source\OBJLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\WallBuilder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TextRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\DirectionalLight.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SpotLight.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv">
@@ -110,6 +122,21 @@
     </None>
     <None Include="..\Assets\Shaders\shadowvertexshader.glsl">
       <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\Assets\Shaders\textfragmentshader.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\Assets\Shaders\textvertexshader.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\Assets\Shapes\Axis\XLine.csv">
+      <Filter>Resource Files\Shapes</Filter>
+    </None>
+    <None Include="..\Assets\Shapes\Axis\YLine.csv">
+      <Filter>Resource Files\Shapes</Filter>
+    </None>
+    <None Include="..\Assets\Shapes\Axis\ZLine.csv">
+      <Filter>Resource Files\Shapes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

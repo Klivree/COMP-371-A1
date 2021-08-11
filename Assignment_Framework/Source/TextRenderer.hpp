@@ -595,11 +595,18 @@ void drawString(string stringToDraw, vec3 pos, vec3 color, GLfloat pScale, GLuin
 	char charToDraw;
 	int drawnWidth;
 	vec3 drawPOS = pos;
+	vec3 startOfLine = drawPOS;
 
 	for (int i = 0; i < stringToDraw.size(); i++) {
 		charToDraw = toupper(stringToDraw[i]);
-		drawnWidth = drawLetter(charToDraw, drawPOS, color, pScale, shaderProgram);
-		drawPOS += vec3((drawnWidth + 1) * pScale, 0, 0);
+		if (charToDraw == '\n') { // create a new line
+			startOfLine += vec3(0.0f, -7.0f, 0.0f) * pScale;
+			drawPOS = startOfLine;
+		}
+		else { // draw a letter
+			drawnWidth = drawLetter(charToDraw, drawPOS, color, pScale, shaderProgram);
+			drawPOS += vec3((drawnWidth + 1) * pScale, 0, 0);
+		}
 	}
 }
 

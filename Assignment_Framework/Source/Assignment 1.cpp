@@ -33,13 +33,7 @@ struct TexturedColoredVertex
 
 char* readFile(string filePath);
 
-char* getVertexShaderSource(string vertexShaderFilePath) { return readFile(vertexShaderFilePath); }
-
-char* getFragmentShaderSource(string fragmentShaderFilePath) { return readFile(fragmentShaderFilePath); }
-
 GLuint getCubeModel();
-
-GLuint getCubeModel(float textureWraps);
 
 GLuint getGridModel(glm::vec3 color);
 
@@ -47,13 +41,13 @@ GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderF
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderFilePath, string fragmentShaderFilePath);
 
-void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr);
+void getShadowCubeMap(GLuint* depthMapFBO, GLuint* depthCubeMa);
 
 void renderGrid(GLuint shaderProgram);
 
 void executeEvents(GLFWwindow* window, Camera& camera, float dt);
 
-void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram);
+void initializeModels();
 
 GLuint loadTexture(const char* filename);
 
@@ -66,8 +60,6 @@ GLuint setupModelVBO(string path, int& vertexCount);
 // dimensions of the window in pixels
 int WINDOW_WIDTH = 1024;
 int WINDOW_HEIGHT = 768;
-
-const float pi = 3.14159265359;
 
 // dimensions of the shadow map
 const int SHADOW_WIDTH = 1024;
@@ -83,40 +75,33 @@ const glm::vec3 CedrikInitialPOS = glm::vec3(20.0f, 10.0f, -20.0f);
 const glm::vec3 AlexInitialPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
 const glm::vec3 ThapanInitialPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
 
-string JacksShape = "../Assets/Shapes/Jack's Shape.csv";
-string MelShape = "../Assets/Shapes/MelShape.csv";
-string CedriksShape = "../Assets/Shapes/Cedrik's Shape.csv";
-string AlexsShape = "../Assets/Shapes/Alex's Shape.csv";
-string ThapansShape = "../Assets/Shapes/Thapan's Shape.csv";
-
 vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
-string JacksWallPath = "../Assets/Shapes/Jack's Wall.csv";
-string MelWallPath = "../Assets/Shapes/MelWall.csv";
-string CedriksWallPath = "../Assets/Shapes/Cedrik's Wall.csv";
-string AlexsWallPath = "../Assets/Shapes/Alex's Wall.csv";
-string ThapansWallPath = "../Assets/Shapes/Thapan's Wall.csv";
 
 string GroundPath = "../Assets/Shapes/Ground.csv";
 
 //creation of model objects to remove switch statements in the executeEvents method
-std::vector<Model *> objectModels;
+std::vector<Model*> objectModels;
 std::vector<Model*> wallModels;
 std::vector<Model*> groundModels;
 
-Model JacksModel = Model(JacksShape, JackInitialPOS, initialScale, GL_TRIANGLES);
-Model MelModel = Model(MelShape, MelInitialPOS, initialScale, GL_TRIANGLES);
-Model CedriksModel = Model(CedriksShape, CedrikInitialPOS, initialScale, GL_TRIANGLES);
-Model AlexsModel = Model(AlexsShape, AlexInitialPOS, initialScale, GL_TRIANGLES);
-Model ThapansModel = Model(ThapansShape, ThapanInitialPOS, initialScale, GL_TRIANGLES);
+Model JacksModel = Model("../Assets/Shapes/Jack's Shape.csv", JackInitialPOS, initialScale, GL_TRIANGLES);
+Model MelModel = Model("../Assets/Shapes/MelShape.csv", MelInitialPOS, initialScale, GL_TRIANGLES);
+Model CedriksModel = Model("../Assets/Shapes/Cedrik's Shape.csv", CedrikInitialPOS, initialScale, GL_TRIANGLES);
+Model AlexsModel = Model("../Assets/Shapes/Alex's Shape.csv", AlexInitialPOS, initialScale, GL_TRIANGLES);
+Model ThapansModel = Model("../Assets/Shapes/Thapan's Shape.csv", ThapanInitialPOS, initialScale, GL_TRIANGLES);
 
 
-Model JacksWall = Model(JacksWallPath, JackInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model MelWall = Model(MelWallPath, MelInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model CedriksWall = Model(CedriksWallPath, CedrikInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model AlexsWall = Model(AlexsWallPath, AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model ThapansWall = Model(ThapansWallPath, ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model JacksWall = Model("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model MelWall = Model("../Assets/Shapes/MelWall.csv", MelInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model CedriksWall = Model("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model AlexsWall = Model("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model ThapansWall = Model("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
 
-Model GroundFloor = Model(GroundPath, glm::vec3(0.0f, 0.0f, 0.0f), initialScale, GL_TRIANGLES);
+Model axisModelX = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0f), 1.0f, GL_TRIANGLES);
+Model axisModelY = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
+Model axisModelZ = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
+
+Model GroundFloor = Model(GroundPath, glm::vec3(0.0f, -1.5f, 0.0f), initialScale, GL_TRIANGLES);
 
 Model pepeModel = Model("../Assets/Shapes/Basic.csv", vec3(0.0f, 10.0f, 0.0f), 0.10f, GL_TRIANGLES);
 
@@ -186,112 +171,33 @@ int main(int argc, char* argv[]) {
 
     // creation of the depth map framebuffer and texture [cube map is used since this is a point light and light is in 360 degrees around it]
     GLuint depthMapFBO, depthCubeMap;
-    glGenFramebuffers(1, &depthMapFBO);
+    getShadowCubeMap(&depthMapFBO, &depthCubeMap);
 
-    glGenTextures(1, &depthCubeMap);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-    for (int i = 0; i < 6; ++i) { //generating the 6 sides of the cube map
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    }
-
-    // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // defining how to wrap the texture
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // get VAOs
-    GLuint cubeModelVAO = getCubeModel();
     GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
-    GLuint groundVAO = getCubeModel(8.0f);
 
+    initializeModels();
 
-    // generate the textures needed
-    GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
-    GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
-    GLuint tileTexture = loadTexture("../Assets/Textures/tile.png");
-    GLuint goldTexture = loadTexture("../Assets/Textures/metal.jpg");
-
-
-    // initialize Materials
-    vec3 goldVec(0.780392f * 1.3f, 0.568627f * 1.3f, 0.113725f * 1.3f);
-    Material goldMaterial(goldVec, 1.0f);
-    Material brickMaterial = Material(vec3(1.0f), 0.01f);
-    Material tileMaterial = Material(vec3(1.0f), 0.2f);
-
-    objectModels.push_back(&JacksModel);
-    objectModels.push_back(&MelModel);
-    objectModels.push_back(&CedriksModel);
-    objectModels.push_back(&AlexsModel);
-    objectModels.push_back(&ThapansModel);   
-
-    wallModels.push_back(&JacksWall);
-    wallModels.push_back(&MelWall);
-    wallModels.push_back(&CedriksWall);
-    wallModels.push_back(&AlexsWall);
-    wallModels.push_back(&ThapansWall);
-
-    groundModels.push_back(&GroundFloor);
-
-
-    // for once we're ready to unleash the beast
-    /*
-    int pepeVertices;
-    GLuint pepeVAO = setupModelVBO("../Assets/Models/Pepe.obj", pepeVertices);
-    pepeModel.linkVAO(pepeVAO, pepeVertices);
-    pepeModel.setMaterial(brickMaterial);
-    pepeModel.linkTexture(blankTexture);
-    */
-
-
-    for (Model *object : objectModels) {
-        object->linkVAO(cubeModelVAO, 36);
-        object->linkTexture(goldTexture);
-        object->setMaterial(goldMaterial);
-    }
-
-    for (Model *wall : wallModels) {
-        wall->linkVAO(cubeModelVAO, 36);
-        wall->linkTexture(brickTexture);
-        wall->setMaterial(brickMaterial);
-    }
-
-    for (Model* ground : groundModels) {
-        ground->linkVAO(cubeModelVAO, 36);
-        ground->texWrapX = 8.0f;
-        ground->texWrapY = 8.0f;
-        ground->linkTexture(tileTexture);
-        ground->setMaterial(tileMaterial);
-    }
-
-
-    //generate camera
+    // generate camera
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
-    //generate light
+    // generate light
     PointLight light(vec3(0.0f, 30.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f, 1.0f, 1.0f), SHADOW_HEIGHT);
-    Material lightMaterial = Material(light.color, 0.01f);
-
-    Model lightSource = Model("", light.POS, blankTexture);
-    lightSource.linkVAO(cubeModelVAO, 36);
-    lightSource.setMaterial(lightMaterial);
+    // this is made outside of initilize models call so that we can get the lights position
+    Model lightSource = Model("", light.POS, loadTexture("../Assets/Textures/blank.jpg"));
+    lightSource.linkVAO(getCubeModel(), 36);
+    lightSource.setMaterial(Material(light.color, 0.01f));
     lightSource.scale = 3.0f;
 
     // For frame time
     float lastFrameTime = glfwGetTime();
 
+    //make the textures point to the right position
+    glUseProgram(sceneShaderProgram);
+    glUniform1i(glGetUniformLocation(sceneShaderProgram, "modelTexture"), 0);
+    glUniform1i(glGetUniformLocation(sceneShaderProgram, "shadowMap"), 1);
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-
-
 
     //Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -319,17 +225,19 @@ int main(int argc, char* argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(sceneShaderProgram);
         //update the values in the scene shader
-        camera.createMatrices(0.01f, 100.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
-        light.updateSceneShader(sceneShaderProgram, enableShadows);
+        camera.createMatrices(0.01f, 200.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
+        light.updateSceneShader(sceneShaderProgram, "pointlight1", enableShadows);
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-
         renderScene(sceneShaderProgram);
 
-
         //render light not in two pass so it does not create shadows
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), false);
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), true);
         lightSource.render(sceneShaderProgram, true);
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), false);
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), enableShadows);
 
         glBindVertexArray(gridVAO);
         renderGrid(sceneShaderProgram);
@@ -653,6 +561,101 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
 }
 
+void renderScene(GLuint shaderProgram) {
+
+    //pepeModel.render(shaderProgram);
+
+    for (Model* object : objectModels)
+        object->render(shaderProgram, enableTextures);
+
+    for (Model* wall : wallModels)
+        wall->render(shaderProgram, enableTextures);
+
+    for (Model* ground : groundModels)
+        ground->render(shaderProgram, enableTextures);
+
+    //render the origin lines
+    axisModelX.render(shaderProgram, enableTextures);
+    axisModelY.render(shaderProgram, enableTextures);
+    axisModelZ.render(shaderProgram, enableTextures);
+}
+
+void initializeModels() {
+    // get VAOs
+    GLuint cubeModelVAO = getCubeModel();
+
+    // generate the textures needed
+    GLuint brickTexture = loadTexture("../Assets/Textures/brick.jpg");
+    GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
+    GLuint tileTexture = loadTexture("../Assets/Textures/tile.png");
+    GLuint goldTexture = loadTexture("../Assets/Textures/metal.jpg");
+
+    // initialize Materials
+    vec3 goldVec(0.780392f * 1.5f, 0.568627f * 1.5f, 0.113725f * 1.5f);
+    Material goldMaterial(goldVec, 1.0f);
+    Material brickMaterial = Material(vec3(1.0f), 0.01f);
+    Material tileMaterial = Material(vec3(1.0f), 0.2f);
+    Material xAxisMaterial = Material(vec3(0.0f, 0.0f, 1.0f), 0.2f);
+    Material yAxisMaterial = Material(vec3(0.0f, 1.0f, 0.0f), 0.2f);
+    Material zAxisMaterial = Material(vec3(1.0f, 0.0f, 0.0f), 0.2f);
+
+    objectModels.push_back(&JacksModel);
+    objectModels.push_back(&MelModel);
+    objectModels.push_back(&CedriksModel);
+    objectModels.push_back(&AlexsModel);
+    objectModels.push_back(&ThapansModel);
+
+    wallModels.push_back(&JacksWall);
+    wallModels.push_back(&MelWall);
+    wallModels.push_back(&CedriksWall);
+    wallModels.push_back(&AlexsWall);
+    wallModels.push_back(&ThapansWall);
+
+    groundModels.push_back(&GroundFloor);
+
+    axisModelX.setMaterial(xAxisMaterial);
+    axisModelX.linkVAO(cubeModelVAO, 36);
+    axisModelX.linkTexture(blankTexture);
+
+    axisModelY.setMaterial(yAxisMaterial);
+    axisModelY.linkVAO(cubeModelVAO, 36);
+    axisModelY.linkTexture(blankTexture);
+
+    axisModelZ.setMaterial(zAxisMaterial);
+    axisModelZ.linkVAO(cubeModelVAO, 36);
+    axisModelZ.linkTexture(blankTexture);
+
+
+    // for once we're ready to unleash the beast
+    /*
+    int pepeVertices;
+    GLuint pepeVAO = setupModelVBO("../Assets/Models/Pepe.obj", pepeVertices);
+    pepeModel.linkVAO(pepeVAO, pepeVertices);
+    pepeModel.setMaterial(brickMaterial);
+    pepeModel.linkTexture(blankTexture);
+    */
+
+    for (Model* object : objectModels) {
+        object->linkVAO(cubeModelVAO, 36);
+        object->linkTexture(goldTexture);
+        object->setMaterial(goldMaterial);
+    }
+
+    for (Model* wall : wallModels) {
+        wall->linkVAO(cubeModelVAO, 36);
+        wall->linkTexture(brickTexture);
+        wall->setMaterial(brickMaterial);
+    }
+
+    for (Model* ground : groundModels) {
+        ground->linkVAO(cubeModelVAO, 36);
+        ground->texWrapX = 8.0f;
+        ground->texWrapY = 8.0f;
+        ground->linkTexture(tileTexture);
+        ground->setMaterial(tileMaterial);
+    }
+}
+
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
     /* compile and link shader program
     * return shader program id
@@ -793,54 +796,6 @@ void renderGrid(GLuint shaderProgram) {
     }
 }
 
-void renderLine(glm::vec3 pos, glm::vec3 size, glm::vec3 color, GLfloat scale, GLuint shaderProgram) {
-    /* Renders a line without the need to first load a VAO.
-    *   pos - position to start drawing the line
-    *   size - vector away from origin the other point is at
-    *   color - color of the line
-    *   scale - world scale to be used
-    *   shaderProgram - shader program of the current application
-    */
-
-    glm::vec3 vertexArray[] = {
-       pos, color,
-       pos + (size * scale), color
-    };
-
-    GLuint VAO, VBO;
-    //create the Vertex Array Object
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    //create Vertex Buffer Object
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
-
-    //create position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //create color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLuint worldMatrixLocation = glGetUniformLocation(shaderProgram, "worldMatrix");
-
-    //draw the line
-    glm::mat4 worldMatrix = glm::mat4(1.0); //ensure no transformation
-    glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &worldMatrix[0][0]);
-    glDrawArrays(GL_LINES, 0, 2);
-
-    glBindVertexArray(0);
-
-    //delete vertex arrays and buffer to prevent memory leak
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-}
-
 GLuint getCubeModel() {
     /* Creates a cube model VAO.
     * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
@@ -919,92 +874,6 @@ GLuint getCubeModel() {
 
     //create texture coordinates attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2*sizeof(vec3)));
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    return VAO;
-}
-
-GLuint getCubeModel(float textureWraps) {
-    /* Creates a cube model VAO.
-    * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
-    *
-    * returns the GLuint corresponding with the created VAO
-    */
-
-    // Cube model
-    TexturedColoredVertex vertexArray[] = {  // position, normal, UV, color
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)), //left 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(-1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)), // far 
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, 0.0f, -1.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)), // bottom
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), vec3(0.0f, -1.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)), // near
-    TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f, 1.0f)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(0.0f, 0.0f, 1.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)), // right
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)), // top
-    TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-
-    TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(1.0f * textureWraps, 1.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f * textureWraps, 0.0f * textureWraps)),
-    TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), vec3(0.0f, 1.0f, 0.0f), vec2(0.0f * textureWraps, 1.0f * textureWraps))
-    };
-
-    GLuint VAO, VBO;
-    //create the Vertex Array Object
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    //create Vertex Buffer Object
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
-
-    //create position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //create normals attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)sizeof(vec3));
-    glEnableVertexAttribArray(1);
-
-    //create texture coordinates attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2 * sizeof(vec3)));
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1123,50 +992,28 @@ GLuint loadTexture(const char* filename) {
     return textureId;
 }
 
-void getShadowCubeMap(GLuint* frameBufferPtr, GLuint* texturePtr) {
+void getShadowCubeMap(GLuint* depthMapFBO, GLuint* depthCubeMap) {
+    glGenFramebuffers(1, depthMapFBO);
 
-    glGenFramebuffers(1, frameBufferPtr);
-
-    glGenTextures(1, texturePtr);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, *texturePtr);
-    for (int i = 0; i < 6; i++) {
+    glGenTextures(1, depthCubeMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *depthCubeMap);
+    for (int i = 0; i < 6; ++i) { //generating the 6 sides of the cube map
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }
 
     // telling the texture sampler the desired filtering methods, GL_NEAREST says to use the value of the nearest pixel
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // defining how to wrap the texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, *frameBufferPtr);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *texturePtr, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, *depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *depthCubeMap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-}
-
-void renderScene(GLuint shaderProgram) {
-
-    //pepeModel.render(shaderProgram);
-
-    for (Model* object : objectModels)
-        object->render(shaderProgram, enableTextures);
-
-    for (Model* wall : wallModels)
-        wall->render(shaderProgram, enableTextures);
-
-    for (Model* ground : groundModels)
-        ground->render(shaderProgram, enableTextures);
-
-    //render the origin lines
-    //          position                    length                      color             scale
-    renderLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, shaderProgram); // x direction
-    renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, shaderProgram); // y direction
-    renderLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), 1.0f, shaderProgram); // z direction
 
 }
 
