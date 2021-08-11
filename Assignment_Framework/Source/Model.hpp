@@ -66,6 +66,8 @@ public:
 
     void updateFilePath(std::string pFilePath);
 
+    std::string getFilePath();
+
     glm::vec3 POS;
     glm::vec3 rotationVector;
     GLfloat scale;

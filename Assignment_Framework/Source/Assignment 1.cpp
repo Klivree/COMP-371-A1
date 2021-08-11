@@ -35,8 +35,6 @@ char* readFile(string filePath);
 
 GLuint getCubeModel();
 
-GLuint getGridModel(glm::vec3 color);
-
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath);
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string geometryShaderFilePath, string fragmentShaderFilePath);
@@ -53,6 +51,8 @@ GLuint loadTexture(const char* filename);
 
 void renderScene(GLuint shaderProgram);
 
+void shapePassedWall();
+
 void window_size_callback(GLFWwindow* window, int width, int height);
 
 GLuint setupModelVBO(string path, int& vertexCount);
@@ -67,43 +67,25 @@ const int SHADOW_HEIGHT = 1024;
 
 const float initialFOV = 90.0f; // FOV of the initial player view in degrees
 const GLfloat initialScale = 1.0f; // initial object scale
-const GLenum defaultDrawMode = GL_TRIANGLES;
-
-const glm::vec3 JackInitialPOS = glm::vec3(0.0f, 10.0f, 0.0f);
-const glm::vec3 MelInitialPOS = glm::vec3(20.0f, 10.0f, 20.0f);
-const glm::vec3 CedrikInitialPOS = glm::vec3(20.0f, 10.0f, -20.0f);
-const glm::vec3 AlexInitialPOS = glm::vec3(-20.0f, 10.0f, 20.0f);
-const glm::vec3 ThapanInitialPOS = glm::vec3(-20.0f, 10.0f, -20.0f);
 
 vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
-
-string GroundPath = "../Assets/Shapes/Ground.csv";
+vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
 
 //creation of model objects to remove switch statements in the executeEvents method
-std::vector<Model*> objectModels;
-std::vector<Model*> wallModels;
-std::vector<Model*> groundModels;
+vector<Model*> groundModels;
 
-Model JacksModel = Model("../Assets/Shapes/Jack's Shape.csv", JackInitialPOS, initialScale, GL_TRIANGLES);
-Model MelModel = Model("../Assets/Shapes/MelShape.csv", MelInitialPOS, initialScale, GL_TRIANGLES);
-Model CedriksModel = Model("../Assets/Shapes/Cedrik's Shape.csv", CedrikInitialPOS, initialScale, GL_TRIANGLES);
-Model AlexsModel = Model("../Assets/Shapes/Alex's Shape.csv", AlexInitialPOS, initialScale, GL_TRIANGLES);
-Model ThapansModel = Model("../Assets/Shapes/Thapan's Shape.csv", ThapanInitialPOS, initialScale, GL_TRIANGLES);
+Model shapeModel = Model("../Assets/Shapes/SHC/SHC-LVL1.csv", objectStartingPoint, initialScale, GL_TRIANGLES);
 
-
-Model JacksWall = Model("../Assets/Shapes/Jack's Wall.csv", JackInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model MelWall = Model("../Assets/Shapes/MelWall.csv", MelInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model CedriksWall = Model("../Assets/Shapes/Cedrik's Wall.csv", CedrikInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model AlexsWall = Model("../Assets/Shapes/Alex's Wall.csv", AlexInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
-Model ThapansWall = Model("../Assets/Shapes/Thapan's Wall.csv", ThapanInitialPOS + wallPosOffset, initialScale, GL_TRIANGLES);
+Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), initialScale, GL_TRIANGLES);
 
 Model axisModelX = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0f), 1.0f, GL_TRIANGLES);
 Model axisModelY = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
 Model axisModelZ = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
 
-Model GroundFloor = Model(GroundPath, glm::vec3(0.0f, -1.5f, 0.0f), initialScale, GL_TRIANGLES);
+Model GroundFloor = Model("../Assets/Shapes/Ground.csv", glm::vec3(0.0f, -25.0f, 0.0f), initialScale, GL_TRIANGLES);
 
-Model pepeModel = Model("../Assets/Shapes/Basic.csv", vec3(0.0f, 10.0f, 0.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel1 = Model("../Assets/Shapes/Basic.csv", vec3(-5.0f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
+Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(7.5f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
 
 bool ModelSelection[] = { true, false, false, false, false };
 
@@ -173,15 +155,13 @@ int main(int argc, char* argv[]) {
     GLuint depthMapFBO, depthCubeMap;
     getShadowCubeMap(&depthMapFBO, &depthCubeMap);
 
-    GLuint gridVAO = getGridModel(glm::vec3(1.0f, 1.0f, 0.0f));
-
     initializeModels();
 
     // generate camera
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     // generate light
-    PointLight light(vec3(0.0f, 30.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f, 1.0f, 1.0f), SHADOW_HEIGHT);
+    PointLight light(vec3(0.0f, 10.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, lightColors[8], SHADOW_HEIGHT);
     // this is made outside of initilize models call so that we can get the lights position
     Model lightSource = Model("", light.POS, loadTexture("../Assets/Textures/blank.jpg"));
     lightSource.linkVAO(getCubeModel(), 36);
@@ -207,6 +187,10 @@ int main(int argc, char* argv[]) {
 
 		// window size callback called when window size changes
 		glfwSetWindowSizeCallback(window, window_size_callback);
+
+        // bind camera to object
+        camera.position = shapeModel.POS + vec3(0.0f, 2.0f, -4.0f);
+        camera.orientation = normalize(shapeModel.POS - camera.position);
 
         // render the depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
@@ -239,10 +223,6 @@ int main(int argc, char* argv[]) {
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), false);
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), enableShadows);
 
-        glBindVertexArray(gridVAO);
-        renderGrid(sceneShaderProgram);
-        glBindVertexArray(0);
-
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
         glfwPollEvents(); //get inputs
@@ -267,32 +247,37 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool JLastReleased = true, ULastReleased = true,  SpaceLastReleased = true, BLastReleased = true, XLastReleased = true;
-    static bool ALastReleased = true, DLastReleased = true, SLastReleased = true, WLastReleased = true, QLastReleased = true, ELastReleased = true;
-    static bool ONELastReleased = true, TWOLastReleased = true, THREELastReleased = true, FOURLastReleased = true, FIVELastReleased = true;
+    static bool BLastReleased = true, XLastReleased = true;
     float scaleFactor = (float)8 / 7;
     float rotationFactor = 5.0f;
     float modelMovementSpeed = 2.0f;
 
+    camera.processInputs(window, dt); // processes all camera inputs
+
     ////////////////////////////// 90 DEGREE ROTATIONS FOR SUPERHYPERCUBE GAME - DO NOT REMOVE - WILL BE UNCOMMENTED FOR FINAL PROJECT ////////////////////////////
-    /*
     //variables for game
     static float currentDeg = 0.0f;
     float goalDeg = 90.0f;
     float rateOfRotation = 180.0f;
     static bool rotating = false;
     static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
-    static vec3 initialRotationAxis = JacksModel.rotationVector;
+    static vec3 initialRotationAxis = shapeModel.rotationVector;
 
+
+    // make shape go towards wall
+    shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
+
+    if (shapeModel.POS.z > 1.0f)
+        shapePassedWall(); // called when we need a reset and a new model
 
     if (rotating) {
         if (currentDeg < goalDeg) { // continue rotation loop
             currentDeg += rateOfRotation * dt;
-            JacksModel.rotationVector += rateOfRotation * dt * rotationAxis; // rotate model
+            shapeModel.rotationVector += rateOfRotation * dt * rotationAxis; // rotate model
         }
         else { // end rotation loop
             // make sure that the model rotates exactly the amount of degrees that we want (shouldn't look too jank since it should be fairly close to the desired degree)
-            JacksModel.rotationVector = initialRotationAxis + (goalDeg * rotationAxis);
+            shapeModel.rotationVector = initialRotationAxis + (goalDeg * rotationAxis);
 
             // reset flags for next rotation
             currentDeg = 0;
@@ -326,59 +311,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         }
 
         if(rotating)
-            initialRotationAxis = JacksModel.rotationVector; // to ensure we do a full 90 degree rotation
-    } */
-
-    camera.processInputs(window, dt); // processes all camera inputs
-
-    //change object
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE)
-        ONELastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ONELastReleased) {
-        ModelSelection[0] = !ModelSelection[0];
-        ONELastReleased = false;
-    }
-
-
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE)
-        TWOLastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && TWOLastReleased) {
-        ModelSelection[1] = !ModelSelection[1];
-        TWOLastReleased = false;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE)
-        THREELastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && THREELastReleased) {
-        ModelSelection[2] = !ModelSelection[2];
-        THREELastReleased = false;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE)
-        FOURLastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && FOURLastReleased) {
-        ModelSelection[3] = !ModelSelection[3];
-        FOURLastReleased = false;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE)
-        FIVELastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && FIVELastReleased) {
-        ModelSelection[4] = !ModelSelection[4];
-        FIVELastReleased = false;
-    }
-
-    // reset the current model
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
-        SpaceLastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastReleased) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->resetModel();
-        }
-            
-        SpaceLastReleased = false;
-    }
+            initialRotationAxis = shapeModel.rotationVector; // to ensure we do a full 90 degree rotation
+    } 
 
     // toggle shadows off and on
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
@@ -396,165 +330,6 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         XLastReleased = false;
     }
 
-    // size up function
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
-        ULastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && ULastReleased) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->scale *= scaleFactor;
-        }
-        ULastReleased = false;
-    }
-  
-
-    // size down function
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_RELEASE)
-        JLastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && JLastReleased) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->scale *= 1 / scaleFactor;
-        }
-        JLastReleased = false;
-    }
-
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
-        ALastReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
-        DLastReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
-        WLastReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
-        SLastReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE)
-        QLastReleased = true;
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
-        ELastReleased = true;
-
-
-    // movement function
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(0.0f, modelMovementSpeed * dt, 0.0f);
-            }
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(0.0f, -modelMovementSpeed * dt, 0.0f);
-            }
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(-modelMovementSpeed * dt, 0.0f, 0.0f);
-            }
-        }
-           
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(modelMovementSpeed * dt, 0.0f, 0.0f);
-            }
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-            }
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->POS += glm::vec3(0.0f, 0.0f, -modelMovementSpeed * dt);
-            }
-        }
-    }
-    else {
-        // rotate counter-clockwise around positive y-axis
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && ALastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.y += rotationFactor;
-            }
-            ALastReleased = false;
-        }
-
-        // rotate clockwise around positive y-axis
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && DLastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.y -= rotationFactor;
-            }
-            DLastReleased = false;
-        }
-
-        // rotate counter-clockwise around positive z-axis
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS && ELastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.z += rotationFactor;
-            }
-            ELastReleased = false;
-        }
-
-        // rotate clockwise around positive z-axis
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && QLastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.z -= rotationFactor;
-            }
-            QLastReleased = false;
-        }
-
-        // rotate counter-clockwise around positive x-axis
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && WLastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.x += rotationFactor;
-            }
-            WLastReleased = false;
-        }
-
-        // rotate clockwise around positive x-axis
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && SLastReleased) {
-            for (int i = 0; i < objectModels.size(); i++) {
-                if (ModelSelection[i])
-                    objectModels[i]->rotationVector.x -= rotationFactor;
-            }
-            SLastReleased = false;
-        }
-    }
-    
-
-    // change the draw mode
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->drawMode = GL_TRIANGLES;
-        }
-    }
-    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->drawMode = GL_LINES;
-        }
-    }
-    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        for (int i = 0; i < objectModels.size(); i++) {
-            if (ModelSelection[i])
-                objectModels[i]->drawMode = GL_POINTS;
-        }
-    }
-
     // close the window on escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -563,13 +338,13 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
 void renderScene(GLuint shaderProgram) {
 
-    //pepeModel.render(shaderProgram);
+    pepeModel1.render(shaderProgram);
+    pepeModel2.render(shaderProgram);
 
-    for (Model* object : objectModels)
-        object->render(shaderProgram, enableTextures);
+    wallModel.render(shaderProgram, enableTextures);
 
-    for (Model* wall : wallModels)
-        wall->render(shaderProgram, enableTextures);
+    shapeModel.render(shaderProgram, enableTextures);
+
 
     for (Model* ground : groundModels)
         ground->render(shaderProgram, enableTextures);
@@ -595,57 +370,43 @@ void initializeModels() {
     Material goldMaterial(goldVec, 1.0f);
     Material brickMaterial = Material(vec3(1.0f), 0.01f);
     Material tileMaterial = Material(vec3(1.0f), 0.2f);
-    Material xAxisMaterial = Material(vec3(0.0f, 0.0f, 1.0f), 0.2f);
-    Material yAxisMaterial = Material(vec3(0.0f, 1.0f, 0.0f), 0.2f);
-    Material zAxisMaterial = Material(vec3(1.0f, 0.0f, 0.0f), 0.2f);
-
-    objectModels.push_back(&JacksModel);
-    objectModels.push_back(&MelModel);
-    objectModels.push_back(&CedriksModel);
-    objectModels.push_back(&AlexsModel);
-    objectModels.push_back(&ThapansModel);
-
-    wallModels.push_back(&JacksWall);
-    wallModels.push_back(&MelWall);
-    wallModels.push_back(&CedriksWall);
-    wallModels.push_back(&AlexsWall);
-    wallModels.push_back(&ThapansWall);
+    
 
     groundModels.push_back(&GroundFloor);
 
-    axisModelX.setMaterial(xAxisMaterial);
+    axisModelX.setMaterial(Material(vec3(0.0f, 0.0f, 1.0f), 0.2f));
     axisModelX.linkVAO(cubeModelVAO, 36);
     axisModelX.linkTexture(blankTexture);
 
-    axisModelY.setMaterial(yAxisMaterial);
+    axisModelY.setMaterial(Material(vec3(0.0f, 1.0f, 0.0f), 0.2f));
     axisModelY.linkVAO(cubeModelVAO, 36);
     axisModelY.linkTexture(blankTexture);
 
-    axisModelZ.setMaterial(zAxisMaterial);
+    axisModelZ.setMaterial(Material(vec3(1.0f, 0.0f, 0.0f), 0.2f));
     axisModelZ.linkVAO(cubeModelVAO, 36);
     axisModelZ.linkTexture(blankTexture);
 
+    shapeModel.setMaterial(goldMaterial);
+    shapeModel.linkVAO(cubeModelVAO, 36);
+    shapeModel.linkTexture(goldTexture);
+
+    wallModel.setMaterial(brickMaterial);
+    wallModel.linkVAO(cubeModelVAO, 36);
+    wallModel.linkTexture(brickTexture);
 
     // for once we're ready to unleash the beast
-    /*
     int pepeVertices;
     GLuint pepeVAO = setupModelVBO("../Assets/Models/Pepe.obj", pepeVertices);
-    pepeModel.linkVAO(pepeVAO, pepeVertices);
-    pepeModel.setMaterial(brickMaterial);
-    pepeModel.linkTexture(blankTexture);
-    */
+    pepeModel1.linkVAO(pepeVAO, pepeVertices);
+    pepeModel1.setMaterial(brickMaterial);
+    pepeModel1.linkTexture(blankTexture);
+    pepeModel1.rotationVector += vec3(0.0f, 90.0f, 0.0f);
+    
+    pepeModel2.linkVAO(pepeVAO, pepeVertices);
+    pepeModel2.setMaterial(brickMaterial);
+    pepeModel2.linkTexture(blankTexture);
+    pepeModel2.rotationVector += vec3(0.0f, 90.0f, 0.0f);
 
-    for (Model* object : objectModels) {
-        object->linkVAO(cubeModelVAO, 36);
-        object->linkTexture(goldTexture);
-        object->setMaterial(goldMaterial);
-    }
-
-    for (Model* wall : wallModels) {
-        wall->linkVAO(cubeModelVAO, 36);
-        wall->linkTexture(brickTexture);
-        wall->setMaterial(brickMaterial);
-    }
 
     for (Model* ground : groundModels) {
         ground->linkVAO(cubeModelVAO, 36);
@@ -654,6 +415,11 @@ void initializeModels() {
         ground->linkTexture(tileTexture);
         ground->setMaterial(tileMaterial);
     }
+}
+
+void shapePassedWall() {
+    shapeModel.resetModel();
+
 }
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
@@ -875,56 +641,6 @@ GLuint getCubeModel() {
     //create texture coordinates attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex), (void*)(2*sizeof(vec3)));
     glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    return VAO;
-}
-
-GLuint getGridModel(glm::vec3 color) {
-    /* Creates a grid model VAO with the given color.
-    * This method should not be called in any loops as it will create a memory leak. Use before the main program loop
-    *
-    *   color - color vector of the grid
-    *
-    * returns the GLuint corresponding with the created VAO
-    */
-
-    // Grid Model
-
-    glm::vec3 vertexArray[] = {  // position,          color
-        glm::vec3(0.5f, 0.5f, 0.5f), color, // C, top - yellow
-        glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
-        glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
-
-        glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
-
-        glm::vec3(0.5f, 0.5f,-0.5f), color,	// A
-        glm::vec3(-0.5f, 0.5f,-0.5f), color, // B
-
-        glm::vec3(-0.5f, 0.5f,0.5f), color,	// D
-        glm::vec3(0.5f, 0.5f, 0.5f), color, // C
-
-    };
-
-    GLuint VAO, VBO;
-    //create the Vertex Array Object
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    //create Vertex Buffer Object
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
-
-    //create position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //create color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(glm::vec3), (void*)sizeof(glm::vec3));
-    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

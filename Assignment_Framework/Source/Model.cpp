@@ -122,6 +122,10 @@ void Model::updateFilePath(std::string pFilePath) {
     initializeModel(); // have to reread the file
 }
 
+std::string Model::getFilePath() {
+    return filePath;
+}
+
 void Model::initializeModel() {
     information.clear();
     if (filePath.empty()) { // add support for simple shapes
