@@ -78,6 +78,7 @@ const GLfloat initialScale = 1.0f; // initial object scale
 
 vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
 vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
+vec3 textPosition = vec3(-0.95f, 0.95f, 0.0f);
 
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
@@ -98,6 +99,8 @@ Model GroundFloor = Model("../Assets/Shapes/Ground.csv", glm::vec3(0.0f, -25.0f,
 
 Model pepeModel1 = Model("../Assets/Shapes/Basic.csv", vec3(-5.0f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
 Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(7.5f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
+
+PointLight mainLight = PointLight(shapeModel.POS + vec3(0.0f, 20.0f, -2.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(0.5f, 1.0f, 0.25f), SHADOW_HEIGHT);
 
 Grouping axises, axisesShape;
 
@@ -126,6 +129,7 @@ vec3 lightColors[] = {
     vec3((float)255 / 255, (float)255 / 255, (float)255 / 255), // white
 };
 int lightColorIndex = 0;
+int lightColorsSize = 14;
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
@@ -176,19 +180,24 @@ int main(int argc, char* argv[]) {
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     // generate light
-    PointLight light(vec3(0.0f, 10.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f), SHADOW_HEIGHT);
     // this is made outside of initilize models call so that we can get the lights position
-    Model lightSource = Model("", light.POS, loadTexture("../Assets/Textures/blank.jpg"));
+    Model lightSource = Model("", mainLight.POS, loadTexture("../Assets/Textures/blank.jpg"));
     lightSource.linkVAO(getCubeModel(), 36);
-    lightSource.setMaterial(Material(light.color, 0.01f));
-    lightSource.scale = 3.0f;
+    lightSource.setMaterial(Material(mainLight.color, 0.01f));
+    lightSource.scale = 1.0f;
 
-    Spotlight spotLight1 = Spotlight(vec3(0.0f, 15.0f, 0.0f), vec3(0.0f, -1.0f, -0.5f), vec3(0.5f, 1.0f, 0.25f), radians(20.0f), radians(30.0f));
+    Spotlight spotLight1 = Spotlight(shapeModel.POS + vec3(0.0f, 5.0f, -4.0f), vec3(0.0f, -1.0f, -0.5f), vec3(1.0f), radians(5.0f), radians(20.0f));
+    spotLight1.direction = -normalize(spotLight1.POS - wallModel.POS);
+
+    Spotlight spotLight2 = Spotlight(pepeModel1.POS + vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f), vec3(1.0f), radians(10.0f), radians(20.0f));
 
     // For frame time
     float lastFrameTime = glfwGetTime();
 
-    srand(time(NULL));
+    float totalTime = 60.0f;
+
+    // seed random number generator
+    srand(time(NULL)); 
 
     //make the textures point to the right position
     glUseProgram(sceneShaderProgram);
@@ -198,9 +207,11 @@ int main(int argc, char* argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    // debug axis models
     axises.setPOS(shapeModel.POS + vec3(2.0f, 0.0f, 2.0f));
     axisesShape.setPOS(shapeModel.POS + vec3(0.0f, -2.0f, 0.0f));
 
+    // play music
     soundEngine->play2D("../Assets/Sounds/Breakout.mp3", true); // music courtesy of https://learnopengl.com
 
     //Main loop
@@ -208,6 +219,7 @@ int main(int argc, char* argv[]) {
         // Frame time calculation
         float dt = glfwGetTime() - lastFrameTime;
         lastFrameTime += dt;
+
 
 		// window size callback called when window size changes
 		glfwSetWindowSizeCallback(window, window_size_callback);
@@ -224,7 +236,7 @@ int main(int argc, char* argv[]) {
         glClear(GL_DEPTH_BUFFER_BIT);
         glUseProgram(shadowShaderProgram); // use proper shaders
         // update values in shadow shader
-        light.updateShadowShader(shadowShaderProgram);
+        mainLight.updateShadowShader(shadowShaderProgram);
         renderScene(shadowShaderProgram); // render to make the texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind depth map FBO
 
@@ -236,8 +248,9 @@ int main(int argc, char* argv[]) {
         glUseProgram(sceneShaderProgram);
         //update the values in the scene shader
         camera.createMatrices(0.01f, 200.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
-        light.updateSceneShader(sceneShaderProgram, "pointlight1", enableShadows);
+        mainLight.updateSceneShader(sceneShaderProgram, "pointlight1", enableShadows);
         spotLight1.updateSceneShader(sceneShaderProgram, "spotlight1");
+        spotLight2.updateSceneShader(sceneShaderProgram, "spotlight2");
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -246,9 +259,12 @@ int main(int argc, char* argv[]) {
         //render light not in two pass so it does not create shadows
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), false);
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), true);
-        lightSource.render(sceneShaderProgram, true);
+        //lightSource.render(sceneShaderProgram, true);
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), false);
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), enableShadows);
+
+
+        drawString(("Time: " + to_string((int)(totalTime - lastFrameTime))), textPosition, vec3(1.0f), 0.01f, textShaderProgram);
 
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
@@ -484,6 +500,9 @@ void initializeModels() {
 void shapePassedWall() {
     shapeModel.resetModel();
     shapeModel.rotationVector = generateStartingAngle();
+
+    lightColorIndex = (lightColorIndex + 1) % lightColorsSize;
+    mainLight.color = lightColors[lightColorIndex];
 }
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
