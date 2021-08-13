@@ -64,6 +64,9 @@
     <ClInclude Include="..\Source\SpotLight.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Grouping.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\Shapes\Alex%27s Shape - Shuffle 1.csv">

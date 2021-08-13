@@ -73,7 +73,7 @@ string buildWall(string shapeFilePath) {
 		
 		if (j == 2) {
 			// set the section of wall to empty
-			wallcoords[xy[1] + ((width / 2) - 1)][xy[0] + ((height / 2) - 1)] = false; // add wall offsets to work with the array coords
+			wallcoords[xy[1] + ((width / 2))][xy[0] + ((height / 2))] = false; // add wall offsets to work with the array coords
 		}
 	}
 
@@ -88,7 +88,7 @@ string buildWall(string shapeFilePath) {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			if (wallcoords[i][j]) // flag that indicates whether we draw in the square or not
-				wallStream << j - ((width / 2) - 1) << "," << i - ((height / 2) - 1) << ",0,1,1,1,\n"; // write line to file and remove the wall offsets to get correct position
+				wallStream << j - ((width / 2) ) << "," << i - ((height / 2)) << ",0,1,1,1,\n"; // write line to file and remove the wall offsets to get correct position
 		}
 	}
 

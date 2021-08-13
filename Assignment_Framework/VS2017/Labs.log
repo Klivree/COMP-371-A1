@@ -19,25 +19,8 @@ C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJL
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(206,16): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(209,17): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(600,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(172,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(185,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(669,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewActiveTexture' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
-LINK : warning LNK4217: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
-LINK : warning LNK4286: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
-LINK : warning LNK4286: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewBindVertexArray' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool)" (?render@Model@@QAEXI_N@Z)'
-glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\vc120.pdb'; linking object as if no debug info
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(189,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(191,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(209,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(733,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   Labs.vcxproj -> C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe

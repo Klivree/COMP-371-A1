@@ -35,6 +35,7 @@ struct SpotLight {
 };
 
 uniform PointLight pointlight1;
+uniform SpotLight spotlight1;
 
 // used so we can repeat the textures as needed
 uniform float texWrapX = 1.0f;
@@ -161,7 +162,7 @@ void main() {
     else
          shadow = 0.0f;
 
-    vec3 lighting = (ambient + (1.0f - shadow) * (calculatePointLight(pointlight1))) * color; // getting the overall lighting of the fragment
+    vec3 lighting = (ambient + (1.0f - shadow) * (calculatePointLight(pointlight1) + calculateSpotLight(spotlight1))) * color; // getting the overall lighting of the fragment
     if(fullLight) // toggle for models we want to be indpendent of light sources
         lighting = color;
     

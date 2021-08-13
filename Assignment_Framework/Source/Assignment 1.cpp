@@ -8,12 +8,16 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <irrKlang.h> // for sound
 #include "Camera.hpp"
 #include "Model.hpp"
 #include "PointLight.hpp"
 #include "OBJLoader.hpp"
 #include "WallBuilder.hpp"
 #include "TextRenderer.hpp"
+#include "Grouping.hpp"
+#include "SpotLight.hpp"
+#include "DirectionalLight.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -30,6 +34,8 @@ struct TexturedColoredVertex
     vec3 normal;
     vec2 uv;
 };
+
+void printVec3(vec3 vector3) { cout << vector3.x << ", " << vector3.y << ", " << vector3.z << endl; }
 
 char* readFile(string filePath);
 
@@ -53,6 +59,8 @@ void renderScene(GLuint shaderProgram);
 
 void shapePassedWall();
 
+vec3 generateStartingAngle();
+
 void window_size_callback(GLFWwindow* window, int width, int height);
 
 GLuint setupModelVBO(string path, int& vertexCount);
@@ -74,7 +82,7 @@ vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
 
-Model shapeModel = Model("../Assets/Shapes/SHC/SHC-LVL1.csv", objectStartingPoint, initialScale, GL_TRIANGLES);
+Model shapeModel = Model("../Assets/Shapes/SHC/SHC-LVL2.csv", objectStartingPoint, initialScale, GL_TRIANGLES);
 
 Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), initialScale, GL_TRIANGLES);
 
@@ -82,10 +90,18 @@ Model axisModelX = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0
 Model axisModelY = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
 Model axisModelZ = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
 
+Model axisModelXSHAPE = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0f), 1.0f, GL_TRIANGLES);
+Model axisModelYSHAPE = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
+Model axisModelZSHAPE = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
+
 Model GroundFloor = Model("../Assets/Shapes/Ground.csv", glm::vec3(0.0f, -25.0f, 0.0f), initialScale, GL_TRIANGLES);
 
 Model pepeModel1 = Model("../Assets/Shapes/Basic.csv", vec3(-5.0f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
 Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(7.5f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
+
+Grouping axises, axisesShape;
+
+irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
 bool ModelSelection[] = { true, false, false, false, false };
 
@@ -113,7 +129,6 @@ int lightColorIndex = 0;
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
-
     //determine openGL version to initialize
 #if defined(PLATFORM_OSX)	
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -161,15 +176,19 @@ int main(int argc, char* argv[]) {
     Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     // generate light
-    PointLight light(vec3(0.0f, 10.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, lightColors[8], SHADOW_HEIGHT);
+    PointLight light(vec3(0.0f, 10.0f, 0.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(1.0f), SHADOW_HEIGHT);
     // this is made outside of initilize models call so that we can get the lights position
     Model lightSource = Model("", light.POS, loadTexture("../Assets/Textures/blank.jpg"));
     lightSource.linkVAO(getCubeModel(), 36);
     lightSource.setMaterial(Material(light.color, 0.01f));
     lightSource.scale = 3.0f;
 
+    Spotlight spotLight1 = Spotlight(vec3(0.0f, 15.0f, 0.0f), vec3(0.0f, -1.0f, -0.5f), vec3(0.5f, 1.0f, 0.25f), radians(20.0f), radians(30.0f));
+
     // For frame time
     float lastFrameTime = glfwGetTime();
+
+    srand(time(NULL));
 
     //make the textures point to the right position
     glUseProgram(sceneShaderProgram);
@@ -178,6 +197,11 @@ int main(int argc, char* argv[]) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+    axises.setPOS(shapeModel.POS + vec3(2.0f, 0.0f, 2.0f));
+    axisesShape.setPOS(shapeModel.POS + vec3(0.0f, -2.0f, 0.0f));
+
+    soundEngine->play2D("../Assets/Sounds/Breakout.mp3", true); // music courtesy of https://learnopengl.com
 
     //Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -191,6 +215,8 @@ int main(int argc, char* argv[]) {
         // bind camera to object
         camera.position = shapeModel.POS + vec3(0.0f, 2.0f, -4.0f);
         camera.orientation = normalize(shapeModel.POS - camera.position);
+
+        axisesShape.setRotationVector(shapeModel.rotationVector); // for debugging 
 
         // render the depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
@@ -211,6 +237,7 @@ int main(int argc, char* argv[]) {
         //update the values in the scene shader
         camera.createMatrices(0.01f, 200.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
         light.updateSceneShader(sceneShaderProgram, "pointlight1", enableShadows);
+        spotLight1.updateSceneShader(sceneShaderProgram, "spotlight1");
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -250,7 +277,9 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     static bool BLastReleased = true, XLastReleased = true;
     float scaleFactor = (float)8 / 7;
     float rotationFactor = 5.0f;
-    float modelMovementSpeed = 2.0f;
+    static float modelMovementSpeed = 1.0f;
+    float slowMovementSpeed = 1.0f;
+    float fastMovementSpeed = 5.0f;
 
     camera.processInputs(window, dt); // processes all camera inputs
 
@@ -258,7 +287,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     //variables for game
     static float currentDeg = 0.0f;
     float goalDeg = 90.0f;
-    float rateOfRotation = 180.0f;
+    float rateOfRotation = 270.0f;
     static bool rotating = false;
     static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
     static vec3 initialRotationAxis = shapeModel.rotationVector;
@@ -267,8 +296,10 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     // make shape go towards wall
     shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
 
-    if (shapeModel.POS.z > 1.0f)
+    if (shapeModel.POS.z > 1.0f) {
+        modelMovementSpeed = slowMovementSpeed;
         shapePassedWall(); // called when we need a reset and a new model
+    }
 
     if (rotating) {
         if (currentDeg < goalDeg) { // continue rotation loop
@@ -287,32 +318,45 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     else{
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             rotating = true;
+
             rotationAxis = vec3(1.0f, 0.0f, 0.0f); // direction of rotation
         }
+ 
         else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
             rotating = true;
+
             rotationAxis = vec3(-1.0f, 0.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             rotating = true;
-            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
+
+            rotationAxis = vec3(0.0f, -1.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             rotating = true;
-            rotationAxis = vec3(0.0f, -1.0f, 0.0f); // direction of rotation
+
+            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
             rotating = true;
-            rotationAxis = vec3(0.0f, 0.0f, -1.0f); // direction of rotation
+            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
             rotating = true;
-            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
+
+            rotationAxis = vec3(0.0f, 0.0f, -1.0f); // direction of rotation
         }
 
-        if(rotating)
-            initialRotationAxis = shapeModel.rotationVector; // to ensure we do a full 90 degree rotation
+        if (rotating) 
+            initialRotationAxis = shapeModel.rotationVector; // to ensure we do a full 90 degree rotatio
     } 
+
+    // speed up model
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+        modelMovementSpeed = slowMovementSpeed;
+    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
+        modelMovementSpeed = fastMovementSpeed;
+    
 
     // toggle shadows off and on
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
@@ -349,10 +393,8 @@ void renderScene(GLuint shaderProgram) {
     for (Model* ground : groundModels)
         ground->render(shaderProgram, enableTextures);
 
-    //render the origin lines
-    axisModelX.render(shaderProgram, enableTextures);
-    axisModelY.render(shaderProgram, enableTextures);
-    axisModelZ.render(shaderProgram, enableTextures);
+    axises.render(shaderProgram, enableTextures);
+    axisesShape.render(shaderProgram, enableTextures);
 }
 
 void initializeModels() {
@@ -386,6 +428,27 @@ void initializeModels() {
     axisModelZ.linkVAO(cubeModelVAO, 36);
     axisModelZ.linkTexture(blankTexture);
 
+    axises.addToGrouping(axisModelX);
+    axises.addToGrouping(axisModelY);
+    axises.addToGrouping(axisModelZ);
+
+
+    axisModelXSHAPE.setMaterial(Material(vec3(0.0f, 0.0f, 1.0f), 0.2f));
+    axisModelXSHAPE.linkVAO(cubeModelVAO, 36);
+    axisModelXSHAPE.linkTexture(blankTexture);
+
+    axisModelYSHAPE.setMaterial(Material(vec3(0.0f, 1.0f, 0.0f), 0.2f));
+    axisModelYSHAPE.linkVAO(cubeModelVAO, 36);
+    axisModelYSHAPE.linkTexture(blankTexture);
+
+    axisModelZSHAPE.setMaterial(Material(vec3(1.0f, 0.0f, 0.0f), 0.2f));
+    axisModelZSHAPE.linkVAO(cubeModelVAO, 36);
+    axisModelZSHAPE.linkTexture(blankTexture);
+
+    axisesShape.addToGrouping(axisModelXSHAPE);
+    axisesShape.addToGrouping(axisModelYSHAPE);
+    axisesShape.addToGrouping(axisModelZSHAPE);
+
     shapeModel.setMaterial(goldMaterial);
     shapeModel.linkVAO(cubeModelVAO, 36);
     shapeModel.linkTexture(goldTexture);
@@ -396,14 +459,15 @@ void initializeModels() {
 
     // for once we're ready to unleash the beast
     int pepeVertices;
+    Material pepeMaterial = Material(vec3((float)43 / 255, (float)106 / 255, (float)64 / 255), 0.2f);
     GLuint pepeVAO = setupModelVBO("../Assets/Models/Pepe.obj", pepeVertices);
     pepeModel1.linkVAO(pepeVAO, pepeVertices);
-    pepeModel1.setMaterial(brickMaterial);
+    pepeModel1.setMaterial(pepeMaterial);
     pepeModel1.linkTexture(blankTexture);
     pepeModel1.rotationVector += vec3(0.0f, 90.0f, 0.0f);
     
     pepeModel2.linkVAO(pepeVAO, pepeVertices);
-    pepeModel2.setMaterial(brickMaterial);
+    pepeModel2.setMaterial(pepeMaterial);
     pepeModel2.linkTexture(blankTexture);
     pepeModel2.rotationVector += vec3(0.0f, 90.0f, 0.0f);
 
@@ -419,7 +483,7 @@ void initializeModels() {
 
 void shapePassedWall() {
     shapeModel.resetModel();
-
+    shapeModel.rotationVector = generateStartingAngle();
 }
 
 GLuint compileAndLinkShaders(string vertexShaderFilePath, string fragmentShaderFilePath){
@@ -669,6 +733,12 @@ char* readFile(string filePath) { //credit: https://badvertex.com/2012/11/20/how
     strcpy(chars, content.c_str());
 
     return chars;
+}
+
+vec3 generateStartingAngle() {
+    float possibleAngles[] = { 0.0f, 90.0f, 180.0f, 270.0f };
+    int arraySize = 4;
+    return vec3(possibleAngles[rand() % arraySize], possibleAngles[rand() % arraySize], possibleAngles[rand() % arraySize]);
 }
 
 GLuint loadTexture(const char* filename) {

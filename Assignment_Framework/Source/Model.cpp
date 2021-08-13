@@ -54,7 +54,9 @@ void Model::linkVAO(GLuint pVAO, int pActiveVertices) {
     activeVertices = pActiveVertices;
 }
 
-void Model::render(GLuint shaderProgram, bool enableTextures) {
+void Model::render(GLuint shaderProgram, bool enableTextures) { render(shaderProgram, enableTextures, glm::mat4(1.0f)); }
+
+void Model::render(GLuint shaderProgram, bool enableTextures, glm::mat4 baseMatrix) {
     //initializeModel(); // will make the model reread the csv file every draw - Uncomment if you want to make the objects in real time
     glUniform3fv(glGetUniformLocation(shaderProgram, "material.color"), 1, &material.color[0]);
     glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
@@ -66,7 +68,6 @@ void Model::render(GLuint shaderProgram, bool enableTextures) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glm::mat4 baseMatrix = glm::mat4(1.0f);
     baseMatrix = glm::translate(baseMatrix, POS);
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
     baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis

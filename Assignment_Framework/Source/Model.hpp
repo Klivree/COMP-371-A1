@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -57,6 +59,8 @@ public:
     void render(GLuint shaderProgram);
 
     void render(GLuint shaderProgram, bool enableTextures);
+
+    void render(GLuint shaderProgram, bool enableTextures, glm::mat4 baseMatrix);
 
     void linkVAO(GLuint pVAO, int pActiveVertices);
 
