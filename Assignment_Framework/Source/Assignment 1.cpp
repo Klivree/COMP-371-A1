@@ -21,6 +21,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <time.h>
 
 using namespace std;
 using namespace glm;
@@ -83,7 +84,16 @@ vec3 textPosition = vec3(-0.95f, 0.95f, 0.0f);
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
 
-Model shapeModel = Model("../Assets/Shapes/SHC/SHC-LVL2.csv", objectStartingPoint, initialScale, GL_TRIANGLES);
+string shapePaths[] = {
+	"../Assets/Shapes/SHC/SHC-LVL1.csv",
+	"../Assets/Shapes/SHC/SHC-LVL2.csv",
+	"../Assets/Shapes/SHC/SHC-LVL3.csv"
+};
+
+int currentShape = 0;
+const int shapePathSize = 3;
+
+Model shapeModel = Model(shapePaths[0], objectStartingPoint, initialScale, GL_TRIANGLES);
 
 Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), initialScale, GL_TRIANGLES);
 
@@ -498,8 +508,12 @@ void initializeModels() {
 }
 
 void shapePassedWall() {
-    shapeModel.resetModel();
+	shapeModel.resetModel();
     shapeModel.rotationVector = generateStartingAngle();
+	shapeModel.updateFilePath(shapePaths[(currentShape + 1) % shapePathSize]);
+	currentShape += 1;
+
+	wallModel.updateFilePath(buildWall(shapeModel.getFilePath()));
 
     lightColorIndex = (lightColorIndex + 1) % lightColorsSize;
     mainLight.color = lightColors[lightColorIndex];
