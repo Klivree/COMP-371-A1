@@ -12,8 +12,8 @@ Model::Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDraw
     initialDrawMode = pDrawMode;
     drawMode = initialDrawMode;
 
-    initialRotationVector = glm::vec3(0.0f);
-    rotationVector = initialRotationVector;
+    initialQuat = quat(vec3(0.0f));
+    rotationQuat = initialQuat;
 
     material = Material(); // default white plastic material
 
@@ -32,8 +32,8 @@ Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture) {
     initialDrawMode = GL_TRIANGLES;
     drawMode = initialDrawMode;
 
-    initialRotationVector = glm::vec3(0.0f);
-    rotationVector = initialRotationVector;
+    initialQuat = quat(vec3(0.0f));
+    rotationQuat = initialQuat;
 
     material = Material(); // default white plastic material
 
@@ -44,7 +44,7 @@ Model::Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture) {
 
 void Model::resetModel() {
     POS = initialPOS;
-    rotationVector = initialRotationVector;
+    rotationQuat = initialQuat;
     scale = initialScale;
     drawMode = initialDrawMode;
 }
@@ -62,16 +62,15 @@ void Model::render(GLuint shaderProgram, bool enableTextures, glm::mat4 baseMatr
     glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "enableTextures"), enableTextures);
+    
 
 
     glBindVertexArray(VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    baseMatrix = glm::translate(baseMatrix, POS);
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.x), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate around x axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.y), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate around y axis
-    baseMatrix = glm::rotate(baseMatrix, glm::radians(rotationVector.z), glm::vec3(0.0f, 0.0f, 1.0f)); //rotate around z axis
+    baseMatrix = glm::translate(baseMatrix, POS); 
+    baseMatrix = baseMatrix * toMat4(rotationQuat);
 
     // allow for texture wrapping
     glUniform1f(glGetUniformLocation(shaderProgram, "texWrapX"), texWrapX);

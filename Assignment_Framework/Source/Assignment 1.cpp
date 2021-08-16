@@ -60,7 +60,7 @@ void renderScene(GLuint shaderProgram);
 
 void shapePassedWall();
 
-vec3 generateStartingAngle();
+quat generateStartingAngle();
 
 void window_size_callback(GLFWwindow* window, int width, int height);
 
@@ -79,7 +79,8 @@ const GLfloat initialScale = 1.0f; // initial object scale
 
 vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
 vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
-vec3 textPosition = vec3(-0.95f, 0.95f, 0.0f);
+vec3 scoreTextPosition = vec3(-0.95f, 0.95f, 0.0f);
+vec3 timeTextPosition = scoreTextPosition + vec3(0.0f, -0.1f, 0.0f);
 
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
@@ -87,13 +88,12 @@ vector<Model*> groundModels;
 string shapePaths[] = {
 	"../Assets/Shapes/SHC/SHC-LVL1.csv",
 	"../Assets/Shapes/SHC/SHC-LVL2.csv",
-	"../Assets/Shapes/SHC/SHC-LVL3.csv"
 };
 
 int currentShape = 0;
-const int shapePathSize = 3;
+const int shapePathSize = 2;
 
-Model shapeModel = Model(shapePaths[0], objectStartingPoint, initialScale, GL_TRIANGLES);
+Model shapeModel = Model(shapePaths[currentShape], objectStartingPoint, initialScale, GL_TRIANGLES);
 
 Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), initialScale, GL_TRIANGLES);
 
@@ -112,11 +112,17 @@ Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(7.5f, 0.0f, -2.5f), 
 
 PointLight mainLight = PointLight(shapeModel.POS + vec3(0.0f, 20.0f, -2.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(0.5f, 1.0f, 0.25f), SHADOW_HEIGHT);
 
+// generate camera
+Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
+
 Grouping axises, axisesShape;
 
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
 bool ModelSelection[] = { true, false, false, false, false };
+
+int score = 0;
+float timeSinceLastPassed;
 
 bool enableShadows = true;
 bool enableTextures = true;
@@ -186,8 +192,6 @@ int main(int argc, char* argv[]) {
 
     initializeModels();
 
-    // generate camera
-    Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
     // generate light
     // this is made outside of initilize models call so that we can get the lights position
@@ -200,11 +204,6 @@ int main(int argc, char* argv[]) {
     spotLight1.direction = -normalize(spotLight1.POS - wallModel.POS);
 
     Spotlight spotLight2 = Spotlight(pepeModel1.POS + vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f), vec3(1.0f), radians(10.0f), radians(20.0f));
-
-    // For frame time
-    float lastFrameTime = glfwGetTime();
-
-    float totalTime = 60.0f;
 
     // seed random number generator
     srand(time(NULL)); 
@@ -224,6 +223,14 @@ int main(int argc, char* argv[]) {
     // play music
     soundEngine->play2D("../Assets/Sounds/Breakout.mp3", true); // music courtesy of https://learnopengl.com
 
+    // For frame time
+    float lastFrameTime = glfwGetTime();
+
+    float totalTime = 60.0f;
+
+    // for scoring
+    timeSinceLastPassed = lastFrameTime;
+
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
@@ -238,7 +245,7 @@ int main(int argc, char* argv[]) {
         camera.position = shapeModel.POS + vec3(0.0f, 2.0f, -4.0f);
         camera.orientation = normalize(shapeModel.POS - camera.position);
 
-        axisesShape.setRotationVector(shapeModel.rotationVector); // for debugging 
+        //axisesShape.setRotationVector(shapeModel.rotationVector); // for debugging 
 
         // render the depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); // change view to the size of the shadow texture
@@ -274,8 +281,8 @@ int main(int argc, char* argv[]) {
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), enableShadows);
 
 
-        drawString(("Time: " + to_string((int)(totalTime - lastFrameTime))), textPosition, vec3(1.0f), 0.01f, textShaderProgram);
-
+        drawString("Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, vec3(1.0f), 0.01f, textShaderProgram);
+        drawString("Score: " + to_string(score), scoreTextPosition, vec3(1.0f), 0.01f, textShaderProgram);
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
         glfwPollEvents(); //get inputs
@@ -300,24 +307,13 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     */
 
     //Note: these have to be static so that their state does not get reset on each function call
-    static bool BLastReleased = true, XLastReleased = true;
-    float scaleFactor = (float)8 / 7;
+    static bool BLastReleased = true, XLastReleased = true, SpaceLastReleased = true;
     float rotationFactor = 5.0f;
     static float modelMovementSpeed = 1.0f;
     float slowMovementSpeed = 1.0f;
-    float fastMovementSpeed = 5.0f;
+    float fastMovementSpeed = 10.0f;
 
     camera.processInputs(window, dt); // processes all camera inputs
-
-    ////////////////////////////// 90 DEGREE ROTATIONS FOR SUPERHYPERCUBE GAME - DO NOT REMOVE - WILL BE UNCOMMENTED FOR FINAL PROJECT ////////////////////////////
-    //variables for game
-    static float currentDeg = 0.0f;
-    float goalDeg = 90.0f;
-    float rateOfRotation = 270.0f;
-    static bool rotating = false;
-    static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
-    static vec3 initialRotationAxis = shapeModel.rotationVector;
-
 
     // make shape go towards wall
     shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
@@ -327,62 +323,64 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         shapePassedWall(); // called when we need a reset and a new model
     }
 
+    //variables for game
+    static float currentDeg = 0.0f; // tracks how much has been rotated 
+    float goalDeg = 90.0f; // how big a rotation will be
+    float rateOfRotation = 270.0f; // how fast the model will rotate
+    static bool rotating = false;
+    static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
+
     if (rotating) {
         if (currentDeg < goalDeg) { // continue rotation loop
+            // if else checks if we are allowed to increase the rotation by the full allowed amount or not
+            if (currentDeg + rateOfRotation * dt > goalDeg)
+                shapeModel.rotationQuat = angleAxis(radians(goalDeg - currentDeg), rotationAxis) * shapeModel.rotationQuat;
+            else
+                shapeModel.rotationQuat = angleAxis(radians(rateOfRotation * dt), rotationAxis) * shapeModel.rotationQuat;
+            
             currentDeg += rateOfRotation * dt;
-            shapeModel.rotationVector += rateOfRotation * dt * rotationAxis; // rotate model
         }
         else { // end rotation loop
-            // make sure that the model rotates exactly the amount of degrees that we want (shouldn't look too jank since it should be fairly close to the desired degree)
-            shapeModel.rotationVector = initialRotationAxis + (goalDeg * rotationAxis);
-
             // reset flags for next rotation
-            currentDeg = 0;
+            currentDeg = 0.0f;
             rotating = false;
         }
     }
     else{
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             rotating = true;
-
             rotationAxis = vec3(1.0f, 0.0f, 0.0f); // direction of rotation
         }
  
         else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
             rotating = true;
-
-            rotationAxis = vec3(-1.0f, 0.0f, 0.0f); // direction of rotation
+            rotationAxis = -vec3(1.0f, 0.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             rotating = true;
-
-            rotationAxis = vec3(0.0f, -1.0f, 0.0f); // direction of rotation
+            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             rotating = true;
-
-            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
+            rotationAxis = -vec3(0.0f, 1.0f, 0.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
             rotating = true;
-            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
+            rotationAxis = -vec3(0.0f, 0.0f, 1.0f); // direction of rotation
         }
         else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
             rotating = true;
-
-            rotationAxis = vec3(0.0f, 0.0f, -1.0f); // direction of rotation
+            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
         }
-
-        if (rotating) 
-            initialRotationAxis = shapeModel.rotationVector; // to ensure we do a full 90 degree rotatio
     } 
 
     // speed up model
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
-        modelMovementSpeed = slowMovementSpeed;
-    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
+        SpaceLastReleased = true;
+    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastReleased) {
         modelMovementSpeed = fastMovementSpeed;
-    
+        SpaceLastReleased = false;
+    }
 
     // toggle shadows off and on
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
@@ -490,12 +488,12 @@ void initializeModels() {
     pepeModel1.linkVAO(pepeVAO, pepeVertices);
     pepeModel1.setMaterial(pepeMaterial);
     pepeModel1.linkTexture(blankTexture);
-    pepeModel1.rotationVector += vec3(0.0f, 90.0f, 0.0f);
+    pepeModel1.rotationQuat = angleAxis(radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * pepeModel1.rotationQuat;
     
     pepeModel2.linkVAO(pepeVAO, pepeVertices);
     pepeModel2.setMaterial(pepeMaterial);
     pepeModel2.linkTexture(blankTexture);
-    pepeModel2.rotationVector += vec3(0.0f, 90.0f, 0.0f);
+    pepeModel2.rotationQuat = angleAxis(radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * pepeModel2.rotationQuat;
 
 
     for (Model* ground : groundModels) {
@@ -508,8 +506,36 @@ void initializeModels() {
 }
 
 void shapePassedWall() {
+    int scoreForPassingWall = 100;
+    int timeScoreBonus = 300;
+    float timeBonusFactor = 0.9;
+
+    // check if the shape was the correct orientation
+    float bias = radians(1.0f);
+    bool passedThroughWall = true;
+    vec3 endingOrientation = eulerAngles(shapeModel.rotationQuat);
+    if (!(endingOrientation.x > -bias && endingOrientation.x < bias))
+        passedThroughWall = false;
+    if (!(endingOrientation.y > -bias && endingOrientation.y < bias))
+        passedThroughWall = false;
+    if (!(endingOrientation.z > -bias && endingOrientation.z < bias))
+        passedThroughWall = false;
+
+    if (passedThroughWall) {
+        cout << "Passed" << endl;
+
+        // score calculations
+        int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
+        cout << scoreToAdd << endl;
+        score += scoreToAdd;
+    }
+    else {
+        cout << "Fail" << endl;
+    }
+    timeSinceLastPassed = glfwGetTime();
+
 	shapeModel.resetModel();
-    shapeModel.rotationVector = generateStartingAngle();
+    shapeModel.rotationQuat = generateStartingAngle();
 	shapeModel.updateFilePath(shapePaths[(currentShape + 1) % shapePathSize]);
 	currentShape += 1;
 
@@ -768,10 +794,10 @@ char* readFile(string filePath) { //credit: https://badvertex.com/2012/11/20/how
     return chars;
 }
 
-vec3 generateStartingAngle() {
+quat generateStartingAngle() {
     float possibleAngles[] = { 0.0f, 90.0f, 180.0f, 270.0f };
     int arraySize = 4;
-    return vec3(possibleAngles[rand() % arraySize], possibleAngles[rand() % arraySize], possibleAngles[rand() % arraySize]);
+    return quat(vec3(radians(possibleAngles[rand() % arraySize]), radians(possibleAngles[rand() % arraySize]), radians(possibleAngles[rand() % arraySize])));
 }
 
 GLuint loadTexture(const char* filename) {

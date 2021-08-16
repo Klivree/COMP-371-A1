@@ -15,16 +15,19 @@
 #include <string>
 #include <vector>
 
+using namespace glm;
+using namespace std;
+
 struct Material { // sample material values can be obtained from : http://devernay.free.fr/cours/opengl/materials.html
-    glm::vec3 color;
+    vec3 color;
     float shininess;
 
     Material() { // default white plastice material
-        color = glm::vec3(1.0f, 1.0f, 1.0f);
+        color = vec3(1.0f, 1.0f, 1.0f);
         shininess = 0.1f;
     }
 
-    Material(glm::vec3 _color, float _shininess) {
+    Material(vec3 _color, float _shininess) {
         color = _color;
         shininess = _shininess;
     }
@@ -50,9 +53,9 @@ struct cubeInfo {
 
 class Model {
 public:
-    Model(std::string pFilePath, glm::vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
+    Model(string pFilePath, vec3 pPOS, GLfloat pScale, GLenum pDrawMode);
 
-    Model(std::string pFilePath, glm::vec3 pPOS, GLuint pTexture);
+    Model(string pFilePath, vec3 pPOS, GLuint pTexture);
 
     void resetModel();
 
@@ -60,7 +63,7 @@ public:
 
     void render(GLuint shaderProgram, bool enableTextures);
 
-    void render(GLuint shaderProgram, bool enableTextures, glm::mat4 baseMatrix);
+    void render(GLuint shaderProgram, bool enableTextures, mat4 baseMatrix);
 
     void linkVAO(GLuint pVAO, int pActiveVertices);
 
@@ -70,10 +73,10 @@ public:
 
     void updateFilePath(std::string pFilePath);
 
-    std::string getFilePath();
+    string getFilePath();
 
-    glm::vec3 POS;
-    glm::vec3 rotationVector;
+    vec3 POS;
+    quat rotationQuat;
     GLfloat scale;
     GLenum drawMode;
 
@@ -84,13 +87,13 @@ public:
 
 
 private:
-    glm::vec3 initialPOS;
-    glm::vec3 initialRotationVector;
+    vec3 initialPOS;
+    quat initialQuat;
     GLfloat initialScale;
     GLenum initialDrawMode;
-    std::string filePath;
+    string filePath;
 
-    std::vector<cubeInfo> information;
+    vector<cubeInfo> information;
 
     GLuint VAO;
     int activeVertices;
