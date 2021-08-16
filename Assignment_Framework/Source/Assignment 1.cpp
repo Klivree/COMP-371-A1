@@ -8,6 +8,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cstring>
 #include <irrKlang.h> // for sound
 #include "Camera.hpp"
 #include "Model.hpp"
@@ -85,6 +86,7 @@ vec3 timeTextPosition = scoreTextPosition + vec3(0.0f, -0.1f, 0.0f);
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
 
+
 string shapePaths[] = {
 	"../Assets/Shapes/SHC/SHC-LVL1.csv",
 	"../Assets/Shapes/SHC/SHC-LVL2.csv",
@@ -97,20 +99,40 @@ Model shapeModel = Model(shapePaths[currentShape], objectStartingPoint, initialS
 
 Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), initialScale, GL_TRIANGLES);
 
-Model axisModelX = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0f), 1.0f, GL_TRIANGLES);
-Model axisModelY = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
-Model axisModelZ = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
-
-Model axisModelXSHAPE = Model("../Assets/Shapes/Axis/XLine.csv", vec3(2.5f, 0.0f, 0.0f), 1.0f, GL_TRIANGLES);
-Model axisModelYSHAPE = Model("../Assets/Shapes/Axis/YLine.csv", vec3(0.0f, 2.5f, 0.0f), 1.0f, GL_TRIANGLES);
-Model axisModelZSHAPE = Model("../Assets/Shapes/Axis/ZLine.csv", vec3(0.0f, 0.0f, 2.5f), 1.0f, GL_TRIANGLES);
 
 Model GroundFloor = Model("../Assets/Shapes/Ground.csv", glm::vec3(0.0f, -25.0f, 0.0f), initialScale, GL_TRIANGLES);
 
-Model pepeModel1 = Model("../Assets/Shapes/Basic.csv", vec3(-5.0f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
-Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(7.5f, 0.0f, -2.5f), 0.10f, GL_TRIANGLES);
+Model pepeModel1 = Model("../Assets/Shapes/Basic.csv", vec3(20.0f, -20.0f, 15.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel2 = Model("../Assets/Shapes/Basic.csv", vec3(-20.0f, -20.0f, 15.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel3 = Model("../Assets/Shapes/Basic.csv", vec3(20.0f, -20.0f, 5.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel4 = Model("../Assets/Shapes/Basic.csv", vec3(-20.0f, -20.0f, 5.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel5 = Model("../Assets/Shapes/Basic.csv", vec3(20.0f, -20.0f, -5.0f), 0.10f, GL_TRIANGLES);
+Model pepeModel6 = Model("../Assets/Shapes/Basic.csv", vec3(-20.0f, -20.0f, -5.0f), 0.10f, GL_TRIANGLES);
 
-PointLight mainLight = PointLight(shapeModel.POS + vec3(0.0f, 20.0f, -2.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(0.5f, 1.0f, 0.25f), SHADOW_HEIGHT);
+
+vector<Model*> pepeModels = {
+    &pepeModel1,
+    &pepeModel2,
+    &pepeModel3,
+    &pepeModel4,
+    &pepeModel5,
+    &pepeModel6
+};
+
+vec3 pepeLightColor = vec3((float)255 / 255, (float)132 / 255, (float)0 / 255);
+
+vector<PointLight> pepeLights = {
+    PointLight(pepeModels[0]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+    PointLight(pepeModels[1]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+    PointLight(pepeModels[2]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+    PointLight(pepeModels[3]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+    PointLight(pepeModels[4]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+    PointLight(pepeModels[5]->POS + vec3(0.0f, 10.0f, 0.0f), 150.0f, 1.0, 0.045, 0.0075, pepeLightColor, SHADOW_HEIGHT),
+};
+
+
+PointLight mainLight = PointLight(shapeModel.POS + vec3(0.0f, 10.0f, -5.0f), 200.0f, 1.0f, 0.007f, 0.002f, vec3(0.5f, 1.0f, 0.25f), SHADOW_HEIGHT);
+
 
 // generate camera
 Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
@@ -123,9 +145,12 @@ bool ModelSelection[] = { true, false, false, false, false };
 
 int score = 0;
 float timeSinceLastPassed;
+bool flickerScore = false;
 
 bool enableShadows = true;
 bool enableTextures = true;
+
+bool gameRunning = true;
 
 // placed in case we want to cycle through light colors in SUPERHYPERCUBE game
 vec3 lightColors[] = {
@@ -146,6 +171,16 @@ vec3 lightColors[] = {
 };
 int lightColorIndex = 0;
 int lightColorsSize = 14;
+
+vector<char*> successSounds = {
+    "../Assets/Sounds/Success1.wav",
+    "../Assets/Sounds/Success2.wav",
+    "../Assets/Sounds/Success3.wav",
+    "../Assets/Sounds/Success4.wav",
+    "../Assets/Sounds/Success5.wav",
+    "../Assets/Sounds/Success6.wav",
+    "../Assets/Sounds/Success7.wav"
+};
 
 int main(int argc, char* argv[]) {
     glfwInit(); //initialize GLFW
@@ -179,7 +214,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Black background
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.5f * 0.4f, 0.0f, 0.125f * 0.4f, 1.0f);
 
     //get shader programs
     GLuint sceneShaderProgram = compileAndLinkShaders("../Assets/Shaders/vertexshader.glsl", "../Assets/Shaders/fragmentshader.glsl");
@@ -192,18 +227,8 @@ int main(int argc, char* argv[]) {
 
     initializeModels();
 
-
-    // generate light
-    // this is made outside of initilize models call so that we can get the lights position
-    Model lightSource = Model("", mainLight.POS, loadTexture("../Assets/Textures/blank.jpg"));
-    lightSource.linkVAO(getCubeModel(), 36);
-    lightSource.setMaterial(Material(mainLight.color, 0.01f));
-    lightSource.scale = 1.0f;
-
-    Spotlight spotLight1 = Spotlight(shapeModel.POS + vec3(0.0f, 5.0f, -4.0f), vec3(0.0f, -1.0f, -0.5f), vec3(1.0f), radians(5.0f), radians(20.0f));
+    Spotlight spotLight1 = Spotlight(shapeModel.POS + vec3(0.0f, 0.0f, -5.0f), vec3(0.0f, -1.0f, -0.5f), vec3(1.0f), radians(5.0f), radians(18.0f));
     spotLight1.direction = -normalize(spotLight1.POS - wallModel.POS);
-
-    Spotlight spotLight2 = Spotlight(pepeModel1.POS + vec3(0.0f, 10.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f), vec3(1.0f), radians(10.0f), radians(20.0f));
 
     // seed random number generator
     srand(time(NULL)); 
@@ -216,10 +241,6 @@ int main(int argc, char* argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    // debug axis models
-    axises.setPOS(shapeModel.POS + vec3(2.0f, 0.0f, 2.0f));
-    axisesShape.setPOS(shapeModel.POS + vec3(0.0f, -2.0f, 0.0f));
-
     // play music
     soundEngine->play2D("../Assets/Sounds/Breakout.mp3", true); // music courtesy of https://learnopengl.com
 
@@ -228,9 +249,17 @@ int main(int argc, char* argv[]) {
 
     float totalTime = 60.0f;
 
+    vec3 scoreBaseColor(1.0f);
+    vec3 scoreFlashColor(1.0f, 0.0f, 0.0f);
+    stringFlickeringEngine scoreTextEngine = stringFlickeringEngine(scoreBaseColor, scoreFlashColor, 0.05f, 10); // creation of score flicker effect
+
+    stringFlickeringEngine timeTextEngine = stringFlickeringEngine(scoreBaseColor, scoreFlashColor, 0.5f, 20); // creation of text flicker effect
+
     // for scoring
     timeSinceLastPassed = lastFrameTime;
 
+    bool timeWarningGiven = false;
+    
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
@@ -242,7 +271,7 @@ int main(int argc, char* argv[]) {
 		glfwSetWindowSizeCallback(window, window_size_callback);
 
         // bind camera to object
-        camera.position = shapeModel.POS + vec3(0.0f, 2.0f, -4.0f);
+        camera.position = shapeModel.POS + vec3(0.0f, 4.0f, -6.0f);
         camera.orientation = normalize(shapeModel.POS - camera.position);
 
         //axisesShape.setRotationVector(shapeModel.rotationVector); // for debugging 
@@ -257,8 +286,6 @@ int main(int argc, char* argv[]) {
         renderScene(shadowShaderProgram); // render to make the texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind depth map FBO
 
-
-
         // render the scene as normal with the shadow mapping using the depth map
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT); // reset viewport tot hte size of the window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -267,7 +294,11 @@ int main(int argc, char* argv[]) {
         camera.createMatrices(0.01f, 200.0f, sceneShaderProgram, WINDOW_WIDTH, WINDOW_HEIGHT);
         mainLight.updateSceneShader(sceneShaderProgram, "pointlight1", enableShadows);
         spotLight1.updateSceneShader(sceneShaderProgram, "spotlight1");
-        spotLight2.updateSceneShader(sceneShaderProgram, "spotlight2");
+        
+        int pepeNum = 1;
+        for (PointLight pepelight : pepeLights) {
+            pepelight.updateSceneShader(sceneShaderProgram, "lightPepe" + to_string(pepeNum++), enableShadows);
+        }
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -280,9 +311,25 @@ int main(int argc, char* argv[]) {
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), false);
         glUniform1i(glGetUniformLocation(sceneShaderProgram, "enableShadows"), enableShadows);
 
+        
+        // play effects when time is running out
+        if (totalTime - lastFrameTime < 10 && !timeWarningGiven) {
+            timeTextEngine.drawText(true, "Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
+            timeWarningGiven = true;
+            soundEngine->play2D("../Assets/Sounds/running_out_of_time.wav", false); // from https://freesound.org/people/acclivity/sounds/32243/
+        }
+        else
+            timeTextEngine.drawText(false, "Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
 
-        drawString("Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, vec3(1.0f), 0.01f, textShaderProgram);
-        drawString("Score: " + to_string(score), scoreTextPosition, vec3(1.0f), 0.01f, textShaderProgram);
+        // send textEngine a flicker signal when the player scores
+        if (flickerScore) { // start flickering the text
+            scoreTextEngine.drawText(true, "Score: " + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+            flickerScore = false;
+        }
+        else // draw normally
+            scoreTextEngine.drawText("Score: " + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+
+         
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
         glfwPollEvents(); //get inputs
@@ -313,16 +360,6 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     float slowMovementSpeed = 1.0f;
     float fastMovementSpeed = 10.0f;
 
-    camera.processInputs(window, dt); // processes all camera inputs
-
-    // make shape go towards wall
-    shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
-
-    if (shapeModel.POS.z > 1.0f) {
-        modelMovementSpeed = slowMovementSpeed;
-        shapePassedWall(); // called when we need a reset and a new model
-    }
-
     //variables for game
     static float currentDeg = 0.0f; // tracks how much has been rotated 
     float goalDeg = 90.0f; // how big a rotation will be
@@ -330,56 +367,71 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     static bool rotating = false;
     static vec3 rotationAxis = vec3(1.0f, 0.0f, 0.0f);
 
-    if (rotating) {
-        if (currentDeg < goalDeg) { // continue rotation loop
-            // if else checks if we are allowed to increase the rotation by the full allowed amount or not
-            if (currentDeg + rateOfRotation * dt > goalDeg)
-                shapeModel.rotationQuat = angleAxis(radians(goalDeg - currentDeg), rotationAxis) * shapeModel.rotationQuat;
-            else
-                shapeModel.rotationQuat = angleAxis(radians(rateOfRotation * dt), rotationAxis) * shapeModel.rotationQuat;
-            
-            currentDeg += rateOfRotation * dt;
-        }
-        else { // end rotation loop
-            // reset flags for next rotation
-            currentDeg = 0.0f;
-            rotating = false;
-        }
-    }
-    else{
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = vec3(1.0f, 0.0f, 0.0f); // direction of rotation
-        }
- 
-        else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = -vec3(1.0f, 0.0f, 0.0f); // direction of rotation
-        }
-        else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
-        }
-        else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = -vec3(0.0f, 1.0f, 0.0f); // direction of rotation
-        }
-        else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = -vec3(0.0f, 0.0f, 1.0f); // direction of rotation
-        }
-        else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-            rotating = true;
-            rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
-        }
-    } 
+    camera.processInputs(window, dt); // processes all camera inputs
 
-    // speed up model
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
-        SpaceLastReleased = true;
-    else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastReleased) {
-        modelMovementSpeed = fastMovementSpeed;
-        SpaceLastReleased = false;
+    if (gameRunning) {
+
+        // make shape go towards wall
+        shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
+
+        if (shapeModel.POS.z > 1.0f) {
+            modelMovementSpeed = slowMovementSpeed;
+            shapePassedWall(); // called when we need a reset and a new model
+        }
+
+
+
+        if (rotating) {
+            if (currentDeg < goalDeg) { // continue rotation loop
+                // if else checks if we are allowed to increase the rotation by the full allowed amount or not
+                if (currentDeg + rateOfRotation * dt > goalDeg)
+                    shapeModel.rotationQuat = angleAxis(radians(goalDeg - currentDeg), rotationAxis) * shapeModel.rotationQuat;
+                else
+                    shapeModel.rotationQuat = angleAxis(radians(rateOfRotation * dt), rotationAxis) * shapeModel.rotationQuat;
+            
+                currentDeg += rateOfRotation * dt;
+            }
+            else { // end rotation loop
+                // reset flags for next rotation
+                currentDeg = 0.0f;
+                rotating = false;
+            }
+        }
+        else{
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = vec3(1.0f, 0.0f, 0.0f); // direction of rotation
+            }
+ 
+            else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = -vec3(1.0f, 0.0f, 0.0f); // direction of rotation
+            }
+            else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = vec3(0.0f, 1.0f, 0.0f); // direction of rotation
+            }
+            else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = -vec3(0.0f, 1.0f, 0.0f); // direction of rotation
+            }
+            else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = -vec3(0.0f, 0.0f, 1.0f); // direction of rotation
+            }
+            else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+                rotating = true;
+                rotationAxis = vec3(0.0f, 0.0f, 1.0f); // direction of rotation
+            }
+        } 
+
+        // speed up model
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+            SpaceLastReleased = true;
+        else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && SpaceLastReleased) {
+            modelMovementSpeed = fastMovementSpeed;
+            SpaceLastReleased = false;
+        }
     }
 
     // toggle shadows off and on
@@ -406,8 +458,8 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
 
 void renderScene(GLuint shaderProgram) {
 
-    pepeModel1.render(shaderProgram);
-    pepeModel2.render(shaderProgram);
+    for (Model *pepe : pepeModels)
+        pepe->render(shaderProgram, enableTextures);
 
     wallModel.render(shaderProgram, enableTextures);
 
@@ -430,77 +482,47 @@ void initializeModels() {
     GLuint blankTexture = loadTexture("../Assets/Textures/blank.jpg");
     GLuint tileTexture = loadTexture("../Assets/Textures/tile.png");
     GLuint goldTexture = loadTexture("../Assets/Textures/metal.jpg");
+    GLuint metalTexture = loadTexture("../Assets/Textures/wood_texture.jpg"); // from https://www.filterforge.com/filters/9452.jpg
+    GLuint explosiveTexture = loadTexture("../Assets/Textures/explosives.jpg"); // from https://i.pinimg.com/236x/52/27/9f/52279f962d19968863ab1448fa973466.jpg
+    GLuint dirtTexture = loadTexture("../Assets/Textures/dirt.jpg"); // from http://1.bp.blogspot.com/-dXMlsHE-rUI/UbWXQcc8aVI/AAAAAAAAEHw/fHwfk_zjVNQ/s1600/Seamless+ground+dirt+texture.jpg
 
     // initialize Materials
     vec3 goldVec(0.780392f * 1.5f, 0.568627f * 1.5f, 0.113725f * 1.5f);
     Material goldMaterial(goldVec, 1.0f);
     Material brickMaterial = Material(vec3(1.0f), 0.01f);
     Material tileMaterial = Material(vec3(1.0f), 0.2f);
-    
 
     groundModels.push_back(&GroundFloor);
 
-    axisModelX.setMaterial(Material(vec3(0.0f, 0.0f, 1.0f), 0.2f));
-    axisModelX.linkVAO(cubeModelVAO, 36);
-    axisModelX.linkTexture(blankTexture);
-
-    axisModelY.setMaterial(Material(vec3(0.0f, 1.0f, 0.0f), 0.2f));
-    axisModelY.linkVAO(cubeModelVAO, 36);
-    axisModelY.linkTexture(blankTexture);
-
-    axisModelZ.setMaterial(Material(vec3(1.0f, 0.0f, 0.0f), 0.2f));
-    axisModelZ.linkVAO(cubeModelVAO, 36);
-    axisModelZ.linkTexture(blankTexture);
-
-    axises.addToGrouping(axisModelX);
-    axises.addToGrouping(axisModelY);
-    axises.addToGrouping(axisModelZ);
-
-
-    axisModelXSHAPE.setMaterial(Material(vec3(0.0f, 0.0f, 1.0f), 0.2f));
-    axisModelXSHAPE.linkVAO(cubeModelVAO, 36);
-    axisModelXSHAPE.linkTexture(blankTexture);
-
-    axisModelYSHAPE.setMaterial(Material(vec3(0.0f, 1.0f, 0.0f), 0.2f));
-    axisModelYSHAPE.linkVAO(cubeModelVAO, 36);
-    axisModelYSHAPE.linkTexture(blankTexture);
-
-    axisModelZSHAPE.setMaterial(Material(vec3(1.0f, 0.0f, 0.0f), 0.2f));
-    axisModelZSHAPE.linkVAO(cubeModelVAO, 36);
-    axisModelZSHAPE.linkTexture(blankTexture);
-
-    axisesShape.addToGrouping(axisModelXSHAPE);
-    axisesShape.addToGrouping(axisModelYSHAPE);
-    axisesShape.addToGrouping(axisModelZSHAPE);
-
-    shapeModel.setMaterial(goldMaterial);
+    shapeModel.setMaterial(brickMaterial);
     shapeModel.linkVAO(cubeModelVAO, 36);
-    shapeModel.linkTexture(goldTexture);
+    shapeModel.linkTexture(explosiveTexture);
 
     wallModel.setMaterial(brickMaterial);
     wallModel.linkVAO(cubeModelVAO, 36);
-    wallModel.linkTexture(brickTexture);
+    wallModel.linkTexture(metalTexture);
 
-    // for once we're ready to unleash the beast
     int pepeVertices;
     Material pepeMaterial = Material(vec3((float)43 / 255, (float)106 / 255, (float)64 / 255), 0.2f);
     GLuint pepeVAO = setupModelVBO("../Assets/Models/Pepe.obj", pepeVertices);
-    pepeModel1.linkVAO(pepeVAO, pepeVertices);
-    pepeModel1.setMaterial(pepeMaterial);
-    pepeModel1.linkTexture(blankTexture);
-    pepeModel1.rotationQuat = angleAxis(radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * pepeModel1.rotationQuat;
-    
-    pepeModel2.linkVAO(pepeVAO, pepeVertices);
-    pepeModel2.setMaterial(pepeMaterial);
-    pepeModel2.linkTexture(blankTexture);
-    pepeModel2.rotationQuat = angleAxis(radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * pepeModel2.rotationQuat;
+    bool oddPepe = true;
 
+    for (Model *pepe : pepeModels) {
+        pepe->linkVAO(pepeVAO, pepeVertices);
+        pepe->setMaterial(pepeMaterial);
+        pepe->linkTexture(blankTexture);
+
+        if (oddPepe)
+            pepe->rotationQuat = angleAxis(radians(180.0f), vec3(0.0f, 1.0f, 0.0f)) * pepe->rotationQuat;
+
+        oddPepe = !oddPepe;
+    }
 
     for (Model* ground : groundModels) {
         ground->linkVAO(cubeModelVAO, 36);
         ground->texWrapX = 8.0f;
         ground->texWrapY = 8.0f;
-        ground->linkTexture(tileTexture);
+        ground->linkTexture(dirtTexture);
         ground->setMaterial(tileMaterial);
     }
 }
@@ -509,6 +531,7 @@ void shapePassedWall() {
     int scoreForPassingWall = 100;
     int timeScoreBonus = 300;
     float timeBonusFactor = 0.9;
+    static int announcerIndex = 0;
 
     // check if the shape was the correct orientation
     float bias = radians(1.0f);
@@ -522,12 +545,14 @@ void shapePassedWall() {
         passedThroughWall = false;
 
     if (passedThroughWall) {
+        soundEngine->play2D(successSounds[announcerIndex++ % successSounds.size()]);
         cout << "Passed" << endl;
 
         // score calculations
         int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
         cout << scoreToAdd << endl;
         score += scoreToAdd;
+        flickerScore = true;
     }
     else {
         cout << "Fail" << endl;

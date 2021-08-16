@@ -10,6 +10,8 @@ using namespace glm;
 
 GLuint pixelVAO;
 bool initialized = false;
+using namespace std;
+using namespace glm;
 
 // Letter Pixel Art from https://www.123rf.com/photo_34046590_stock-vector-alphabet-and-numbers-pixel-art-style.html
 
@@ -609,5 +611,64 @@ void drawString(string stringToDraw, vec3 pos, vec3 color, GLfloat pScale, GLuin
 		}
 	}
 }
+
+class stringFlickeringEngine {
+public:
+	stringFlickeringEngine(vec3 pBaseColor, vec3 pFlickerColor, GLfloat pTimeBetweenFlickers, GLuint pNumofFlickers) {
+		baseColor = pBaseColor;
+		flickerColor = pFlickerColor;
+		numOfFlickers = pNumofFlickers;
+		timeBetweenFlickers = pTimeBetweenFlickers;
+		lastFlickerTime = glfwGetTime();
+	}
+
+	void drawText(string pStringToDraw, vec3 pPOS, GLfloat pScale, GLuint shaderProgram) { drawText(false, pStringToDraw, pPOS, pScale, shaderProgram); }
+
+	void drawText(bool resetFlicker, string pStringToDraw, vec3 pPOS, GLfloat pScale, GLuint shaderProgram) {
+		vec3 drawColor;
+		GLfloat newTime = glfwGetTime();
+
+		if (resetFlicker)
+			currentlyFlickering = true;
+
+		if (currentlyFlickering) {
+			if (curFlickerNum >= numOfFlickers) { // finish flickering
+				currentlyFlickering = false;
+				drawColor = baseColor;
+				curFlickerNum = 0;
+			}
+			else {
+				if (lastFlickerOn)
+					drawColor = baseColor;
+				else
+					drawColor = flickerColor;
+
+				if (newTime - lastFlickerTime > timeBetweenFlickers) {
+					lastFlickerOn = !lastFlickerOn;
+					lastFlickerTime = newTime;
+					curFlickerNum++;
+				}
+			}
+		}
+		else
+			drawColor = baseColor;
+
+		drawString(pStringToDraw, pPOS, drawColor, pScale, shaderProgram);
+	}
+
+private:
+	vec3 baseColor;
+	vec3 flickerColor;
+
+	GLfloat lastFlickerTime;
+	GLfloat timeBetweenFlickers;
+	GLuint numOfFlickers;
+
+	int curFlickerNum = 0;
+
+	bool lastFlickerOn = false;
+	bool currentlyFlickering = false;
+
+};
 
 #endif
