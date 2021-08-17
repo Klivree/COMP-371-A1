@@ -81,7 +81,7 @@ const GLfloat initialScale = 1.0f; // initial object scale
 vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
 vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
 vec3 scoreTextPosition = vec3(-0.95f, 0.95f, 0.0f);
-vec3 timeTextPosition = scoreTextPosition + vec3(0.0f, -0.1f, 0.0f);
+vec3 timeTextPosition = scoreTextPosition + vec3(1.55f, 0.0f, 0.0f);
 
 //creation of model objects to remove switch statements in the executeEvents method
 vector<Model*> groundModels;
@@ -317,20 +317,20 @@ int main(int argc, char* argv[]) {
         
         // play effects when time is running out
         if (totalTime - lastFrameTime < 10 && !timeWarningGiven) {
-            timeTextEngine.drawText(true, "Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
+            timeTextEngine.drawText(true, "Time Left: \n" + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
             timeWarningGiven = true;
             soundEngine->play2D("../Assets/Sounds/running_out_of_time.wav", false); // from https://freesound.org/people/acclivity/sounds/32243/
         }
         else
-            timeTextEngine.drawText(false, "Time: " + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
+            timeTextEngine.drawText(false, "Time Left: \n" + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
 
         // send textEngine a flicker signal when the player scores
         if (flickerScore) { // start flickering the text
-            scoreTextEngine.drawText(true, "Score: " + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+            scoreTextEngine.drawText(true, "Score: \n" + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
             flickerScore = false;
         }
         else // draw normally
-            scoreTextEngine.drawText("Score: " + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+            scoreTextEngine.drawText("Score: \n" + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
 
          
         //end frame
