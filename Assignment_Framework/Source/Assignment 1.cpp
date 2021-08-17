@@ -90,10 +90,13 @@ vector<Model*> groundModels;
 string shapePaths[] = {
 	"../Assets/Shapes/SHC/SHC-LVL1.csv",
 	"../Assets/Shapes/SHC/SHC-LVL2.csv",
+	"../Assets/Shapes/SHC/SHC-LVL3.csv",
+	"../Assets/Shapes/SHC/SHC-LVL4.csv",
+	"../Assets/Shapes/SHC/SHC-LVL5.csv",
 };
 
 int currentShape = 0;
-const int shapePathSize = 2;
+const int shapePathSize = 5;
 
 Model shapeModel = Model(shapePaths[currentShape], objectStartingPoint, initialScale, GL_TRIANGLES);
 
