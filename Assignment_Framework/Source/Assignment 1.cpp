@@ -143,6 +143,8 @@ PointLight mainLight = PointLight(shapeModel.POS + vec3(0.0f, 10.0f, -5.0f), 200
 // generate camera
 Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(0.0f, 10.0f, 5.0f), initialFOV);
 
+vec3 cameraPositionBias = vec3(0.0f);
+
 irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
 int score = 0;
@@ -262,7 +264,6 @@ int main(int argc, char* argv[]) {
 
     bool timeWarningGiven = false;
     
-    
     //Main loop
     while (!glfwWindowShouldClose(window)) {
         // Frame time calculation
@@ -273,7 +274,7 @@ int main(int argc, char* argv[]) {
 		glfwSetWindowSizeCallback(window, window_size_callback);
 
         // bind camera to object
-        camera.position = shapeModel.POS + vec3(0.0f, 4.0f, -6.0f);
+        camera.position = shapeModel.POS + vec3(0.0f, 4.0f, -6.0f) + cameraPositionBias;
         camera.orientation = normalize(shapeModel.POS - camera.position);
 
         ////////////////////////////////// GENERATE SHADOW MAP //////////////////////////////////
@@ -343,7 +344,7 @@ int main(int argc, char* argv[]) {
         ////////////////////////////////// GAME CHECKS //////////////////////////////////
         if (totalTime - lastFrameTime < 0)
             endGame();
- 
+
         //end frame
         glfwSwapBuffers(window); //swap the front buffer with back buffer
         glfwPollEvents(); //get inputs
@@ -446,6 +447,78 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             modelMovementSpeed = fastMovementSpeed;
             SpaceLastReleased = false;
         }
+
+        // for camera movement
+        static bool cameraMoving = false;
+        static vec3 initialBias;
+        static float overallCameraMovement = 0.0f;
+        static vec3 movementDirection;
+        static string cameraPositionX = "center";
+        static string cameraPositionY = "center";
+        float cameraMoveSpeed = 6.0f;
+        float desiredMovement = 2.0f;
+        
+
+        if (cameraMoving) {
+            if (overallCameraMovement >= desiredMovement) { // we finish moving
+                cameraPositionBias = initialBias + (desiredMovement * movementDirection); // snap into the proper position
+                overallCameraMovement = 0.0f; // reset counter
+                cameraMoving = false;
+            }
+            else { // we continue to move
+                cameraPositionBias += cameraMoveSpeed * dt * movementDirection;
+                overallCameraMovement += cameraMoveSpeed * dt;
+            }
+        }
+        else {
+            initialBias = cameraPositionBias;
+
+            if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+                if (cameraPositionX != "left") { // make sure the camera is not all the way to the left
+                    cameraMoving = true;
+                    movementDirection = vec3(1.0f, 0.0f, 0.0f);
+
+                    if (cameraPositionX == "right")
+                        cameraPositionX = "center";
+                    else
+                        cameraPositionX = "left";
+                }
+            }
+            else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+                if (cameraPositionX != "right") { // make sure the camera is not all the way to the right
+                    cameraMoving = true;
+                    movementDirection = vec3(-1.0f, 0.0f, 0.0f);
+
+                    if (cameraPositionX == "left")
+                        cameraPositionX = "center";
+                    else
+                        cameraPositionX = "right";
+                }
+            }
+            else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+                if (cameraPositionY != "up") { // make sure the camera is not all the way to the top
+                    cameraMoving = true;
+                    movementDirection = vec3(0.0f, 1.0f, 0.0f);
+
+                    if (cameraPositionY == "down")
+                        cameraPositionY = "center";
+                    else
+                        cameraPositionY = "up";
+                }
+            }
+            else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+                if (cameraPositionY != "down") { // make sure the camera is not all the way to the top
+                    cameraMoving = true;
+                    movementDirection = vec3(0.0f, -1.0f, 0.0f);
+
+                    if (cameraPositionY == "up")
+                        cameraPositionY = "center";
+                    else
+                        cameraPositionY = "down";
+                }
+            }
+        }
+
     }
 
     // toggle shadows off and on

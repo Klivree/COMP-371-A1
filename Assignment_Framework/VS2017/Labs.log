@@ -28,28 +28,10 @@ C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assi
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(126,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(127,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(128,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(236,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(250,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(269,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(540,32): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(573,38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(843,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewUniform3fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'
-LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj'
-LINK : warning LNK4286: symbol '___glewUniformMatrix4fv' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewActiveTexture' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool,struct glm::mat<4,4,float,0>)" (?render@Model@@QAEXI_NU?$mat@$03$03M$0A@@glm@@@Z)'
-LINK : warning LNK4217: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool,struct glm::mat<4,4,float,0>)" (?render@Model@@QAEXI_NU?$mat@$03$03M$0A@@glm@@@Z)'
-LINK : warning LNK4286: symbol '___glewUniform1f' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool,struct glm::mat<4,4,float,0>)" (?render@Model@@QAEXI_NU?$mat@$03$03M$0A@@glm@@@Z)'
-LINK : warning LNK4286: symbol '___glewUniform1i' defined in 'glew32s.lib(glew.obj)' is imported by 'PointLight.obj'
-LINK : warning LNK4217: symbol '___glewBindVertexArray' defined in 'glew32s.lib(glew.obj)' is imported by 'Model.obj' in function '"public: void __thiscall Model::render(unsigned int,bool,struct glm::mat<4,4,float,0>)" (?render@Model@@QAEXI_NU?$mat@$03$03M$0A@@glm@@@Z)'
-glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\vc120.pdb'; linking object as if no debug info
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(238,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(252,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(270,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(610,32): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(643,38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(913,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   Labs.vcxproj -> C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Bin\COMP 371 - Assignment-Debug.exe
