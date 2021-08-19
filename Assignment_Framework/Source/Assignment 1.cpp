@@ -263,9 +263,11 @@ int main(int argc, char* argv[]) {
     
     // for explosion
     float curExplosionTime = 0.0f;
-    float lengthOfExplosion = 0.25f;
-    float lightIntensityFactor = 15.0f;
+    float lengthOfExplosion = 0.35f;
+    float lightIntensityFactor = 12.5f;
     vec3 lightInitialColor = mainLight.color;
+
+    shapeModel.rotationQuat = generateStartingAngle();
 
     //Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -669,12 +671,17 @@ void shapePassedWall() {
 
 	shapeModel.resetModel(); // brings shape to intial position
     shapeModel.rotationQuat = generateStartingAngle(); // creates a random orientation for the new shape
-	shapeModel.updateFilePath(shapePaths[(++currentShape) % shapePaths.size()]); // change the shape
+
+    int filePathIndex = rand() % shapePaths.size();
+    while(shapeModel.getFilePath() == shapePaths[filePathIndex]) // ensure past shape is not the same as the new one
+        filePathIndex = rand() % shapePaths.size();
+
+	shapeModel.updateFilePath(shapePaths[filePathIndex]); // change the shape
 
 	wallModel.updateFilePath(buildWall(shapeModel.getFilePath())); // update the wall to correspond to the new shape
 
     // change the main light for dramatic effect
-    mainLight.color = lightColors[++lightColorIndex % lightColors.size()];
+    mainLight.color = lightColors[rand() % lightColors.size()];
 }
 
 void endGame() {
