@@ -94,6 +94,7 @@ vector<string> shapePaths = {
 	"../Assets/Shapes/SHC/SHC-LVL5.csv",
     "../Assets/Shapes/SHC/SHC-LVL6.csv",
     "../Assets/Shapes/SHC/SHC-LVL7.csv",
+    "../Assets/Shapes/SHC/SHC-LVL8.csv",
     "../Assets/Shapes/SHC/SHC-LVL9.csv",
     "../Assets/Shapes/SHC/SHC-LVL10.csv",
 };
@@ -144,6 +145,7 @@ irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
 //////////////////////////////////////////////// GAME CONSTANTS ////////////////////////////////////////////////
 int score = 0; // total score
+int highScore = 0;
 float totalTime = 60.0f; // total time to get a high score
 float gameLastStartTime;
 float timeSinceLastPassed; // time since shape last passed wall to get time component of the score
@@ -349,18 +351,18 @@ int main(int argc, char* argv[]) {
 
             // send textEngine a flicker signal when the player scores
             if (flickerScore) { // start flickering the text
-                scoreTextEngine.drawText(true, "Score: \n" + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+                scoreTextEngine.drawText(true, "Score: \n" + to_string(score) + "\nHigh Score: \n" + to_string(highScore), scoreTextPosition, 0.01f, textShaderProgram);
                 flickerScore = false;
             }
             else // draw normally
-                scoreTextEngine.drawText("Score: \n" + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
+                scoreTextEngine.drawText("Score: \n" + to_string(score) + "\nHigh Score: \n" + to_string(highScore), scoreTextPosition, 0.01f, textShaderProgram);
 
             if (totalTime - (lastFrameTime - gameLastStartTime) < 0)
                 endGame();
         }
         else { // what to render when the game is done running (the end screen)
             // change draw size and position when the game is over
-            scoreTextEngine.drawText(true, "Score: \n" + to_string(score) + "\nRestart? (Y/N)", vec3(-0.85f, 0.35f, 0.0f), 0.01f * 3, textShaderProgram);
+            scoreTextEngine.drawText(true, "Score: \n" + to_string(score) + "\nHigh Score: \n" + to_string(highScore) + "\nRestart? (Y/N)", vec3(-0.85f, 0.35f, 0.0f), 0.01f * 3, textShaderProgram);
 
             // rotate pepes when game is done on end screen
             float rateOfRotation = 120.0f;
@@ -670,6 +672,7 @@ void shapePassedWall() {
             // score calculations
             int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
             score += scoreToAdd;
+            highScore = score > highScore ? score : highScore;
             totalTime += (score <= 1000 ? 5.0f : (5000.0f / (float)score));
 
             flickerScore = true; // flag to begin score flash effect in the main loop
