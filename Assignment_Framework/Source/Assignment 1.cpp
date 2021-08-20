@@ -92,6 +92,11 @@ vector<string> shapePaths = {
 	"../Assets/Shapes/SHC/SHC-LVL3.csv",
 	"../Assets/Shapes/SHC/SHC-LVL4.csv",
 	"../Assets/Shapes/SHC/SHC-LVL5.csv",
+    "../Assets/Shapes/SHC/SHC-LVL6.csv",
+    "../Assets/Shapes/SHC/SHC-LVL7.csv",
+    "../Assets/Shapes/SHC/SHC-LVL8.csv",
+    "../Assets/Shapes/SHC/SHC-LVL9.csv",
+    "../Assets/Shapes/SHC/SHC-LVL10.csv",
 };
 int currentShape = 0;
 
