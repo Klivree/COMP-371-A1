@@ -18,22 +18,23 @@ C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJL
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(203,15): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(206,16): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\OBJLoader.hpp(209,17): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(602,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(622,32): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(629,19): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(635,22): warning C4018: '>=': signed/unsigned mismatch
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(118,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(119,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(120,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(121,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(122,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(635,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(655,32): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(662,19): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\TextRenderer.hpp(668,22): warning C4018: '>=': signed/unsigned mismatch
 C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(123,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(232,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(247,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(275,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(634,32): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(668,38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(949,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(124,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(125,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(126,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(127,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(128,139): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(240,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(255,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(278,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(553,44): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(650,32): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(686,38): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\jjtel\source\repos\Klivree\COMP-371-A1\Assignment_Framework\Source\Assignment 1.cpp(967,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4217: symbol '___glewGetUniformLocation' defined in 'glew32s.lib(glew.obj)' is imported by 'Camera.obj' in function '"public: void __thiscall Camera::createMatrices(float,float,unsigned int &,int,int)" (?createMatrices@Camera@@QAEXMMAAIHH@Z)'

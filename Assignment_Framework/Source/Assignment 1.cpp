@@ -94,7 +94,6 @@ vector<string> shapePaths = {
 	"../Assets/Shapes/SHC/SHC-LVL5.csv",
     "../Assets/Shapes/SHC/SHC-LVL6.csv",
     "../Assets/Shapes/SHC/SHC-LVL7.csv",
-    "../Assets/Shapes/SHC/SHC-LVL8.csv",
     "../Assets/Shapes/SHC/SHC-LVL9.csv",
     "../Assets/Shapes/SHC/SHC-LVL10.csv",
 };
@@ -146,6 +145,7 @@ irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 //////////////////////////////////////////////// GAME CONSTANTS ////////////////////////////////////////////////
 int score = 0; // total score
 float totalTime = 60.0f; // total time to get a high score
+float gameLastStartTime;
 float timeSinceLastPassed; // time since shape last passed wall to get time component of the score
 bool flickerScore = false; // tell program we want to flicker the score
 bool explosionOccuring = false; // tells program we want to have the explosion effect
@@ -261,6 +261,7 @@ int main(int argc, char* argv[]) {
 
     // for scoring the time aspect of the score
     timeSinceLastPassed = lastFrameTime;
+    gameLastStartTime = lastFrameTime;
     
     // for explosion
     float curExplosionTime = 0.0f;
@@ -327,14 +328,14 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////// DRAW TEXT ////////////////////////////////
         // play effects when time is running out
-        if (totalTime - lastFrameTime < 10 && !timeWarningGiven) {
+        if (totalTime - (lastFrameTime - gameLastStartTime) < 10 && !timeWarningGiven) {
             timeTextEngine.drawText(true, "Time Left: \n" + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
             timeWarningGiven = true;
             soundEngine->play2D("../Assets/Sounds/running_out_of_time.wav", false); // from https://freesound.org/people/acclivity/sounds/32243/
         }
         else {
             if(gameRunning)
-                timeTextEngine.drawText(false, "Time Left: \n" + to_string((int)(totalTime - lastFrameTime)), timeTextPosition, 0.01f, textShaderProgram);
+                timeTextEngine.drawText(false, "Time Left: \n" + to_string((int)(totalTime - (lastFrameTime - gameLastStartTime))), timeTextPosition, 0.01f, textShaderProgram);
             else
                 timeTextEngine.drawText(false, "Time Left: \n0", timeTextPosition, 0.01f, textShaderProgram);
         }
@@ -354,7 +355,7 @@ int main(int argc, char* argv[]) {
             else // draw normally
                 scoreTextEngine.drawText("Score: \n" + to_string(score), scoreTextPosition, 0.01f, textShaderProgram);
 
-            if (totalTime - lastFrameTime < 0)
+            if (totalTime - (lastFrameTime - gameLastStartTime) < 0)
                 endGame();
         }
         else { // what to render when the game is done running (the end screen)
@@ -548,7 +549,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
             score = 0;
             totalTime = 60.0f;
-            glfwSetTime(0.0);
+            gameLastStartTime = glfwGetTime();
             timeWarningGiven = false;
             shapePassedWall();
             gameRunning = true;
