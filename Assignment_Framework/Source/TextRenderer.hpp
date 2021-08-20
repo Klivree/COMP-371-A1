@@ -367,6 +367,30 @@ bool colon[] {
 	false
 };
 
+bool openParentheses[]{
+	false, true, false,
+	true, false, false,
+	true, false, false,
+	true, false, false,
+	false, true, false
+};
+
+bool closeParentheses[]{
+	false, true, false,
+	false, false, true,
+	false, false, true,
+	false, false, true,
+	false, true, false
+};
+
+bool slash[]{
+	false, false, true,
+	false, false, true,
+	false, true, false,
+	true, false, false,
+	true, false, false,
+};
+
 bool nullChar[] {
 	true, true, true, false, true, true, true,
 	true, false, true, false, true, false, true,
@@ -555,6 +579,15 @@ int drawLetter(char letter, vec3 pos, vec3 color, GLfloat pScale, GLuint shaderP
 	case ':':
 		charInfo = ::colon;
 		width = 1;
+		break;
+	case '(':
+		charInfo = ::openParentheses;
+		break;
+	case ')':
+		charInfo = ::closeParentheses;
+		break;
+	case '/':
+		charInfo = ::slash;
 		break;
 	default:
 		charInfo = nullChar;

@@ -145,9 +145,11 @@ irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
 
 //////////////////////////////////////////////// GAME CONSTANTS ////////////////////////////////////////////////
 int score = 0; // total score
+float totalTime = 60.0f; // total time to get a high score
 float timeSinceLastPassed; // time since shape last passed wall to get time component of the score
 bool flickerScore = false; // tell program we want to flicker the score
 bool explosionOccuring = false; // tells program we want to have the explosion effect
+bool timeWarningGiven = false; // ensures we only give one time warning
 
 bool enableShadows = true; // rendering flag
 bool enableTextures = true; // rendering flag
@@ -251,9 +253,6 @@ int main(int argc, char* argv[]) {
     // For frame time
     float lastFrameTime = glfwGetTime();
 
-    // total time to get a high score
-    float totalTime = 60.0f;
-
     // making text renderer objects with flickering effect
     vec3 scoreBaseColor(1.0f);
     vec3 scoreFlashColor(1.0f, 0.0f, 0.0f);
@@ -262,9 +261,6 @@ int main(int argc, char* argv[]) {
 
     // for scoring the time aspect of the score
     timeSinceLastPassed = lastFrameTime;
-
-    // ensures we only give one time warning
-    bool timeWarningGiven = false;
     
     // for explosion
     float curExplosionTime = 0.0f;
@@ -363,7 +359,7 @@ int main(int argc, char* argv[]) {
         }
         else { // what to render when the game is done running (the end screen)
             // change draw size and position when the game is over
-            scoreTextEngine.drawText(true, "Score: \n" + to_string(score), vec3(-0.45f, 0.25f, 0.0f), 0.01f * 5, textShaderProgram); 
+            scoreTextEngine.drawText(true, "Score: \n" + to_string(score) + "\nRestart? (Y/N)", vec3(-0.85f, 0.35f, 0.0f), 0.01f * 3, textShaderProgram);
 
             // rotate pepes when game is done on end screen
             float rateOfRotation = 120.0f;
@@ -547,6 +543,19 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
             }
         }
 
+    } 
+    else {
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+            score = 0;
+            totalTime = 60.0f;
+            glfwSetTime(0.0);
+            timeWarningGiven = false;
+            shapePassedWall();
+            gameRunning = true;
+        }
+        else if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
     }
 
     // toggle shadows off and on
@@ -641,33 +650,35 @@ void shapePassedWall() {
     // keeps track of what announcer track to play
     static int announcerIndex = 0;
 
-    // check if the shape was the correct orientation
-    float bias = radians(1.0f); // degrees off of a pure 0 deg due to floating point errors
-    bool passedThroughWall = true;
-    vec3 endingOrientation = eulerAngles(shapeModel.rotationQuat); // convert the quarternion to euler angles to make easier to conceptualize
+    if (gameRunning) {
+        // check if the shape was the correct orientation
+        float bias = radians(1.0f); // degrees off of a pure 0 deg due to floating point errors
+        bool passedThroughWall = true;
+        vec3 endingOrientation = eulerAngles(shapeModel.rotationQuat); // convert the quarternion to euler angles to make easier to conceptualize
 
-    if (!(endingOrientation.x > -bias && endingOrientation.x < bias)) // check x component
-        passedThroughWall = false;
-    if (!(endingOrientation.y > -bias && endingOrientation.y < bias)) // check y component
-        passedThroughWall = false;
-    if (!(endingOrientation.z > -bias && endingOrientation.z < bias)) // check z component
-        passedThroughWall = false;
+        if (!(endingOrientation.x > -bias && endingOrientation.x < bias)) // check x component
+            passedThroughWall = false;
+        if (!(endingOrientation.y > -bias && endingOrientation.y < bias)) // check y component
+            passedThroughWall = false;
+        if (!(endingOrientation.z > -bias && endingOrientation.z < bias)) // check z component
+            passedThroughWall = false;
 
-    if (passedThroughWall) { // events happening if the shape successfully passes the wall
-        soundEngine->play2D(successSounds[announcerIndex++ % successSounds.size()]); // playing success sound
+        if (passedThroughWall) { // events happening if the shape successfully passes the wall
+            soundEngine->play2D(successSounds[announcerIndex++ % successSounds.size()]); // playing success sound
 
-        // score calculations
-        int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
-        score += scoreToAdd;
+            // score calculations
+            int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
+            score += scoreToAdd;
+            totalTime += (5.0f - ((float)score / 1000.0f));
 
-        flickerScore = true; // flag to begin score flash effect in the main loop
+            flickerScore = true; // flag to begin score flash effect in the main loop
+        }
+        else { // events that happen if the shape fails to go through the wall
+            soundEngine->play2D("../Assets/Sounds/explosion.wav"); // from freesound.org
+
+            explosionOccuring = true;
+        }
     }
-    else { // events that happen if the shape fails to go through the wall
-        soundEngine->play2D("../Assets/Sounds/explosion.wav"); // from freesound.org
-
-        explosionOccuring = true;
-    }
-
 
 
     timeSinceLastPassed = glfwGetTime(); // used for scoring the time component
