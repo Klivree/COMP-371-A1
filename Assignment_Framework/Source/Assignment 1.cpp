@@ -670,7 +670,7 @@ void shapePassedWall() {
             // score calculations
             int scoreToAdd = scoreForPassingWall + (int)(timeScoreBonus * pow(timeBonusFactor, glfwGetTime() - timeSinceLastPassed));
             score += scoreToAdd;
-            totalTime += (5.0f - ((float)score / 1000.0f));
+            totalTime += (score <= 1000 ? 5.0f : (5000.0f / (float)score));
 
             flickerScore = true; // flag to begin score flash effect in the main loop
         }
