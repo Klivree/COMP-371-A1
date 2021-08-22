@@ -80,8 +80,8 @@ const int SHADOW_WIDTH = 1024;
 const int SHADOW_HEIGHT = 1024;
 
 //////////////////////////////////////////////// OBJECT POSTION CONSTANTS ////////////////////////////////////////////////
-vec3 wallPosOffset = vec3(0.0f, 0.0f, -5.0f);
-vec3 objectStartingPoint = vec3(0.0f, 0.0f, -10.0f);
+vec3 wallPosOffset = vec3(0.0f, 0.0f, -10.0f);
+vec3 objectStartingPoint = vec3(0.0f, 0.0f, -15.0f);
 vec3 scoreTextPosition = vec3(-0.95f, 0.95f, 0.0f);
 vec3 timeTextPosition = scoreTextPosition + vec3(1.55f, 0.0f, 0.0f);
 
@@ -346,7 +346,7 @@ int main(int argc, char* argv[]) {
         ////////////////////////////////// GAME TIME EVNETS //////////////////////////////////
         if (gameRunning) {
             // bind camera to object
-            camera.position = shapeModel.POS + vec3(0.0f, 4.0f, -6.0f) + cameraPositionBias;
+            camera.position = shapeModel.POS + vec3(0.0f, 4.5f, -8.0f) + cameraPositionBias;
             camera.orientation = normalize(shapeModel.POS - camera.position);
 
             // send textEngine a flicker signal when the player scores
@@ -399,7 +399,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
     static bool BLastReleased = true, XLastReleased = true, SpaceLastReleased = true;
     float rotationFactor = 5.0f;
     static float modelMovementSpeed = 1.0f;
-    float slowMovementSpeed = 1.0f;
+    float slowMovementSpeed = 2.0f;
     float fastMovementSpeed = 10.0f;
 
     //variables for game
@@ -415,7 +415,7 @@ void executeEvents(GLFWwindow* window, Camera& camera, float dt) {
         // make shape go towards wall
         shapeModel.POS += vec3(0.0f, 0.0f, modelMovementSpeed * dt);
 
-        if (shapeModel.POS.z > 1.0f) {
+        if (shapeModel.POS.z > 0.0f) {
             modelMovementSpeed = slowMovementSpeed;
             shapePassedWall(); // called when we need a reset and a new model
         }
