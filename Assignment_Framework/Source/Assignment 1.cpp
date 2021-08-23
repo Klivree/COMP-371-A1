@@ -612,8 +612,9 @@ void initializeModels() {
     Material goldMaterial(goldVec, 1.0f);
     Material brickMaterial = Material(vec3(1.0f), 0.01f);
     Material tileMaterial = Material(vec3(1.0f), 0.2f);
+    Material explosiveMaterial = Material(vec3(1.0f, 0.0f, 0.0f), 0.01f);
 
-    shapeModel.setMaterial(brickMaterial);
+    shapeModel.setMaterial(explosiveMaterial);
     shapeModel.linkVAO(cubeModelVAO, 36);
     shapeModel.linkTexture(explosiveTexture);
 
