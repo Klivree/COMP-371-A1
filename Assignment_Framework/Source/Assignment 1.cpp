@@ -101,6 +101,8 @@ vector<string> shapePaths = {
 int currentShape = 0;
 
 //////////////////////////////////////////////// GENERATE MODELS ////////////////////////////////////////////////
+Model skyboxModel = Model("../Assets/Shapes/Basic.csv", glm::vec3(0.0f, 0.0f, 0.0f), -100.0f, GL_TRIANGLES);
+
 Model shapeModel = Model(shapePaths[currentShape], objectStartingPoint, 1.0f, GL_TRIANGLES);
 
 Model wallModel = Model(buildWall(shapeModel.getFilePath()), vec3(0.0f), 1.0f, GL_TRIANGLES);
@@ -327,6 +329,10 @@ int main(int argc, char* argv[]) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
         renderScene(sceneShaderProgram);
 
+        // Render fully lit space skybox without shadows
+        skyboxModel.render(sceneShaderProgram, enableTextures);
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), 0);
+
 
         ////////////////////////////////// DRAW TEXT ////////////////////////////////
         // play effects when time is running out
@@ -377,6 +383,7 @@ int main(int argc, char* argv[]) {
 
         // get inputs
         executeEvents(window, camera, dt);
+
     }
 
     // Shutdown GLFW
@@ -606,6 +613,7 @@ void initializeModels() {
     GLuint explosiveTexture = loadTexture("../Assets/Textures/explosives.jpg"); // from https://i.pinimg.com/236x/52/27/9f/52279f962d19968863ab1448fa973466.jpg
     GLuint dirtTexture = loadTexture("../Assets/Textures/dirt.jpg"); // from http://1.bp.blogspot.com/-dXMlsHE-rUI/UbWXQcc8aVI/AAAAAAAAEHw/fHwfk_zjVNQ/s1600/Seamless+ground+dirt+texture.jpg
     GLuint whiteTex = loadTexture("../Assets/Textures/WhiteTex2.jpg"); // from https://seamless-pixels.blogspot.com/2012/07/seamless-wall-white-paint-stucco.html
+    GLuint spaceTexture = loadTexture("../Assets/Textures/space.jpg"); // from https://earth.google.com/web/data=CiQSIhIgMTU0MjhiZDQ3MjZiMTFlOWFjZjc5NWNjZjZlMjU3MDc
 
     // initialize Materials
     vec3 goldVec(0.780392f * 1.5f, 0.568627f * 1.5f, 0.113725f * 1.5f);
@@ -621,6 +629,9 @@ void initializeModels() {
     wallModel.setMaterial(brickMaterial);
     wallModel.linkVAO(cubeModelVAO, 36);
     wallModel.linkTexture(metalTexture);
+
+    skyboxModel.linkVAO(cubeModelVAO, 36);
+    skyboxModel.linkTexture(spaceTexture);
 
     int pepeVertices;
     Material pepeMaterial = Material(vec3((float)43 / 255, (float)106 / 255, (float)64 / 255), 0.2f);
