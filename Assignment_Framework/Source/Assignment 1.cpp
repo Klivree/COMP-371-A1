@@ -330,8 +330,9 @@ int main(int argc, char* argv[]) {
         renderScene(sceneShaderProgram);
 
         // Render fully lit space skybox without shadows
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), true);
         skyboxModel.render(sceneShaderProgram, enableTextures);
-        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), 0);
+        glUniform1i(glGetUniformLocation(sceneShaderProgram, "fullLight"), false);
 
 
         ////////////////////////////////// DRAW TEXT ////////////////////////////////
@@ -614,6 +615,7 @@ void initializeModels() {
     GLuint dirtTexture = loadTexture("../Assets/Textures/dirt.jpg"); // from http://1.bp.blogspot.com/-dXMlsHE-rUI/UbWXQcc8aVI/AAAAAAAAEHw/fHwfk_zjVNQ/s1600/Seamless+ground+dirt+texture.jpg
     GLuint whiteTex = loadTexture("../Assets/Textures/WhiteTex2.jpg"); // from https://seamless-pixels.blogspot.com/2012/07/seamless-wall-white-paint-stucco.html
     GLuint spaceTexture = loadTexture("../Assets/Textures/space.jpg"); // from https://earth.google.com/web/data=CiQSIhIgMTU0MjhiZDQ3MjZiMTFlOWFjZjc5NWNjZjZlMjU3MDc
+    GLuint spaceTextureNEW = loadTexture("../Assets/Textures/spaceNEW.jpg");// from https://render.fineartamerica.com/images/rendered/medium/print/images/artworkimages/medium/2/space-stars-texture-sololos.jpg
 
     // initialize Materials
     vec3 goldVec(0.780392f * 1.5f, 0.568627f * 1.5f, 0.113725f * 1.5f);
@@ -631,7 +633,7 @@ void initializeModels() {
     wallModel.linkTexture(metalTexture);
 
     skyboxModel.linkVAO(cubeModelVAO, 36);
-    skyboxModel.linkTexture(spaceTexture);
+    skyboxModel.linkTexture(spaceTextureNEW);
 
     int pepeVertices;
     Material pepeMaterial = Material(vec3((float)43 / 255, (float)106 / 255, (float)64 / 255), 0.2f);
