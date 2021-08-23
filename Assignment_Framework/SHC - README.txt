@@ -54,3 +54,6 @@ B - Toggle Shadows
 X - Toggle Textures
 
 Esc - Exit Game
+
+DEMO VIDEO LINK:
+https://www.youtube.com/watch?v=S8Y3rU3T0co
