@@ -65,7 +65,7 @@ uniform vec3 viewPosition;
 
 uniform bool enableShadows;
 uniform bool enableTextures;
-uniform bool fullLight = false;
+uniform bool fullLight = true;
 
 
 float cubeShadowScalar(PointLight pPointLight, samplerCube cubeShadowMap) {
